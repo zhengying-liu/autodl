@@ -41,7 +41,6 @@ South==1.0.2
 SQLAlchemy==0.9.7
 watchdog==0.8.1
 #wsgiref==0.1.2
-#wsgiref>=0.1.2
 
 django-simple-captcha==0.4.5
 django-bootstrap-form==3.2
@@ -80,4 +79,3 @@ pytest-watch==4.1.0
 pytest-env==0.6.2
 
 lxml==4.1.1
-
