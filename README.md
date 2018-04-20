@@ -9,7 +9,7 @@ The directories correspond to:
 - `starting_kit_lisheng`: starting kit code given by Lisheng in December 2017. Listed here just for archive.
 
 ### Remarks:
-- Zhengying wrote the script `convert_mnist_to_tfrecords.py` (in the directory `starting_kit_andre/code_zhengying`) contains a snippet of code that generates TFRecords (SequenceExample proto) from original MNIST datasets. Experts in Protocol Buffers (e.g. @André) can check if Zhengying has used the good approach.
+- Zhengying wrote the script `convert_mnist_to_tfrecords.py` (in the directory `starting_kit_andre/code_zhengying`) containing a snippet of code that generates TFRecords (SequenceExample proto) from original MNIST datasets. Experts in Protocol Buffers (e.g. @André) can check if Zhengying has used the good approach.
 
 ### To-do:
 1. Replace the fake datasets `mnist1`, ..., `mnist5` by real datasets, e.g. `mnist1` by real MNIST, with train and test (done);
