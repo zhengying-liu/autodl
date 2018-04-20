@@ -8,7 +8,7 @@ The three directories correspond to:
 3. `starting_kit_lisheng`: starting kit code given by Lisheng in December 2017. Listed here just for archive.
 
 To-do:
-1. Replace the fake dataset `mnist1`, ..., `mnist5` by real datasets, e.g. `mnist1` by real MNIST, with train and test (done);
+1. Replace the fake datasets `mnist1`, ..., `mnist5` by real datasets, e.g. `mnist1` by real MNIST, with train and test (done);
 2. Create a file `mnist_test.solution` containing real labels on test set and put it in the directory `AutoDL_reference_data/`;
 3. Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`
 4. (to be added...)
