@@ -22,4 +22,4 @@ To be discussed at Zurich:
 Usefuls links:
 - Current version of competition on [CodaLab](http://35.193.242.121/competitions/8)
 - Info on [Protocol Buffers](https://developers.google.com/protocol-buffers/)
-- [SequenceExample proto](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto)
+- Definition of [SequenceExample proto](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto)
