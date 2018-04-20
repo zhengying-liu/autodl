@@ -47,7 +47,10 @@ class Model(algorithm.Algorithm):
 
 
   def test(self, dataset):
-    """Test this algorithm on the tensorflow |dataset|."""
+    """DON'T CHANGE THIS FUNCTION
+    Given a dataset, make predictions using self.predict() on all examples.
+    TODO: Test this algorithm on the tensorflow |dataset|.
+    """
     dataset_iterator = dataset.make_one_shot_iterator()
     Y_test = []
     with tf.Session() as sess:
@@ -60,5 +63,5 @@ class Model(algorithm.Algorithm):
         except tf.errors.OutOfRangeError:
           break
     res = np.concatenate(Y_test)
-    print("Model::test",res.shape)
+    print("Model::test", res.shape)
     return res
