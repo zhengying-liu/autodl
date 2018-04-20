@@ -18,3 +18,8 @@ To be discussed at Zurich:
 2. Prediction for one single line? or for a matrix? For now, we added a method `Model.test()` to make prediction on the whole test set;
 3. Evaluation by batch? We need a solution for faster evaluation
 4. (to be added...)
+
+Usefuls links:
+- Current version of competition on [CodaLab](http://35.193.242.121/competitions/8)
+- Info on [Protocol Buffers](https://developers.google.com/protocol-buffers/)
+- [SequenceExample proto](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto)
