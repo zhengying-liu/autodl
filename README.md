@@ -10,8 +10,9 @@ The three directories correspond to:
 ### To-do:
 1. Replace the fake datasets `mnist1`, ..., `mnist5` by real datasets, e.g. `mnist1` by real MNIST, with train and test (done);
 2. Create a file `mnist_test.solution` containing real labels on test set and put it in the directory `AutoDL_reference_data/`;
-3. Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`
-4. (to be added...)
+3. Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`;
+4. Improve codes in general by adding comments and turn them more user friendly;
+5. (to be added...)
 
 ### To be discussed at Zurich:
 1. Integrate test dataset to each data set? or train/test independently? Personnaly, I think it's more natural to have train and test in a single a dataset but to consider them separately as 2 datasets (which is what we have now);
