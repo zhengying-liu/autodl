@@ -28,9 +28,15 @@ class Model(algorithm.Algorithm):
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
+    self.classifier = None
+    self.is_trained = False
 
   def train(self, dataset):
-    """Keeps only the first example of the training set."""
+    """Train the model on `dataset`
+
+    Args:
+    - dataset: A tf.data.Dataset object
+    """
     dataset_iterator = dataset.make_one_shot_iterator()
     # The next lines assume that
     # (a) get_next() returns a minibatch of examples
@@ -47,9 +53,12 @@ class Model(algorithm.Algorithm):
 
 
   def test(self, dataset):
-    """DON'T CHANGE THIS FUNCTION
+    """
     Given a dataset, make predictions using self.predict() on all examples.
     TODO: Test this algorithm on the tensorflow |dataset|.
+
+    Args:
+    - dataset: A tf.data.Dataset object
     """
     dataset_iterator = dataset.make_one_shot_iterator()
     Y_test = []

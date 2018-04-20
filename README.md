@@ -24,7 +24,8 @@ The directories correspond to:
 2. Prediction for one single line? or for a matrix? For now, we added a method `Model.test()` to make prediction on the whole test set;
 3. Evaluation by batch? We need a solution for faster evaluation
 4. Use tf.estimator.Estimator instead of Model()? 
-5. (to be added...)
+5. Sparse to dense? More adaptive handling for sparse data?
+6. (to be added...)
 
 ### Usefuls links:
 - Current version of competition on [CodaLab](http://35.193.242.121/competitions/8)
