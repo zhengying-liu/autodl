@@ -72,8 +72,8 @@ if __name__ == "__main__":
   print("Validation data size:", datasets.validation.images.shape)
   print("Test data size:", datasets.test.images.shape)
 
-  input_sequence = datasets.train.images
-  output_sequence = datasets.train.labels
+  input_sequence = datasets.test.images
+  output_sequence = datasets.test.labels
   filename = 'sample-00000-of-00001'
 
   convert_to_sequence_example_tfrecords(
