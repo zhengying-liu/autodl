@@ -2,10 +2,11 @@
 A data challenge in Automatic Deep Learning (AutoDL), co-organized with Google.
 
 
-The three directories correspond to:
-1. `codalab_competition_bundle`: the current competition bundle used on [CodaLab](http://35.193.242.121/competitions/8);
-2. `starting_kit_andre`: starting kit code given by André, slightly modified by Zhengying to make it work. This starting kit is the model that the current competition is based on. Thus we can find most codes in `codalab_competition_bundle` too;
-3. `starting_kit_lisheng`: starting kit code given by Lisheng in December 2017. Listed here just for archive.
+The directories correspond to:
+- `codalab_competition_bundle`: the current competition bundle used on [CodaLab](http://35.193.242.121/competitions/8);
+- `docker`: the Dockerfile used to generate the Docker image for the challenge;
+- `starting_kit_andre`: starting kit code given by André, slightly modified by Zhengying to make it work. This starting kit is the model that the current competition is based on. Thus we can find most codes in `codalab_competition_bundle` too;
+- `starting_kit_lisheng`: starting kit code given by Lisheng in December 2017. Listed here just for archive.
 
 ### Remarks:
 - Zhengying wrote the script `convert_mnist_to_tfrecords.py` (in the directory `starting_kit_andre/code_zhengying`) contains a snippet of code that generates TFRecords (SequenceExample proto) from original MNIST datasets. Experts in Protocol Buffers (e.g. @André) can check if Zhengying has used the good approach.
