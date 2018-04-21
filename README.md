@@ -17,7 +17,8 @@ The directories correspond to:
 3. Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`;
 4. Improve codes in general by adding comments and turn them more user friendly;
 5. Add Checkpoints feature to save and restore models;
-6. (to be added...)
+6. Add feature of drawing learning curves;
+7. (to be added...)
 
 ### To be discussed at Zurich:
 1. Integrate test dataset to each data set? or train/test independently? Personnaly, I think it's more natural to have train and test in a single a dataset but to consider them separately as 2 datasets (which is what we have now);
