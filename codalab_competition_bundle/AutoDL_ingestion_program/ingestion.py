@@ -184,14 +184,14 @@ if __name__=="__main__" and debug_mode<4:
         # ======== Creating a data object with data, informations about it
         vprint( verbose,  "========= Reading and converting data ==========")
         # TODO: Read data : 2 datasets: train, test
-        
+
         ##### To show to Andre #####
         D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
         D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
-        D_train.init(batch_size=1000, repeat=False)
+        D_train.init()
         D_test.init(batch_size=1000, repeat=False)
         ##### To show to Andre #####
-        
+
         vprint( verbose,  "[+] Size of uploaded data  %5.2f bytes" % data_io.total_size(D_train))
         # TODO: modify total_size
 
@@ -216,11 +216,11 @@ if __name__=="__main__" and debug_mode<4:
 
         # ========= Creating a model
         vprint( verbose,  "======== Creating model ==========")
-        
+
         ##### To show to Andre #####
         M = Model(D_train.get_metadata())
         ##### To show to Andre #####
-        
+
         # 2 metadata files for model? Not a problem!
 
         # ========= Reload trained model if it exists
@@ -252,27 +252,27 @@ if __name__=="__main__" and debug_mode<4:
         # Make predictions
         # -----------------
         # TODO: dataset
-        
+
         # Y_valid = M.predict(D.data['X_valid'])
-        
+
         ##### To show to Andre #####
         # Y_train = M.test(D_train.get_dataset())
         Y_test = M.test(D_test.get_dataset())
 #        def compute_output(*arg):
 #            # arg[0] is the input
 #            return tf.map_fn(M.predict, arg[0])
-#        
+#
 #        Y_train = D_train.get_dataset().map(compute_output)
 #        Y_test = D_test.get_dataset().map(compute_output)
         ##### To show to Andre #####
-        
+
         vprint( verbose,  "[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
         # Write results
         # -------------
         filename_train = basename + '_train.predict'
         # filename_valid = basename + '_valid.predict'
         filename_test = basename + '_test.predict'
-        
+
         vprint( verbose, "======== Saving results to: " + output_dir)
         # data_io.write(os.path.join(output_dir,filename_train), Y_train)
         # data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
