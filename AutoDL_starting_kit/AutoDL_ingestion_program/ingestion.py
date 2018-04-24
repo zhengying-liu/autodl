@@ -166,8 +166,9 @@ if __name__=="__main__" and debug_mode<4:
     for index in range(len(datanames)):
       dataname = datanames[index]
       if dataname.endswith('.zip'):
+        print("Found dataset %s in zip format. Unzipping..." % dataname)
         path_to_zip_file = os.path.join(input_dir, dataname)
-        call(['unzip', '-d', path_to_zip_file[:-4], path_to_zip_file])
+        call(['unzip', '-o','-d', path_to_zip_file[:-4], path_to_zip_file])
         call(['rm', path_to_zip_file])
         datanames[index] = dataname[:-4]
 

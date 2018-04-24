@@ -103,16 +103,16 @@ class Model(algorithm.Algorithm):
 
     self.is_trained = True
 
-    dataset_iterator = dataset.make_one_shot_iterator()
-    # The next lines assume that
-    # (a) get_next() returns a minibatch of examples
-    # (b) each minibatch is a pair (inputs, outputs)
-    # (c) the outputs has the same length as the inputs
-    # We get the first minibatch by get_next,
-    # then the output by [1], then the first example by [0].
-    with tf.Session() as sess:
-      self.first_example_output = sess.run(dataset_iterator.get_next()[1][0])
-      # print("*"*50, "constant.py", dataset_iterator.get_next()[1][0].shape)
+    # dataset_iterator = dataset.make_one_shot_iterator()
+    # # The next lines assume that
+    # # (a) get_next() returns a minibatch of examples
+    # # (b) each minibatch is a pair (inputs, outputs)
+    # # (c) the outputs has the same length as the inputs
+    # # We get the first minibatch by get_next,
+    # # then the output by [1], then the first example by [0].
+    # with tf.Session() as sess:
+    #   self.first_example_output = sess.run(dataset_iterator.get_next()[1][0])
+    #   # print("*"*50, "constant.py", dataset_iterator.get_next()[1][0].shape)
 
   def predict(self, *input_arg):
     return self.first_example_output
