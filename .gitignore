@@ -4,9 +4,5 @@
 *old_stuff*
 *.zip*
 *AutoDL_sample_result_submission*
-./z_old_stuff/AutoDL_input_data_1_2018_04_24.zip
-./z_old_stuff/cifar-100.zip
-./z_old_stuff/cifar-100/train/sample-cifar-100-train
-./.git/objects/3e/e33869cc46ea818428d03cdd29c8096eb41843
-./.git/objects/d1/c4a9696798c878a15b4177952ef1cac76c3240
-./codalab_competition_bundle/AutoDL_input_data_1/cifar-100/train/sample-cifar-100-train
+*sample-cifar-100-train*
+*AutoDL_sample_result_submission*
