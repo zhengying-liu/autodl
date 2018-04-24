@@ -32,10 +32,9 @@ class Model(algorithm.Algorithm):
     # They can be got from `self.metadata_`
     # Now these values only work for MNIST
     num_epochs = 10
-    col_count = 28
-    row_count = 28
-    sequence_size = 1
-    output_dim = 10
+    col_count, row_count = self.metadata_.get_matrix_size(0)
+    sequence_size = self.metadata_.get_sequence_size()
+    output_dim = self.metadata_.get_output_size()
     batch_size = 30
 
     # Construct a neural network with 0 hidden layer
@@ -104,16 +103,16 @@ class Model(algorithm.Algorithm):
 
     self.is_trained = True
 
-    # dataset_iterator = dataset.make_one_shot_iterator()
-    # # The next lines assume that
-    # # (a) get_next() returns a minibatch of examples
-    # # (b) each minibatch is a pair (inputs, outputs)
-    # # (c) the outputs has the same length as the inputs
-    # # We get the first minibatch by get_next,
-    # # then the output by [1], then the first example by [0].
-    # with tf.Session() as sess:
-    #   self.first_example_output = sess.run(dataset_iterator.get_next()[1][0])
-    #   # print("*"*50, "constant.py", dataset_iterator.get_next()[1][0].shape)
+    dataset_iterator = dataset.make_one_shot_iterator()
+    # The next lines assume that
+    # (a) get_next() returns a minibatch of examples
+    # (b) each minibatch is a pair (inputs, outputs)
+    # (c) the outputs has the same length as the inputs
+    # We get the first minibatch by get_next,
+    # then the output by [1], then the first example by [0].
+    with tf.Session() as sess:
+      self.first_example_output = sess.run(dataset_iterator.get_next()[1][0])
+      # print("*"*50, "constant.py", dataset_iterator.get_next()[1][0].shape)
 
   def predict(self, *input_arg):
     return self.first_example_output

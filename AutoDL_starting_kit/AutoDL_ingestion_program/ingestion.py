@@ -161,6 +161,16 @@ if __name__=="__main__" and debug_mode<4:
     datanames = data_io.inventory_data(input_dir)
     # Overwrite the "natural" order
 
+    #### Unzip dataset if necessary ####
+    from subprocess import call
+    for index in range(len(datanames)):
+      dataname = datanames[index]
+      if dataname.endswith('.zip'):
+        path_to_zip_file = os.path.join(input_dir, dataname)
+        call(['unzip', '-d', path_to_zip_file[:-4], path_to_zip_file])
+        call(['rm', path_to_zip_file])
+        datanames[index] = dataname[:-4]
+
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:
         data_io.show_version()
