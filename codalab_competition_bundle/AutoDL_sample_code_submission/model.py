@@ -29,7 +29,11 @@ class Model(algorithm.Algorithm):
     self.is_trained = False
 
   def model_fn(self, features, labels, mode):
-    """Model function to construct TensorFlow estimator"""
+    """Model function to construct TensorFlow estimator.
+
+    For details see:
+    https://www.tensorflow.org/get_started/custom_estimators#write_a_model_function
+    """
     col_count, row_count = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
