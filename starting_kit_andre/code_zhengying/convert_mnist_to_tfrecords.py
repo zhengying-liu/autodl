@@ -48,13 +48,14 @@ def convert_to_sequence_example_tfrecords(features, labels, filename):
     raise ValueError('Features size %d does not match labels size %d.' %
                      (num_examples, labels.shape[0]))
 
+  num_examples = 10 # To be commented
   print('Writing', filename)
   with tf.python_io.TFRecordWriter(filename) as writer:
     for index in range(num_examples):
       context = tf.train.Features(
             feature={
                 'label_index': _int64_feature(labels[index]),
-                'label_score': _float_feature([1])
+                'label_score': _float_feature([0])
             })
       feature_lists = tf.train.FeatureLists(
           feature_list={
@@ -72,9 +73,15 @@ if __name__ == "__main__":
   print("Validation data size:", datasets.validation.images.shape)
   print("Test data size:", datasets.test.images.shape)
 
-  input_sequence = datasets.test.images
-  output_sequence = datasets.test.labels
-  filename = 'sample-00000-of-00001'
+  mode = "test" # train or test
+  if mode == "train":
+    input_sequence = datasets.train.images
+    output_sequence = datasets.train.labels
+  else:
+    input_sequence = datasets.test.images
+    output_sequence = datasets.test.labels
+
+  filename = 'sample-00000-of-00001-' + mode
 
   convert_to_sequence_example_tfrecords(
       features=input_sequence,
