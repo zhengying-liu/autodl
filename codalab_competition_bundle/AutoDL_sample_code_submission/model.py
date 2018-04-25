@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by: Zhengying Liu, Isabelle Guyon
 
 """Trivial example of learning algorithm."""
 
@@ -28,14 +29,10 @@ class Model(algorithm.Algorithm):
     self.is_trained = False
 
   def model_fn(self, features, labels, mode):
-    # To be changed for general datasets
-    # They can be got from `self.metadata_`
-    # Now these values only work for MNIST
-    num_epochs = 10
+    """Model function to construct TensorFlow estimator"""
     col_count, row_count = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
-    batch_size = 30
 
     # Construct a neural network with 0 hidden layer
     input_layer = tf.reshape(features['x'],
@@ -99,11 +96,12 @@ class Model(algorithm.Algorithm):
         input_fn=train_input_fn,
         steps=2000)#,
         # hooks=[logging_hook])
-      print("@"*50, "Training finished.")
+      print("@"*50, "Finished training.")
 
     self.is_trained = True
 
   def predict(self, *input_arg):
+    """Make prediction for one single example."""
     return self.first_example_output
 
   def test(self, dataset):
