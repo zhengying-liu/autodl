@@ -120,7 +120,7 @@ class Model(algorithm.Algorithm):
 
   def test(self, dataset):
     """
-    Given a dataset, make predictions using self.predict() on all examples.
+    Given a dataset, make predictions using self.classifier.predict() on all examples.
     TODO: Test this algorithm on the tensorflow |dataset|.
 
     Args:
