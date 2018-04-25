@@ -27,7 +27,7 @@ admin_names: eric, guyon, Zhengying, neutralnet
 html:
     overview: overview.html
     evaluation: evaluation.html
-    terms: terms_and_conditions.html
+    terms: terms.html
     data: data.html
 
 # ----------------------------------------------------------------------------------------
