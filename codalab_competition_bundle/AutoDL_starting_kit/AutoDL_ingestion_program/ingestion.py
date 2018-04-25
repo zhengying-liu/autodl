@@ -143,6 +143,7 @@ if __name__=="__main__" and debug_mode<4:
 	# Our libraries
     path.append (program_dir)
     path.append (submission_dir)
+    path.append (submission_dir + '/AutoDL_sample_code_submission') #IG: to allow submitting the starting kit as sample submission
     import data_io
     from data_io import vprint
     import tensorflow as tf
