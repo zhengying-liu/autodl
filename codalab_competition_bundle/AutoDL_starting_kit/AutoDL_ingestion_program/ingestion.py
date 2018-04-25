@@ -286,9 +286,11 @@ if __name__=="__main__" and debug_mode<4:
         vprint( verbose,  "[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
         # Write results
         # -------------
-        filename_train = basename + '_train.predict'
+        # filename_train = basename + '_train.predict'
         # filename_valid = basename + '_valid.predict'
-        filename_test = basename + '_test.predict'
+        # filename_test = basename + '_test.predict'
+        
+        filename_test = basename[:-5] + '.predict'
 
         vprint( verbose, "======== Saving results to: " + output_dir)
         # data_io.write(os.path.join(output_dir,filename_train), Y_train)
