@@ -145,7 +145,7 @@ def zipdir(archivename, basedir):
 def inventory_data(input_dir):
     ''' Inventory the datasets in the input directory and return them in alphabetical order'''
     # Assume first that there is a hierarchy dataname/dataname_train.data
-    training_names = ls(os.path.join(input_dir, '*'))
+    training_names = ls(os.path.join(input_dir, '*.data'))
     training_names = [ name.split('/')[-1] for name in training_names ]
         
     ntr=len(training_names)

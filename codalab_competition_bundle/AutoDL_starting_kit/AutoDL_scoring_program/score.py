@@ -26,7 +26,7 @@ from libscores import *
 # Default I/O directories:
 root_dir = pwd()
 from os.path import join
-default_solution_dir = join(root_dir, "AutoDL_sample_data", "mnist")
+default_solution_dir = join(root_dir, "AutoDL_sample_data")
 default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_score_dir = join(root_dir, "AutoDL_scoring_output")
 

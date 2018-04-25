@@ -34,4 +34,4 @@ Eventually, substitute AutoDL_sample_data with other public data. The full call 
 	python AutoDL_scoring_program/score.py
 
 The full call is:
-	python AutoDL_scoring_program/score.py AutoDL_sample_solution AutoDL_sample_result_submission AutoDL_scoring_output
+	python AutoDL_scoring_program/score.py AutoDL_sample_data AutoDL_sample_result_submission AutoDL_scoring_output

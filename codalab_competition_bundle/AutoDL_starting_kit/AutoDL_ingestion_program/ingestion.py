@@ -96,7 +96,7 @@ save_previous_results = False
 from os import getcwd as pwd
 from os.path import join
 root_dir = pwd()
-default_input_dir = join(root_dir, "AutoDL_sample_input_data")
+default_input_dir = join(root_dir, "AutoDL_sample_data")
 default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_program_dir = join(root_dir, "AutoDL_ingestion_program")
 default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
