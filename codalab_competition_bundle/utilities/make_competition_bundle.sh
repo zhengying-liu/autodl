@@ -31,16 +31,30 @@ DIR='tmp/'
 mkdir $DIR
 cp '../'*.jpg $DIR
 cp '../'*.html $DIR
+cp '../'*.yaml $DIR
 cp -r '../assets' $DIR
 cd ..
 # Begin zipping each data
 for filename in $(find . -name 'AutoDL_*' | grep -v '.zip'); do
   cd $filename;
   echo $filename;
-  DATE=`date +%Y_%m_%d`;
-  zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../$filename'-'$DATE" ../utilities/$DIR;
+  zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../utilities/"$DIR$filename .;
   cd ..;
 done
 # Zipping ingestion and scoring program
+cd AutoDL_starting_kit/
+filename="AutoDL_ingestion_program"
+cd $filename;
+echo $filename;
+echo $(pwd)
+zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../../utilities/"$DIR$filename .;
+cd ..;
+filename="AutoDL_scoring_program"
+cd $filename;
+echo $(pwd)
+zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../../utilities/"$DIR$filename .;
+cd ..;
 
-echo $DATE
+# Zip all to make a competition bundle
+cd "../utilities/"$DIR
+zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../AutoDL_competition_bundle_"$DATE .;
