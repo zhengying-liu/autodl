@@ -159,18 +159,9 @@ if __name__=="__main__" and debug_mode<4:
     datanames = data_io.inventory_data(input_dir)
     # Overwrite the "natural" order
 
-    #### Unzip dataset if necessary ####
-    from subprocess import call
-    for index in range(len(datanames)):
-      dataname = datanames[index]
-      if dataname.endswith('.zip'):
-        path_to_zip_file = os.path.join(input_dir, dataname)
-        print('Unzipping zip file:', path_to_zip_file)
-        call(['ls'])
-        call(['unzip', '-o', '-d', path_to_zip_file[:-4], path_to_zip_file])
-        print('Removing zip file:', path_to_zip_file)
-        call(['rm', path_to_zip_file])
-        datanames[index] = dataname[:-4]
+    #### Delete zip files and metadata file
+    datanames = [x for x in datanames
+      if x!='metadata' and not x.endswith('.zip')]
 
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:
