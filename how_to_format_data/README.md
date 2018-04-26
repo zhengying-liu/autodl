@@ -10,5 +10,4 @@ We strongly encourage participants to format their own data and **share with the
 The data used in this challenge are in the standard TensorFlow format: [TFRecords](https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data). According to the official documentation of TensorFlow,
 > the TFRecord file format is a simple record-oriented binary format that many TensorFlow applications use for training data.
 
-
-
+As binary files can have follow different format, TFRecords can be obtained following different protocols, as in [Protocol Buffers](https://developers.google.com/protocol-buffers/). 
