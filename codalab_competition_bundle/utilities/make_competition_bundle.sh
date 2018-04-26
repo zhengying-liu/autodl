@@ -32,14 +32,14 @@ cp '../'*.jpg $DIR
 cp '../'*.html $DIR
 cp '../'*.yaml $DIR
 cp -r '../assets' $DIR
-cd ..
+cd .. # codalab_competition_bundle/
 
 # Begin zipping each data
 for filename in $(find . -name 'AutoDL_*' | grep -v '.zip'); do
   cd $filename;
   echo $filename;
   zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../utilities/"$DIR$filename .;
-  cd ..;
+  cd ..; # codalab_competition_bundle/
 done
 
 # Zipping ingestion and scoring program
@@ -49,12 +49,12 @@ cd $filename;
 echo $filename;
 echo $(pwd)
 zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../../utilities/"$DIR$filename .;
-cd ..;
+cd ..; # AutoDL_starting_kit/
 filename="AutoDL_scoring_program"
 cd $filename;
 echo $(pwd)
 zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../../utilities/"$DIR$filename .;
-cd ..;
+cd ..; # AutoDL_starting_kit/
 
 # Zip all to make a competition bundle
 cd "../utilities/"$DIR
