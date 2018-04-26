@@ -11,3 +11,5 @@ The data used in this challenge are in the standard TensorFlow format: [TFRecord
 > the TFRecord file format is a simple record-oriented binary format that many TensorFlow applications use for training data.
 
 As binary files can have follow different format, TFRecords can be obtained following different protocols, as in [Protocol Buffers](https://developers.google.com/protocol-buffers/). 
+
+
