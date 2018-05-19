@@ -1,0 +1,126 @@
+########################################################################
+############################ AUTODL CHALLENGE  #########################
+########################################################################
+# Authors: Isabelle Guyon, Zhengying Liu
+# Date: Apr 12, 2018
+
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
+# UNIVERSITE PARIS SUD, INRIA, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
+# ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
+# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL UNIVERSITE PARIS SUD, INRIA, CHALEARN, AND/OR OTHER ORGANIZERS 
+# BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER 
+# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, 
+# MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
+
+title: "AutoDL :: competition mockup - TensorFlow"
+description: "Create a fully Automatic Deep Learning solution."
+image: AutoDL.jpg
+has_registration: False                 # We do not check participants, registration is free
+force_submission_to_leaderboard: True   # If false, participants must submit manually
+disallow_leaderboard_modifying: True    # If true, submissions cannot be changed
+enable_detailed_results: True           # True if html file written
+competition_docker_image: evariste/autodl:dockerfile # replace that by your own docker
+end_date:
+admin_names: eric, guyon, Zhengying, neutralnet
+html:
+    overview: overview.html
+    evaluation: evaluation.html
+    terms: terms.html
+    data: data.html
+
+# ----------------------------------------------------------------------------------------
+# ----------------------                PHASES                   -------------------------
+# ----------------------------------------------------------------------------------------
+
+phases:
+
+# ----------------------            AUTODL              -------------------------
+
+    1:
+        phasenumber: 1
+        label: "Feed-back"
+        description: "Practice on five datasets similar to those of the second phase. You can make multiple submissions of results or code."
+        color: orange                # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-04-11
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        public_data: AutoDL_public_data.zip
+        input_data: AutoDL_input_data_1.zip
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_1.zip
+        starting_kit: AutoDL_starting_kit.zip
+
+
+    2:
+        phasenumber: 2              # NO submission, auto-migration
+        label: "AutoDL"
+        description: "No new submissions. Your last submission of the first phase will be blindly tested." # For phase list and result pages.
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2019-06-30
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 1  # Because of auto-migration, this means no submission
+        auto_migration: True        # first submission = last one of previous phase
+        input_data: AutoDL_input_data_2.zip
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_2.zip
+
+
+# ----------------------------------------------------------------------------------------
+# ----------------------              LEADERBOARD                -------------------------
+# ----------------------------------------------------------------------------------------
+
+leaderboard:
+    leaderboards:
+        Results: &RESULTS
+            label: RESULTS
+            rank: 1
+    columns:
+        set1_score:
+            leaderboard: *RESULTS
+            label: Set 1
+            numeric_format: 4
+            rank: 2
+        set2_score:
+            leaderboard: *RESULTS
+            label: Set 2
+            numeric_format: 4
+            rank: 3
+        set3_score:
+            leaderboard: *RESULTS
+            label: Set 3
+            numeric_format: 4
+            rank: 4
+        set4_score:
+            leaderboard: *RESULTS
+            label: Set 4
+            numeric_format: 4
+            rank: 5
+        set5_score:
+            leaderboard: *RESULTS
+            label: Set 5
+            numeric_format: 4
+            rank: 6
+        ave_score:
+            leaderboard: *RESULTS
+            label: <Rank>
+            numeric_format: 4
+            rank: 1
+            selection_default: 1
+            sorting: ascending
+            computed:
+                operation: Avg
+                fields: set1_score, set2_score, set3_score, set4_score, set5_score
+        Duration:
+            leaderboard: *RESULTS
+            label: Duration
+            numeric_format: 2
+            rank: 7

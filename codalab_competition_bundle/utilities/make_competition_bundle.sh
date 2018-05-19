@@ -1,3 +1,4 @@
+#!/bin/bash
 # This script is going to create a zip file by
 #
 # 1) creating a tmp/ directory
