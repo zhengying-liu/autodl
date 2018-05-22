@@ -25,7 +25,22 @@ class Model(algorithm.Algorithm):
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
-    self.classifier = tf.estimator.Estimator(model_fn=self.model_fn)
+
+    # Checkpoints configuration
+    my_checkpointing_config = tf.estimator.RunConfig(
+      save_checkpoints_secs = 10,  # Save checkpoints every 10 seconds.
+      keep_checkpoint_max = 10,       # Retain the 10 most recent checkpoints.
+    )
+
+    # Remove the directory './checkpoints/' if exists
+    checkpoints_dir = 'checkpoints'
+    from subprocess import call
+    call(['rm','-rf',checkpoints_dir])
+
+    self.classifier = tf.estimator.Estimator(
+      model_fn=self.model_fn,
+      model_dir=checkpoints_dir,
+      config=my_checkpointing_config)
     self.is_trained = False
 
   def model_fn(self, features, labels, mode):
@@ -41,7 +56,7 @@ class Model(algorithm.Algorithm):
     # Construct a neural network with 0 hidden layer
     input_layer = tf.reshape(features['x'],
                              [-1, sequence_size*row_count*col_count])
-    print("#"*50, "model_fn", mode, input_layer.shape)
+    # print("#"*50, "In model_fn, mode:", mode, "input shape:", input_layer.shape)
     logits = tf.layers.dense(inputs=input_layer, units=output_dim)
 
     predictions = {
@@ -95,12 +110,12 @@ class Model(algorithm.Algorithm):
       return features, labels
 
     with tf.Session() as sess:
-      print("@"*50, "Begin training!!!")
+      # print("@"*50, "Begin training!!!")
       self.classifier.train(
         input_fn=train_input_fn,
-        steps=2000)#,
+        steps=20000)#,
         # hooks=[logging_hook])
-      print("@"*50, "Finished training.")
+      # print("@"*50, "Finished training.")
 
     self.is_trained = True
 

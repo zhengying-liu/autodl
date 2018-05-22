@@ -113,6 +113,7 @@ import time
 import numpy as np
 overall_start = time.time()         # <== Mark starting time
 import os
+import sys
 from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
@@ -252,12 +253,50 @@ if __name__=="__main__" and debug_mode<4:
         #     you_must_train=0
         #     vprint( verbose,  "[+] Model reloaded, no need to train!")
 
+        total_pause_time = 0
+        prediction_order_number = 0
+
         # ========= Train if needed only
         if you_must_train:
-            vprint( verbose, "======== Trained model not found, proceeding to train!")
+            # vprint( verbose, "======== Trained model not found, proceeding to train!")
+            vprint(verbose, "======== Begin training. Use Ctrl+C to pause.")
             start = time.time()
             # TODO:
-            M.train(D_train.get_dataset())
+            while(True):
+              try:
+                M.train(D_train.get_dataset())
+                # If training terminates normally then break the loop
+                break
+
+              # Ctrl+C for pause training and make predictions using present model
+              except KeyboardInterrupt:
+                pause_start = time.time()
+                vprint(verbose,
+                  "\n======== Pause training and begin making predictions...")
+
+                # Make predictions using the most recent checkpoint
+                # Prediction files: mini.predict_0, mini.predict_1, ...
+                Y_test = M.test(D_test.get_dataset())
+                vprint( verbose, "======== Saving results to: " + output_dir)
+                filename_test = basename[:-5] + '.predict_' +\
+                  str(prediction_order_number)
+                data_io.write(os.path.join(output_dir,filename_test), Y_test)
+
+                # User types 'y' to resume training, types others to quit
+                vprint(verbose,
+                  "======== Finished making predictions. Resume training? (y/n)")
+                input = sys.stdin.readline()[0].lower()
+                if input == 'y':
+                  vprint(verbose, "======== Continue training...")
+                  prediction_order_number += 1
+                  continue
+                else:
+                  vprint(verbose,
+                    "======== Stop training and make final predictions...")
+                  break
+                pause_end = time.time()
+                total_pause_time += pause_end - pause_start
+
             vprint( verbose,  "[+] Fitting success, time spent so far %5.2f sec" % (time.time() - start))
             # Save model
             # ----------
@@ -290,8 +329,9 @@ if __name__=="__main__" and debug_mode<4:
         # filename_train = basename + '_train.predict'
         # filename_valid = basename + '_valid.predict'
         # filename_test = basename + '_test.predict'
-        
-        filename_test = basename[:-5] + '.predict'
+
+        filename_test = basename[:-5] + '.predict_' +\
+          str(prediction_order_number)
 
         vprint( verbose, "======== Saving results to: " + output_dir)
         # data_io.write(os.path.join(output_dir,filename_train), Y_train)

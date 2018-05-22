@@ -1,3 +1,4 @@
+#!/bin/bash
 # This script creates zip files for each dataset facilitating
 # the creation of datasets and the editing of competition on CodaLab
 
