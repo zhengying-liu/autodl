@@ -39,6 +39,7 @@ from data_pb2 import MatrixSpec
 #
 # def dataset_file_pattern(dataset_name):
 #   return os.path.join(FLAGS.dataset_dir, dataset_name, "sample*")
+
 def metadata_filename(dataset_name):
   return os.path.join("", dataset_name,
                       "metadata.textproto")
@@ -56,6 +57,9 @@ class AutoDLMetadata(object):
     self.metadata_ = DataSpecification()
     with gfile.GFile(metadata_filename(dataset_name), "r") as f:
       text_format.Merge(f.read(), self.metadata_)
+
+  def get_dataset_name(self):
+    return self.dataset_name_
 
   def is_compressed(self, bundle_index):
     return self.metadata_.matrix_spec[

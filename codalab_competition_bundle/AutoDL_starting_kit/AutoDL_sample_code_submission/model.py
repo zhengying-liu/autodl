@@ -18,7 +18,7 @@
 import tensorflow as tf
 import algorithm
 import numpy as np
-
+import os
 
 class Model(algorithm.Algorithm):
   """A neural network with no hidden layer."""
@@ -27,20 +27,24 @@ class Model(algorithm.Algorithm):
     super(Model, self).__init__(metadata)
 
     # Checkpoints configuration
-    my_checkpointing_config = tf.estimator.RunConfig(
+    self.my_checkpointing_config = tf.estimator.RunConfig(
       save_checkpoints_secs = 10,  # Save checkpoints every 10 seconds.
       keep_checkpoint_max = 10,       # Retain the 10 most recent checkpoints.
     )
 
-    # Remove the directory './checkpoints/' if exists
-    checkpoints_dir = 'checkpoints'
-    from subprocess import call
-    call(['rm','-rf',checkpoints_dir])
+    # Get dataset name. To be changed.
+    self.dataset_name = self.metadata_.get_dataset_name()\
+                          .split('/')[-2].split('.')[0]
 
+    # IMPORTANT: directory to store checkpoints of the model
+    self.checkpoints_dir = 'checkpoints_' + self.dataset_name
+
+    # Classifier
     self.classifier = tf.estimator.Estimator(
       model_fn=self.model_fn,
-      model_dir=checkpoints_dir,
-      config=my_checkpointing_config)
+      model_dir=self.checkpoints_dir,
+      config=self.my_checkpointing_config)
+
     self.is_trained = False
 
   def model_fn(self, features, labels, mode):
@@ -113,7 +117,7 @@ class Model(algorithm.Algorithm):
       # print("@"*50, "Begin training!!!")
       self.classifier.train(
         input_fn=train_input_fn,
-        steps=20000)#,
+        steps=2000)#,
         # hooks=[logging_hook])
       # print("@"*50, "Finished training.")
 

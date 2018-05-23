@@ -21,7 +21,7 @@ class Algorithm(object):
   """Algorithm class: API (abstract class)."""
 
   def __init__(self, metadata):
-    self.metadata_ = metadata
+    self.metadata_ = metadata # An AutoDLMetadata object
 
   def train_by_time(self, dataset, max_time):
     del max_time

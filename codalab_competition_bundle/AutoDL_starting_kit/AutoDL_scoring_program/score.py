@@ -18,17 +18,20 @@ import os
 from sys import argv
 from os import getcwd as pwd
 
-# Solve the display issue
+# Solve the Tkinter display issue of matplotlib.pyplot
 import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 import libscores
 import my_metric
 import yaml
 from libscores import *
+
+# Libraries for reconstructing the model
 
 # Default I/O directories:
 root_dir = pwd()
@@ -71,7 +74,12 @@ def get_prediction_files(prediction_dir, basename):
   prediction_files = ls(os.path.join(prediction_dir, basename + '*.predict_*'))
   return prediction_files
 
-def draw_learning_curve(solution_file, prediction_files, scoring_function, output_dir):
+def get_fig_name(basename):
+  fig_name = "learning-curve-" + basename + ".png"
+  return fig_name
+
+def draw_learning_curve(solution_file, prediction_files,
+                        scoring_function, output_dir, basename):
   """Draw learning curve for one task."""
   solution = read_array(solution_file) # numpy array
   scores = []
@@ -90,22 +98,35 @@ def draw_learning_curve(solution_file, prediction_files, scoring_function, outpu
   X = [t - start for t,_ in sorted_pairs]
   Y = [s for _,s in sorted_pairs]
 
-  basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-
   # Draw learning curve
-  plt.plot(X,Y)
+  plt.clf()
+  plt.plot(X,Y,marker="o", label="Test score")
   plt.title("Learning curve for the task " + basename)
   plt.xlabel('time/second')
   plt.ylabel('score')
-  fig_name = 'learning-curve-'+basename+".png"
+  fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
 
-  return fig_name
+# TODO: transform this whole score.py script in an object-oriented manner
+class Scorer():
+  """A class for scoring one single task"""
+
+  def ___init__(data_dir, solution_dir, prediction_dir, score_dir):
+    self.birth_time = time.time()
+
+    self.solution_dir = solution_dir
+    self.prediction_dir = prediction_dir
+    self.score_dir = score_dir
+    self.time_budget = 300 # TODO
 
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
+
+    start = time.time()
+    # TODO
+    time_budget = 300
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
@@ -141,29 +162,53 @@ if __name__ == "__main__":
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
 
+    # Automatic refresh every 5 seconds: content="5"
+    tag_auto_refresh =\
+      """<head> <meta http-equiv="refresh" content="5"> </head>"""
+
+    html_file.write(tag_auto_refresh.encode('utf-8'))
     html_file.write('<pre>'.encode('utf-8'))
-
-    # Loop over files in solution directory and search for predictions with extension .predict having the same basename
     for i, solution_file in enumerate(solution_names):
-        set_num = i + 1  # 1-indexed
-        score_name = 'set%s_score' % set_num
-
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-
-        # Give list of prediction files
-        prediction_files = get_prediction_files(prediction_dir, basename)
-
-        # Draw the learning curve
-        fig_name =\
-          draw_learning_curve(solution_file=solution_file,
-                              prediction_files=prediction_files,
-                              scoring_function=scoring_function,
-                              output_dir=score_dir)
-
         # Add the image learning curve to html_file
+        fig_name = get_fig_name(basename)
         img_tag = "<img src=" + fig_name + ">"
         html_file.write(img_tag.encode('utf-8'))
+    html_file.flush()
+
+    nb_preds = {x:0 for x in solution_names}
+
+    # Moniter training processes while time budget is not attained
+    while(time.time() < start + time_budget):
+      # Loop over files in solution directory and search for predictions with extension .predict having the same basename
+      for i, solution_file in enumerate(solution_names):
+          set_num = i + 1  # 1-indexed
+          score_name = 'set%s_score' % set_num
+
+          # Extract the dataset name from the file name
+          basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
+
+          time.sleep(0.5)
+
+          # Give list of prediction files
+          prediction_files = get_prediction_files(prediction_dir, basename)
+
+          nb_preds_old = nb_preds[solution_file]
+          nb_preds_new = len(prediction_files)
+
+          if(nb_preds_new > nb_preds_old):
+            print("New nb_preds:", nb_preds_new)
+            # Draw the learning curve
+            print("Refreshing learning curve for", basename)
+            draw_learning_curve(solution_file=solution_file,
+                                prediction_files=prediction_files,
+                                scoring_function=scoring_function,
+                                output_dir=score_dir,
+                                basename=basename)
+            nb_preds[solution_file] = nb_preds_new
+
+
 
         # if 1==1: #try:
         #     # Get the last prediction from the res subdirectory (must end with '.predict')
@@ -213,8 +258,8 @@ if __name__ == "__main__":
         str_temp = "Duration: 0\n"
         score_file.write(str_temp.encode('utf-8'))
 
-    html_file.close()
     score_file.close()
+    html_file.close()
 
     # Lots of debug stuff
     if debug_mode > 1:

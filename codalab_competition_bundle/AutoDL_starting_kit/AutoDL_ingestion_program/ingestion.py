@@ -37,7 +37,7 @@
 #    ----------------
 # model.py
 # model.Model.train
-# model.Model.predict
+# model.Model.test
 #
 # ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # UNIVERSITE PARIS SUD, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
@@ -118,7 +118,7 @@ from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
 
-# =========================== BEGIN PROGRAM ================================\
+# =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
     #### Check whether everything went well (no time exceeded)
@@ -166,17 +166,6 @@ if __name__=="__main__" and debug_mode<4:
     #### Delete zip files and metadata file
     datanames = [x for x in datanames
       if x!='metadata' and not x.endswith('.zip')]
-
-    #### Unzip dataset if necessary ####
-    # from subprocess import call
-    # for index in range(len(datanames)):
-    #   dataname = datanames[index]
-    #   if dataname.endswith('.zip'):
-    #     print("Found dataset %s in zip format. Unzipping..." % dataname)
-    #     path_to_zip_file = os.path.join(input_dir, dataname)
-    #     call(['unzip', '-o','-d', path_to_zip_file[:-4], path_to_zip_file])
-    #     call(['rm', path_to_zip_file])
-    #     datanames[index] = dataname[:-4]
 
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:
@@ -264,31 +253,30 @@ if __name__=="__main__" and debug_mode<4:
             # TODO:
             while(True):
               try:
-                M.train(D_train.get_dataset())
+                while(time.time() < start + time_budget + total_pause_time):
+                  M.train(D_train.get_dataset())
+                  # Make predictions using the most recent checkpoint
+                  # Prediction files: mini.predict_0, mini.predict_1, ...
+                  Y_test = M.test(D_test.get_dataset())
+                  vprint( verbose, "======== Saving results to: " + output_dir)
+                  filename_test = basename[:-5] + '.predict_' +\
+                    str(prediction_order_number)
+                  data_io.write(os.path.join(output_dir,filename_test), Y_test)
+                  prediction_order_number += 1
+
                 # If training terminates normally then break the loop
                 break
 
               # Ctrl+C for pause training and make predictions using present model
               except KeyboardInterrupt:
                 pause_start = time.time()
-                vprint(verbose,
-                  "\n======== Pause training and begin making predictions...")
-
-                # Make predictions using the most recent checkpoint
-                # Prediction files: mini.predict_0, mini.predict_1, ...
-                Y_test = M.test(D_test.get_dataset())
-                vprint( verbose, "======== Saving results to: " + output_dir)
-                filename_test = basename[:-5] + '.predict_' +\
-                  str(prediction_order_number)
-                data_io.write(os.path.join(output_dir,filename_test), Y_test)
+                vprint(verbose, "\n======== User interrupt. Pause training.")
 
                 # User types 'y' to resume training, types others to quit
-                vprint(verbose,
-                  "======== Finished making predictions. Resume training? (y/n)")
+                vprint(verbose, "======== Resume training? (y/n)")
                 input = sys.stdin.readline()[0].lower()
                 if input == 'y':
                   vprint(verbose, "======== Continue training...")
-                  prediction_order_number += 1
                   continue
                 else:
                   vprint(verbose,
