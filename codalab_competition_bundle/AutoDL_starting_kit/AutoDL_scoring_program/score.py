@@ -104,6 +104,7 @@ def draw_learning_curve(solution_file, prediction_files,
   plt.title("Learning curve for the task " + basename)
   plt.xlabel('time/second')
   plt.ylabel('score')
+  plt.legend()
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
