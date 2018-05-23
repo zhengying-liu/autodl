@@ -26,6 +26,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
+# To compute area under learning curve
+from sklearn.metrics import auc
+
 import libscores
 import my_metric
 import yaml
@@ -33,8 +36,12 @@ from libscores import *
 
 # Libraries for reconstructing the model
 
+def _HERE(*args):
+    h = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(h, *args)
+
 # Default I/O directories:
-root_dir = pwd()
+root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
 from os.path import join
 default_solution_dir = join(root_dir, "AutoDL_sample_data")
 default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
@@ -49,12 +56,6 @@ missing_score = -0.999999
 
 # Version number
 scoring_version = 1.0
-
-
-def _HERE(*args):
-    h = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(h, *args)
-
 
 def _load_scoring_function():
     with open(_HERE('metric.txt'), 'r') as f:
@@ -108,6 +109,10 @@ def draw_learning_curve(solution_file, prediction_files,
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
+  return X, Y
+
+def area_under_learning_curve(X,Y):
+  return auc(X,Y)
 
 # TODO: transform this whole score.py script in an object-oriented manner
 class Scorer():
@@ -127,7 +132,7 @@ if __name__ == "__main__":
 
     start = time.time()
     # TODO
-    time_budget = 300
+    TIME_BUDGET = 300
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
@@ -159,6 +164,7 @@ if __name__ == "__main__":
 
     # Get the metric
     metric_name, scoring_function = _load_scoring_function()
+    metric_name = "Area Under Learning Curve"
 
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
@@ -168,7 +174,7 @@ if __name__ == "__main__":
       """<head> <meta http-equiv="refresh" content="5"> </head>"""
 
     html_file.write(tag_auto_refresh.encode('utf-8'))
-    html_file.write('<pre>'.encode('utf-8'))
+    # html_file.write('<pre>'.encode('utf-8'))
     for i, solution_file in enumerate(solution_names):
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
@@ -179,9 +185,10 @@ if __name__ == "__main__":
     html_file.flush()
 
     nb_preds = {x:0 for x in solution_names}
+    scores = {x:0 for x in solution_names}
 
     # Moniter training processes while time budget is not attained
-    while(time.time() < start + time_budget):
+    while(time.time() < start + TIME_BUDGET):
       # Loop over files in solution directory and search for predictions with extension .predict having the same basename
       for i, solution_file in enumerate(solution_names):
           set_num = i + 1  # 1-indexed
@@ -202,51 +209,31 @@ if __name__ == "__main__":
             print("New nb_preds:", nb_preds_new)
             # Draw the learning curve
             print("Refreshing learning curve for", basename)
-            draw_learning_curve(solution_file=solution_file,
+            X, Y = draw_learning_curve(solution_file=solution_file,
                                 prediction_files=prediction_files,
                                 scoring_function=scoring_function,
                                 output_dir=score_dir,
                                 basename=basename)
             nb_preds[solution_file] = nb_preds_new
+            scores[solution_file] = area_under_learning_curve(X,Y)
 
 
+    for i, solution_file in enumerate(solution_names):
+        set_num = i + 1  # 1-indexed
+        score_name = 'set%s_score' % set_num
 
-        # if 1==1: #try:
-        #     # Get the last prediction from the res subdirectory (must end with '.predict')
-        #     predict_file = ls(os.path.join(prediction_dir, basename + '*.predict'))[-1]
-        #     if (predict_file == []): raise IOError('Missing prediction file {}'.format(basename))
-        #     predict_name = predict_file[-predict_file[::-1].index(filesep):-predict_file[::-1].index('.') - 1]
-        #     # Read the solution and prediction values into numpy arrays
-        #     solution = read_array(solution_file)
-        #     prediction = read_array(predict_file)
-        #     if (solution.shape != prediction.shape): raise ValueError(
-        #         "Bad prediction shape {}".format(prediction.shape))
-        #
-        #     if 1==1: #try:
-        #         # Compute the score prescribed by the metric file
-        #         score = scoring_function(solution, prediction)
-        #         str_temp = "======= Set %d" % set_num + " (" + predict_name.capitalize() + "): " + metric_name + "(" + score_name + ")=%0.12f =======\n" % score
-        #         print(str_temp)
-        #         html_file.write(str_temp.encode('utf-8'))
-        #     else: #except:
-        #         raise Exception('Error in calculation of the specific score of the task')
-        #
-        #     if debug_mode > 0:
-        #         scores = compute_all_scores(solution, prediction)
-        #         write_scores(html_file, scores)
-        #
-        # else: #except Exception as inst:
-        #     score = missing_score
-        #     print(
-        #         "======= Set %d" % set_num + " (" + basename.capitalize() + "): " + metric_name + "(" + score_name + ")=ERROR =======")
-        #     html_file.write(
-        #         "======= Set %d" % set_num + " (" + basename.capitalize() + "): " + metric_name + "(" + score_name + ")=ERROR =======\n")
-        #     print
-        #     inst
-        #
-        # # Write score corresponding to selected task and metric to the output file
-        # str_temp = score_name + ": %0.12f\n" % score
-        # score_file.write(str_temp.encode('utf-8'))
+        # Extract the dataset name from the file name
+        basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
+
+        score = scores[solution_file]
+        str_temp = "\n======= Set %d" % set_num + " (" + basename.capitalize() + "): " + metric_name + "(" + score_name + ")=%0.12f =======\n" % score
+        print(str_temp)
+        html_file.write(str_temp.encode('utf-8'))
+
+
+        # Write score corresponding to selected task and metric to the output file
+        str_temp = score_name + ": %0.12f\n" % score
+        score_file.write(str_temp.encode('utf-8'))
 
     # End loop for solution_file in solution_names
 

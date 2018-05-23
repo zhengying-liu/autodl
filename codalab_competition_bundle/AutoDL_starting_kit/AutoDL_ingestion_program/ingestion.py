@@ -93,9 +93,17 @@ save_previous_results = False
 # Use default location for the input and output data:
 # If no arguments to run.py are provided, this is where the data will be found
 # and the results written to. Change the root_dir to your local directory.
+import os
 from os import getcwd as pwd
 from os.path import join
-root_dir = pwd()
+
+def _HERE(*args):
+    h = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(h, *args)
+
+# Default I/O directories:
+# root_dir is the parent directory of the folder "AutoDL_ingestion_program"
+root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
 default_input_dir = join(root_dir, "AutoDL_sample_data")
 default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_program_dir = join(root_dir, "AutoDL_ingestion_program")
@@ -140,6 +148,10 @@ if __name__=="__main__" and debug_mode<4:
         print("Using output_dir: " + output_dir)
         print("Using program_dir: " + program_dir)
         print("Using submission_dir: " + submission_dir)
+    if verbose:
+        print("In input_dir: ", os.listdir(input_dir))
+        print("In program_dir: ", os.listdir(program_dir))
+        print("In submission_dir: ", os.listdir(submission_dir))
 
 	# Our libraries
     path.append (program_dir)

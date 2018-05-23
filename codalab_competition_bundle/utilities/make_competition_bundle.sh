@@ -28,6 +28,8 @@
 
 DATE=`date "+%Y-%m-%d-%H-%M-%S"`
 DIR='tmp/'
+# Delete $DIR if exists
+rm -rf $DIR
 mkdir $DIR
 cp '../'*.jpg $DIR
 cp '../'*.html $DIR
