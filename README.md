@@ -14,11 +14,11 @@ The directories correspond to:
 
 ### To-do:
 1. <s> Replace the fake datasets `mnist1`, ..., `mnist5` by real datasets, e.g. `mnist1` by real MNIST, with train and test ; </s>
-2. **(Done)** Create a file `mnist_test.solution` containing real labels on test set and put it in the directory `AutoDL_reference_data/`;
-3. **(Done)** Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`;
+2. <s> Create a file `mnist_test.solution` containing real labels on test set and put it in the directory `AutoDL_reference_data/`;</s>
+3. <s> Write a real estimator (neural network) as baseline model in the file `AutoDL_sample_code_submission/model.py`;</s>
 4. Improve codes in general by adding comments and turn them more user friendly. And possibly rewrite score.py (and maybe ingestion.py) in a more object-oriented manner;
-5. **(Done)** Add Checkpoints feature to save and restore models;
-6. **(Done)** Add feature of drawing learning curves;
+5. <s> Add Checkpoints feature to save and restore models;</s>
+6. <s> Add feature of drawing learning curves;</s>
 7. Modify the API that will be provided to participants: 
     - Checkpoint feature for the participants so that they can pause and resume their training;
     - Candidate model: during the whole training process, one candidate model should be available at any moment to make predictions.Typically, a `save()` method should be called by the participant during training to update such candidate model and a `load()` method should be implemented by each participant such that the challenge backend can call it and make predictions *in parallel* with the training;
