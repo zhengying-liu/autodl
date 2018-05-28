@@ -25,7 +25,7 @@ The directories correspond to:
 8. Format KTH video dataset to TFRecords;
 9. Format RCV1 text dataset to TFRecords;
 10. Format KTH video dataset to TFRecords;
-11. Format Adulte dataset to TFRecords;
+11. Format Adult dataset to TFRecords;
 12. Finish "How to format data" tutorial;
 13. Test *parallel ingestion/score* feature;
 14. Test *several independent tracks* feautre (one dataset in each track, but in only 1 phase);
