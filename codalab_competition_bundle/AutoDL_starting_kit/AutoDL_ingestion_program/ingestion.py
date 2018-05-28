@@ -124,7 +124,7 @@ import os
 import sys
 from sys import argv, path
 import datetime
-the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
 
 # =========================== BEGIN PROGRAM ================================
 
@@ -152,6 +152,12 @@ if __name__=="__main__" and debug_mode<4:
         print("In input_dir: ", os.listdir(input_dir))
         print("In program_dir: ", os.listdir(program_dir))
         print("In submission_dir: ", os.listdir(submission_dir))
+        print("Ingestion datetime:", the_date)
+    try:
+        print("In input_dir/res: ", os.listdir(os.path.join(input_dir, 'res')))
+        print("In input_dir/ref: ", os.listdir(os.path.join(input_dir, 'ref')))
+    except:
+        pass
 
 	# Our libraries
     path.append (program_dir)
@@ -177,7 +183,7 @@ if __name__=="__main__" and debug_mode<4:
 
     #### Delete zip files and metadata file
     datanames = [x for x in datanames
-      if x!='metadata' and not x.endswith('.zip')]
+      if x!='metadata' and x.endswith('.data') and not x.endswith('.zip')]
 
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:

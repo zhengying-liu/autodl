@@ -129,6 +129,8 @@ class Scorer():
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
+    import datetime
+    the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
 
     start = time.time()
     # TODO
@@ -155,6 +157,8 @@ if __name__ == "__main__":
         print("Using solution_dir: " + solution_dir)
         print("Using prediction_dir: " + prediction_dir)
         print("Using score_dir: " + score_dir)
+        print("Scoring datetime:", the_date)
+
 
 
     # Create the output directory, if it does not already exist and open output files
