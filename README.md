@@ -22,10 +22,14 @@ The directories correspond to:
 7. Modify the API that will be provided to participants: 
     - Checkpoint feature for the participants so that they can pause and resume their training;
     - Candidate model: during the whole training process, one candidate model should be available at any moment to make predictions.Typically, a `save()` method should be called by the participant during training to update such candidate model and a `load()` method should be implemented by each participant such that the challenge backend can call it and make predictions *in parallel* with the training;
-8. Finish "How to format data" tutorial;
-9. Test *parallel ingestion/score* feature;
-10. Test *several independent tracks* feautre (one dataset in each track, but in only 1 phase);
-11. (to be added...)
+8. Format KTH video dataset to TFRecords;
+9. Format RCV1 text dataset to TFRecords;
+10. Format KTH video dataset to TFRecords;
+11. Format Adulte dataset to TFRecords;
+12. Finish "How to format data" tutorial;
+13. Test *parallel ingestion/score* feature;
+14. Test *several independent tracks* feautre (one dataset in each track, but in only 1 phase);
+15. (to be added...)
 
 
 ### Usefuls links:
