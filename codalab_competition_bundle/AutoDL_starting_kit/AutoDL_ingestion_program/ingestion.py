@@ -124,7 +124,7 @@ import os
 import sys
 from sys import argv, path
 import datetime
-the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
 # =========================== BEGIN PROGRAM ================================
 
@@ -143,6 +143,13 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = os.path.abspath(argv[2])
         program_dir = os.path.abspath(argv[3])
         submission_dir = os.path.abspath(argv[4])
+        # TODO
+        # Now data are with reference data, in run/input/ref
+        # Eric created run/submission to store participants' model.py
+        input_dir = os.path.abspath(os.path.join(argv[1], 'ref'))
+        output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
+        submission_dir = os.path.abspath(os.path.join(argv[4], '..', 'submission'))
+
     if verbose:
         print("Using input_dir: " + input_dir)
         print("Using output_dir: " + output_dir)
@@ -150,12 +157,15 @@ if __name__=="__main__" and debug_mode<4:
         print("Using submission_dir: " + submission_dir)
     if verbose:
         print("In input_dir: ", os.listdir(input_dir))
+        print("In output_dir: ", os.listdir(output_dir))
         print("In program_dir: ", os.listdir(program_dir))
         print("In submission_dir: ", os.listdir(submission_dir))
         print("Ingestion datetime:", the_date)
     try:
         print("In input_dir/res: ", os.listdir(os.path.join(input_dir, 'res')))
         print("In input_dir/ref: ", os.listdir(os.path.join(input_dir, 'ref')))
+        print("In run/: ", os.listdir(os.path.join(input_dir, '..')))
+        print("In /: ", os.listdir('/'))
     except:
         pass
 
@@ -183,7 +193,7 @@ if __name__=="__main__" and debug_mode<4:
 
     #### Delete zip files and metadata file
     datanames = [x for x in datanames
-      if x!='metadata' and x.endswith('.data') and not x.endswith('.zip')]
+      if x!='metadata' and x.endswith('.data') and not x.endswith('.zip')] # TODO: change .endswith('.data')
 
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:
@@ -196,7 +206,9 @@ if __name__=="__main__" and debug_mode<4:
     #### MAIN LOOP OVER DATASETS:
     overall_time_budget = 0
     time_left_over = 0
-    for basename in datanames: # Loop over datasets
+
+
+    for i, basename in enumerate(datanames): # Loop over datasets
 
         vprint( verbose,  "\n========== Ingestion program version " + str(version) + " ==========\n")
         vprint( verbose,  "************************************************")
@@ -226,7 +238,6 @@ if __name__=="__main__" and debug_mode<4:
         if debug_mode<1:
             time_budget = max_time
             #time_budget = D.info['time_budget']        # <== HERE IS THE TIME BUDGET!
-            # TODO
         else:
             time_budget = max_time
         overall_time_budget = overall_time_budget + time_budget
@@ -271,12 +282,13 @@ if __name__=="__main__" and debug_mode<4:
             # TODO:
             while(True):
               try:
-                while(time.time() < start + time_budget + total_pause_time):
+                while(time.time() < overall_start + time_budget/6*(i+1) + total_pause_time):
                   M.train(D_train.get_dataset())
                   # Make predictions using the most recent checkpoint
                   # Prediction files: mini.predict_0, mini.predict_1, ...
                   Y_test = M.test(D_test.get_dataset())
-                  vprint( verbose, "======== Saving results to: " + output_dir)
+                  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                  vprint( verbose, "INFO:" + str(now)+ " ======== Saving results to: " + output_dir)
                   filename_test = basename[:-5] + '.predict_' +\
                     str(prediction_order_number)
                   data_io.write(os.path.join(output_dir,filename_test), Y_test)
@@ -320,7 +332,7 @@ if __name__=="__main__" and debug_mode<4:
 
         ##### To show to Andre #####
         # Y_train = M.test(D_train.get_dataset())
-        Y_test = M.test(D_test.get_dataset())
+        # Y_test = M.test(D_test.get_dataset())
 #        def compute_output(*arg):
 #            # arg[0] is the input
 #            return tf.map_fn(M.predict, arg[0])
@@ -336,13 +348,13 @@ if __name__=="__main__" and debug_mode<4:
         # filename_valid = basename + '_valid.predict'
         # filename_test = basename + '_test.predict'
 
-        filename_test = basename[:-5] + '.predict_' +\
-          str(prediction_order_number)
+        # filename_test = basename[:-5] + '.predict_' +\
+        #   str(prediction_order_number)
 
-        vprint( verbose, "======== Saving results to: " + output_dir)
-        # data_io.write(os.path.join(output_dir,filename_train), Y_train)
-        # data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
-        data_io.write(os.path.join(output_dir,filename_test), Y_test)
+        # vprint( verbose, "======== Saving results to: " + output_dir)
+        # # data_io.write(os.path.join(output_dir,filename_train), Y_train)
+        # # data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
+        # data_io.write(os.path.join(output_dir,filename_test), Y_test)
         vprint( verbose,  "[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
         time_spent = time.time() - start
         time_left_over = time_budget - time_spent

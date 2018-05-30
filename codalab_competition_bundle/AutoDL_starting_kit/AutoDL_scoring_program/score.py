@@ -173,11 +173,12 @@ if __name__ == "__main__":
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
 
-    # Automatic refresh every 5 seconds: content="5"
-    tag_auto_refresh =\
-      """<head> <meta http-equiv="refresh" content="5"> </head>"""
-
-    html_file.write(tag_auto_refresh.encode('utf-8'))
+    # TODO: automatic refreshing
+    # # Automatic refresh every 5 seconds: content="5"
+    # tag_auto_refresh =\
+    #   """<head> <meta http-equiv="refresh" content="5"> </head>"""
+    #
+    # html_file.write(tag_auto_refresh.encode('utf-8'))
     # html_file.write('<pre>'.encode('utf-8'))
     for i, solution_file in enumerate(solution_names):
         # Extract the dataset name from the file name
@@ -210,16 +211,19 @@ if __name__ == "__main__":
           nb_preds_new = len(prediction_files)
 
           if(nb_preds_new > nb_preds_old):
-            print("New nb_preds:", nb_preds_new)
+            now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+            print("INFO:", now, " ====== New prediction found. Now nb_preds =", nb_preds_new)
             # Draw the learning curve
-            print("Refreshing learning curve for", basename)
+            print("INFO:", now," ====== Refreshing learning curve for", basename)
             X, Y = draw_learning_curve(solution_file=solution_file,
                                 prediction_files=prediction_files,
                                 scoring_function=scoring_function,
                                 output_dir=score_dir,
                                 basename=basename)
             nb_preds[solution_file] = nb_preds_new
-            scores[solution_file] = area_under_learning_curve(X,Y)
+            if len(X) > 1:
+              scores[solution_file] = area_under_learning_curve(X,Y)
+              print("INFO:", now," ====== Current area under learning curve for", basename, ":", scores[solution_file])
 
 
     for i, solution_file in enumerate(solution_names):
@@ -259,3 +263,8 @@ if __name__ == "__main__":
         show_platform()
         show_io(prediction_dir, score_dir)
         show_version(scoring_version)
+
+    if verbose:
+        print("In solution_dir: ", os.listdir(solution_dir))
+        print("In prediction_dir: ", os.listdir(prediction_dir))
+        print("In score_dir: ", os.listdir(score_dir))
