@@ -157,7 +157,10 @@ if __name__=="__main__" and debug_mode<4:
         print("Using submission_dir: " + submission_dir)
     if verbose:
         print("In input_dir: ", os.listdir(input_dir))
-        print("In output_dir: ", os.listdir(output_dir))
+        try:
+          print("In output_dir: ", os.listdir(output_dir))
+        except:
+          print("In output_dir: ", "no output directory yet.")
         print("In program_dir: ", os.listdir(program_dir))
         print("In submission_dir: ", os.listdir(submission_dir))
         print("Ingestion datetime:", the_date)

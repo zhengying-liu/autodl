@@ -34,6 +34,9 @@ import my_metric
 import yaml
 from libscores import *
 
+# Convert images to Base64 to show in scores.html
+import base64
+
 # Libraries for reconstructing the model
 
 def _HERE(*args):
@@ -98,18 +101,22 @@ def draw_learning_curve(solution_file, prediction_files,
   start = sorted_pairs[0][0]
   X = [t - start for t,_ in sorted_pairs]
   Y = [s for _,s in sorted_pairs]
+  if len(X) > 1:
+    aulc = area_under_learning_curve(X,Y)
+  else:
+    aulc = 0
 
   # Draw learning curve
   plt.clf()
   plt.plot(X,Y,marker="o", label="Test score")
-  plt.title("Learning curve for the task " + basename)
+  plt.title("Task: " + basename + " - Current AUC: " + format(aulc, '.2f'))
   plt.xlabel('time/second')
   plt.ylabel('score')
   plt.legend()
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
-  return X, Y
+  return aulc
 
 def area_under_learning_curve(X,Y):
   return auc(X,Y)
@@ -126,11 +133,31 @@ class Scorer():
     self.score_dir = score_dir
     self.time_budget = 300 # TODO
 
+def write_scores_html(score_dir):
+  with open(os.path.join(score_dir, 'scores.html'), 'w+') as html_file:
+    html_str = """<html>
+    <head> <meta http-equiv="refresh" content="5"> </head>
+    <body>
+    <pre>
+    """
+    html_file.write(html_str)
+
+    image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
+    for image_path in image_paths:
+      with open(image_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        encoded_string = encoded_string.decode('utf-8')
+        s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
+        html_file.write(s + '<br>')
+
+    html_file.write('</pre></body></html>')
+
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
     import datetime
-    the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
+    the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
     start = time.time()
     # TODO
@@ -159,12 +186,9 @@ if __name__ == "__main__":
         print("Using score_dir: " + score_dir)
         print("Scoring datetime:", the_date)
 
-
-
     # Create the output directory, if it does not already exist and open output files
     mkdir(score_dir)
     score_file = open(os.path.join(score_dir, 'scores.txt'), 'wb')
-    html_file = open(os.path.join(score_dir, 'scores.html'), 'wb')
 
     # Get the metric
     metric_name, scoring_function = _load_scoring_function()
@@ -173,27 +197,12 @@ if __name__ == "__main__":
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
 
-    # TODO: automatic refreshing
-    # # Automatic refresh every 5 seconds: content="5"
-    # tag_auto_refresh =\
-    #   """<head> <meta http-equiv="refresh" content="5"> </head>"""
-    #
-    # html_file.write(tag_auto_refresh.encode('utf-8'))
-    # html_file.write('<pre>'.encode('utf-8'))
-    for i, solution_file in enumerate(solution_names):
-        # Extract the dataset name from the file name
-        basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-        # Add the image learning curve to html_file
-        fig_name = get_fig_name(basename)
-        img_tag = "<img src=" + fig_name + ">"
-        html_file.write(img_tag.encode('utf-8'))
-    html_file.flush()
-
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
 
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
+      time.sleep(0.5)
       # Loop over files in solution directory and search for predictions with extension .predict having the same basename
       for i, solution_file in enumerate(solution_names):
           set_num = i + 1  # 1-indexed
@@ -201,8 +210,6 @@ if __name__ == "__main__":
 
           # Extract the dataset name from the file name
           basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-
-          time.sleep(0.5)
 
           # Give list of prediction files
           prediction_files = get_prediction_files(prediction_dir, basename)
@@ -215,16 +222,18 @@ if __name__ == "__main__":
             print("INFO:", now, " ====== New prediction found. Now nb_preds =", nb_preds_new)
             # Draw the learning curve
             print("INFO:", now," ====== Refreshing learning curve for", basename)
-            X, Y = draw_learning_curve(solution_file=solution_file,
+            aulc = draw_learning_curve(solution_file=solution_file,
                                 prediction_files=prediction_files,
                                 scoring_function=scoring_function,
                                 output_dir=score_dir,
                                 basename=basename)
             nb_preds[solution_file] = nb_preds_new
-            if len(X) > 1:
-              scores[solution_file] = area_under_learning_curve(X,Y)
-              print("INFO:", now," ====== Current area under learning curve for", basename, ":", scores[solution_file])
 
+            scores[solution_file] = aulc
+            print("INFO:", now," ====== Current area under learning curve for", basename, ":", scores[solution_file])
+
+      # Update scores.html
+      write_scores_html(score_dir)
 
     for i, solution_file in enumerate(solution_names):
         set_num = i + 1  # 1-indexed
@@ -233,11 +242,8 @@ if __name__ == "__main__":
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
 
-        score = scores[solution_file]
-        str_temp = "\n======= Set %d" % set_num + " (" + basename.capitalize() + "): " + metric_name + "(" + score_name + ")=%0.12f =======\n" % score
-        print(str_temp)
-        html_file.write(str_temp.encode('utf-8'))
-
+        # TODO: for fun
+        score = scores[solution_file] + 315
 
         # Write score corresponding to selected task and metric to the output file
         str_temp = score_name + ": %0.12f\n" % score
@@ -253,9 +259,6 @@ if __name__ == "__main__":
     except:
         str_temp = "Duration: 0\n"
         score_file.write(str_temp.encode('utf-8'))
-
-    score_file.close()
-    html_file.close()
 
     # Lots of debug stuff
     if debug_mode > 1:
