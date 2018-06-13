@@ -135,13 +135,13 @@ class Scorer():
 
 def write_scores_html(score_dir):
   with open(os.path.join(score_dir, 'scores.html'), 'w+') as html_file:
+    # Automatic refreshing the page every 5 seconds
     html_str = """<html>
     <head> <meta http-equiv="refresh" content="5"> </head>
     <body>
     <pre>
     """
     html_file.write(html_str)
-
     image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
     for image_path in image_paths:
       with open(image_path, "rb") as image_file:
@@ -149,9 +149,7 @@ def write_scores_html(score_dir):
         encoded_string = encoded_string.decode('utf-8')
         s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
         html_file.write(s + '<br>')
-
     html_file.write('</pre></body></html>')
-
 
 # =============================== MAIN ========================================
 
@@ -242,8 +240,7 @@ if __name__ == "__main__":
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
 
-        # TODO: for fun
-        score = scores[solution_file] + 315
+        score = scores[solution_file]
 
         # Write score corresponding to selected task and metric to the output file
         str_temp = score_name + ": %0.12f\n" % score
