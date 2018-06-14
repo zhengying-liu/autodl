@@ -1,16 +1,16 @@
 # AutoDL
-We are co-organizing with Google Zurich a new data science challenge in Automatic Deep Learning (AutoDL). This repo contains 
+This repo contains the competition bundle (including sample data, starter code), a data formatting tutorial and other useful files of AutoDL challenge a new data science challenge aiming at pushing the state of the art in the field of Automatic Deep Learning (and more generally, Automatic Machine Learning). 
 
 The directories correspond to:
-- `codalab_competition_bundle`: the current competition bundle used on [CodaLab](http://35.193.242.121/competitions/8). It contains all the information to create a copy of the current version of the competition. For more information on how to create a competition. Important changes are to be made;
+- `codalab_competition_bundle`: the current competition bundle used on [CodaLab](http://35.193.242.121/competitions/8). It contains all the information to create a copy of the current version of the competition. For more information on how to create a competition on CodaLab, please refer to [this page](https://github.com/codalab/codalab-competitions/wiki#2-organizers). Important changes are to be made and the final version will be very different;
 - `docker`: the Dockerfile used to generate the Docker image for the challenge;
 - `how_to_format_data`: a tutorial on how to format participants' own data in this challenge's format, namely the AutoDL format (involving standard TensorFlow Record (TFRecord) format).
 
 ### How to participate?
-The challenge is in full preparation
+The challenge is in full preparation and more details will be announced later.
 
 ### How to Contribute Data
-We encourage enterprises and research laboratories to format their own data 
+We encourage enterprises and research laboratories to format their own data and contribute to this challenge. In return, these contributors can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. To contribute data, please follow the tutorial in the directory[`how_to_format_data`](https://github.com/zhengying-liu/autodl/tree/master/how_to_format_data).
 
 ### Usefuls links:
 - Competitions on [CodaLab](https://competitions.codalab.org/competitions/)
