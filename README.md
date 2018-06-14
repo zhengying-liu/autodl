@@ -31,6 +31,11 @@ The directories correspond to:
 14. Test *several independent tracks* feautre (one dataset in each track, but in only 1 phase);
 15. (to be added...)
 
+| To-do | Description | Deadline |
+| --- | --- | --- |
+| `git status` | List all *new or modified* files |
+| `git diff` | Show file differences that **haven't been** staged |
+
 
 ### Usefuls links:
 - Current version of competition on [CodaLab](http://35.193.242.121/competitions/8)
