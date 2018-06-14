@@ -9,8 +9,8 @@ The directories correspond to:
 ### How to participate?
 The challenge is in full preparation and more details will be announced later.
 
-### How to Contribute Data
-We encourage enterprises and research laboratories to format their own data and contribute to this challenge. In return, these contributors can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. To contribute data, please follow the tutorial in the directory[`how_to_format_data`](https://github.com/zhengying-liu/autodl/tree/master/how_to_format_data).
+### How to contribute data?
+We encourage enterprises and research laboratories to format their own data and contribute to this challenge. In return, they can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. To contribute data, please follow the tutorial in the directory[`how_to_format_data`](https://github.com/zhengying-liu/autodl/tree/master/how_to_format_data).
 
 ### Usefuls links:
 - Competitions on [CodaLab](https://competitions.codalab.org/competitions/)
