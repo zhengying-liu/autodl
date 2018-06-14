@@ -13,3 +13,9 @@ The data used in this challenge are in the standard TensorFlow format: [TFRecord
 As binary files can have follow different format, TFRecords can be obtained following different protocols, as in [Protocol Buffers](https://developers.google.com/protocol-buffers/). 
 
 
+## Readings (IMPORTANT)
+In order to understand what TFRecords are and how to work with them, we recommend to read:
+- A [basic introduction](https://developers.google.com/protocol-buffers/docs/pythontutorial) on Protocol Buffers for Python programmers;
+- After reading above introduction, you can find the definition of two important `proto`'s (short for Protocol Buffers) in the source code of TensorFlow:
+  - [Feature](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/feature.proto) proto;
+  - [Example](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto) proto, in which we find the extremely important definition of **SequenceExample** proto.
