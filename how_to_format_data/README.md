@@ -65,6 +65,7 @@ feature_lists {
 }
 </code></pre>
 
+We see that each sequence 
 
 ## Readings (IMPORTANT)
 In order to understand what TFRecords are and how to work with them, we strongly recommend to read the following references:
