@@ -19,7 +19,7 @@ context: {
     key  : "id"
     value: {
       bytes_list: {
-        value: [*Video id. Can be translated to YouTube ID (link).*]
+        value: [<em>Video id. Can be translated to YouTube ID (link).</em>]
       }
     }
   }
@@ -44,7 +44,7 @@ feature_lists: {
       }
       feature: {
         bytes_list: {
-          value: [*1024 8bit quantized features*]
+          value: [<em>1024 8bit quantized features</em>]
         }
       }
       ... # Repeated for every second of the video, up to 300
@@ -54,12 +54,12 @@ feature_lists: {
     value: {
       feature: {
         bytes_list: {
-          value: [128 8bit quantized features]
+          value: [<em>128 8bit quantized features</em>]
         }
       }
       feature: {
         bytes_list: {
-          value: [128 8bit quantized features]
+          value: [<em>128 8bit quantized features</em>]
         }
       }
     }
