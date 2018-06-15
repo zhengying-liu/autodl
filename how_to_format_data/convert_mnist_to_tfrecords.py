@@ -27,13 +27,13 @@ def convert_to_sequence_example_tfrecords(features, labels, filename):
   """Convert NumPy arrays `features` and `labels` to SequenceExample proto.
   A SequenceExample proto consists of a series of sequence examples. Each
   sequence example is a pair (context, feature_list), where `context` is of type
-  tf.train.Features and `feature_list` is of type tf.train.FeatureListsself.
+  tf.train.Features and `feature_lists` is of type tf.train.FeatureLists.
 
   See:
     https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto
   for more information.
 
-  In our case, `context` will be the label and `feature_list` will be, say, the
+  In our case, `context` will be the label and `feature_lists` will be, say, the
   image (or audio, video, text, etc).
 
   Args:
