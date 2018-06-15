@@ -16,58 +16,52 @@ Here we give an example of MNIST dataset formatted in SequenceExample proto:
 
 [TODO]:
 <pre><code>
-context: {
-  feature: {
-    key  : "id"
-    value: {
-      bytes_list: {
-        value: [<em>Video id. Can be translated to YouTube ID (link).</em>]
+context {
+  feature {
+    key: "id"
+    value {
+      int64_list {
+        value: 0
       }
     }
   }
-  feature: {
-    key  : "labels"
-      value: {
-        int64_list: {
-          value: [1, 522, 11, 172] # The meaning of the labels can be found here.
-        }
+  feature {
+    key: "label_index"
+    value {
+      int64_list {
+        value: 7
       }
     }
+  }
+  feature {
+    key: "label_score"
+    value {
+      float_list {
+        value: 1.0
+      }
+    }
+  }
 }
-
-feature_lists: {
-  feature_list: {
-    key  : "rgb"
-    value: {
-      feature: {
-        bytes_list: {
-          value: [<em>1024 8bit quantized features</em>]
-        }
-      }
-      feature: {
-        bytes_list: {
-          value: [<em>1024 8bit quantized features</em>]
-        }
-      }
-      ... # Repeated for every second of the video, up to 300
-  }
-  feature_list: {
-    key  : "audio"
-    value: {
-      feature: {
-        bytes_list: {
-          value: [<em>128 8bit quantized features</em>]
-        }
-      }
-      feature: {
-        bytes_list: {
-          value: [<em>128 8bit quantized features</em>]
+feature_lists {
+  feature_list {
+    key: "0_dense_input"
+    value {
+      feature {
+        float_list {
+          value: 0.0
+          value: 0.0
+          value: 0.0
+          value: 0.0
+          value: 0.0
+          value: 0.0
+          value: 255.0
+          value: 141.0
+          value: 0.0
+          [<em>...More pixel-wise numerical values</em>]
         }
       }
     }
-    ... # Repeated for every second of the video, up to 300
   }
-
 }
 </code></pre>
 
