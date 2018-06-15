@@ -39,7 +39,7 @@ feature_lists: {
     value: {
       feature: {
         bytes_list: {
-          value: [*1024 8bit quantized features*]
+          value: [`1024 8bit quantized features`]
         }
       }
       feature: {
