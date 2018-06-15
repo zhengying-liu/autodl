@@ -13,7 +13,7 @@ The data used in this challenge are in the standard TensorFlow format: [TFRecord
 Just as binary files can have follow different encoding and decoding methods, TFRecords can be obtained following different protocols, defined by Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
 
 [TODO]: Add an example here, of type:
-```
+<pre><code>
 context: {
   feature: {
     key  : "id"
@@ -67,7 +67,7 @@ feature_lists: {
   }
 
 }
-```
+</code></pre>
 
 
 ## Readings (IMPORTANT)
