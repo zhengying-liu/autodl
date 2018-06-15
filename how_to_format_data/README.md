@@ -7,10 +7,10 @@ We strongly encourage enterprises and research laboratories to format their own 
 
 ## What is the data format used in this challenge?
 
-The data used in this challenge are in the standard TensorFlow format: [TFRecord](https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data). According to the official documentation of TensorFlow,
+The data used in this challenge are in the standard TensorFlow format: [TFRecord](https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data). According to the [official documentation]((https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data)) of TensorFlow,
 > the TFRecord file format is a simple [record-oriented](https://en.wikipedia.org/wiki/Record-oriented_filesystem) binary format that many TensorFlow applications use for training data.
 
-Just as binary files can have follow different encoding and decoding methods, TFRecords can be obtained following different protocols, defined by Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/). In this challenge, we use the **SequenceExample** protocol buffers defined [here](https://www.tensorflow.org/code/tensorflow/core/example/example.proto). **SequenceExample** proto allows us to format all types of data, i.e. both sequential and non-sequential, into a uniform format.
+Just as binary files can have follow different encoding and decoding formula, TFRecords can be obtained following different protocols, defined by Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/). In this challenge, we use the **SequenceExample** protocol buffers defined [here](https://www.tensorflow.org/code/tensorflow/core/example/example.proto). **SequenceExample** proto allows us to format all types of data, i.e. both sequential and non-sequential, into a uniform format.
 
 Here we give an example of MNIST dataset formatted in SequenceExample proto:
 
