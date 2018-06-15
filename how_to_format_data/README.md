@@ -12,6 +12,63 @@ The data used in this challenge are in the standard TensorFlow format: [TFRecord
 
 Just as binary files can have follow different encoding and decoding methods, TFRecords can be obtained following different protocols, defined by Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/).
 
+[TODO]: Add an example here, of type:
+```
+context: {
+  feature: {
+    key  : "id"
+    value: {
+      bytes_list: {
+        value: [*Video id. Can be translated to YouTube ID (link).*]
+      }
+    }
+  }
+  feature: {
+    key  : "labels"
+      value: {
+        int64_list: {
+          value: [1, 522, 11, 172] # The meaning of the labels can be found here.
+        }
+      }
+    }
+}
+
+feature_lists: {
+  feature_list: {
+    key  : "rgb"
+    value: {
+      feature: {
+        bytes_list: {
+          value: [*1024 8bit quantized features*]
+        }
+      }
+      feature: {
+        bytes_list: {
+          value: [*1024 8bit quantized features*]
+        }
+      }
+      ... # Repeated for every second of the video, up to 300
+  }
+  feature_list: {
+    key  : "audio"
+    value: {
+      feature: {
+        bytes_list: {
+          value: [128 8bit quantized features]
+        }
+      }
+      feature: {
+        bytes_list: {
+          value: [128 8bit quantized features]
+        }
+      }
+    }
+    ... # Repeated for every second of the video, up to 300
+  }
+
+}
+```
+
 
 ## Readings (IMPORTANT)
 In order to understand what TFRecords are and how to work with them, we recommend to read:
@@ -19,3 +76,6 @@ In order to understand what TFRecords are and how to work with them, we recommen
 - After reading above introduction, you can find the definition of two important `proto`'s (short for Protocol Buffers) in the source code of TensorFlow:
   - [Feature](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/feature.proto) proto;
   - [Example](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto) proto, in which we find the extremely important definition of **SequenceExample** proto that we'll use in this challenge.
+- The [Consuming TFRecord data](https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data) section of TensorFlow's official documentation;
+- Other blog articles on this topics, for example [this article](https://planspace.org/20170323-tfrecords_for_humans/).
+
