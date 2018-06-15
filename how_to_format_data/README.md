@@ -13,8 +13,6 @@ The data used in this challenge are in the standard TensorFlow format: [TFRecord
 Just as binary files can have follow different encoding and decoding formula, TFRecords can be obtained following different protocols, defined by Google's [Protocol Buffers](https://developers.google.com/protocol-buffers/). In this challenge, we use the **SequenceExample** protocol buffers defined [here](https://www.tensorflow.org/code/tensorflow/core/example/example.proto). **SequenceExample** proto allows us to format all types of data, i.e. both sequential and non-sequential, into a uniform format.
 
 Here we give an example of MNIST dataset formatted in SequenceExample proto:
-
-[TODO]:
 <pre><code>
 context {
   feature {
