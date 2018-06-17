@@ -1,5 +1,5 @@
-# Author: Zhengying Liu
-# Date: 17 April 2018
+# Author: LIU Zhengying
+# Creation Date: 17 April 2018
 # Description: Download and convert MNIST (training) dataset to TFRecords
 #   according SequenceExample protocol buffer (tf.train.SequenceExample).
 #   The code is partly inspired by:
@@ -53,6 +53,7 @@ def convert_to_sequence_example_tfrecords(features, labels, filename):
     for index in range(num_examples):
       context = tf.train.Features(
             feature={
+                'id': _int64_feature(index),  # Use index as id
                 'label_index': _int64_feature(labels[index]),
                 'label_score': _float_feature([1])
             })
@@ -72,13 +73,28 @@ if __name__ == "__main__":
   print("Validation data size:", datasets.validation.images.shape)
   print("Test data size:", datasets.test.images.shape)
 
-  input_sequence = datasets.test.images
-  output_sequence = datasets.test.labels
-  filename = 'sample-00000-of-00001'
+  # mnist-train
+  input_sequence = datasets.train.images
+  output_sequence = datasets.train.labels
+  filename = 'mnist-train.tfrecord'
 
   convert_to_sequence_example_tfrecords(
       features=input_sequence,
       labels=output_sequence,
       filename=filename)
+  
+  print("Conversion done! Now you can read %s using Andre's dataset.py."\
+
+  
+  # mnist-test
+  input_sequence = datasets.test.images
+  output_sequence = datasets.test.labels
+  filename = 'mnist-test.tfrecord'
+
+  convert_to_sequence_example_tfrecords(
+      features=input_sequence,
+      labels=output_sequence,
+      filename=filename)
+  
   print("Conversion done! Now you can read %s using Andre's dataset.py."\
         % filename)
