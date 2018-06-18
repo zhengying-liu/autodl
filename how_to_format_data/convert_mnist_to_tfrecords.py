@@ -53,6 +53,7 @@ def convert_to_sequence_example_tfrecords(features, labels, filename):
     for index in range(num_examples):
       context = tf.train.Features(
             feature={
+                'id': _int64_feature(index), # use index as id
                 'label_index': _int64_feature(labels[index]),
                 'label_score': _float_feature([1])
             })
