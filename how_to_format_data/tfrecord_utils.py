@@ -40,8 +40,8 @@ def convert_matrix_to_tfrecord(features, labels, dataset_name, mode=None):
   """
   num_examples = features.shape[0]
   if num_examples != labels.shape[0]:
-    raise ValueError('Features size %d does not match labels size %d.' %
-                     (num_examples, labels.shape[0]))
+    raise ValueError('Features size {} does not match labels size {}.'\
+                     .format(num_examples, labels.shape[0]))
 
   if mode:
     filename = dataset_name + '-' + mode + '.tfrecord'
@@ -65,7 +65,7 @@ def convert_matrix_to_tfrecord(features, labels, dataset_name, mode=None):
           context=context,
           feature_lists=feature_lists)
       writer.write(sequence_example.SerializeToString())
-      
+
 def checks_exist_and_splits_filename(path_to_file):
   if os.path.exists(path_to_file):
     folder, filename = os.path.split(path_to_file)
@@ -74,7 +74,7 @@ def checks_exist_and_splits_filename(path_to_file):
   else:
     raise IOError("The file {} doesn't exist!".format(path_to_file))
 
-def get_sharded_filenames(path_to_file, num_shards):
+def _get_sharded_filenames(path_to_file, num_shards):
   """Create a list of filenames for sharded files.
 
   Example of resulting files: `<path_to_file>-00001-of-00007.tfrecord`
@@ -92,6 +92,7 @@ def get_sharded_filenames(path_to_file, num_shards):
 
   return output_filenames
 
+
 def shard_tfrecord(path_to_tfrecord, num_shards, keep_old_file=True):
   """Shards one TFRecord file into small pieces in the same format.
 
@@ -101,13 +102,14 @@ def shard_tfrecord(path_to_tfrecord, num_shards, keep_old_file=True):
       less than 10000.
     keep_old_file: bool, optional. Whether keep old TFRecord file.
   Raises:
-    IOError: If cannot find the file
+    IOError: if cannot find the file.
   Returns:
-    None: Write `num_shards` files named as, say,
+    filenames: a list of paths of newly generated files.
+    Write `num_shards` files named as, say,
       `mnist-train-00001-of-00007.tfrecord` in the same directory
   """
 
-  filenames = get_sharded_filenames(path_to_tfrecord, num_shards)
+  filenames = _get_sharded_filenames(path_to_tfrecord, num_shards)
   writers = [tf.python_io.TFRecordWriter(x) for x in filenames]
 
   for i, sequence_example in enumerate(
@@ -119,23 +121,26 @@ def shard_tfrecord(path_to_tfrecord, num_shards, keep_old_file=True):
 
   if not keep_old_file:
     os.remove(path_to_tfrecord)
-    
-def get_examples_and_labels_filenames(path_to_tfrecord):
-  
+
+  return filenames
+
+
+def _get_examples_and_labels_filenames(path_to_tfrecord):
+
   folder, file_wo_ext, ext = checks_exist_and_splits_filename(path_to_tfrecord)
-  
+
   if ext == '.tfrecord':
     basename = os.path.join(folder, file_wo_ext)
   else:
     basename = path_to_tfrecord
-    
+
   path_to_examples = basename + "-examples.tfrecord"
   path_to_labels = basename + "-labels.tfrecord"
   return path_to_examples, path_to_labels
-  
+
 
 def separate_examples_and_labels(path_to_tfrecord, keep_old_file=True):
-  """Given a SequenceExample prot containing test data, separates labels from 
+  """Given a SequenceExample prot containing test data, separates labels from
   examples.
 
   Args:
@@ -144,48 +149,101 @@ def separate_examples_and_labels(path_to_tfrecord, keep_old_file=True):
     ValueError: if examples in `test_data_file` don't have the `labels` as
       attribute
   Returns:
-    None: Write 2 files with separated examples and labels, both with `id`
+    Write 2 files with separated examples and labels, both with `id` and return
+    the two path string `path_to_examples` and `path_to_labels`.
   """
   path_to_examples, path_to_labels =\
-      get_examples_and_labels_filenames(path_to_tfrecord)
-      
+      _get_examples_and_labels_filenames(path_to_tfrecord)
+
   examples_writer = tf.python_io.TFRecordWriter(path_to_examples)
   labels_writer = tf.python_io.TFRecordWriter(path_to_labels)
-  
-  for sequence_example in tf.python_io.tf_record_iterator(path_to_tfrecord):
-    parsed_example = tf.train.SequenceExample.FromString(sequence_example)
-    
+
+  for bytes in tf.python_io.tf_record_iterator(path_to_tfrecord):
+    sequence_example = tf.train.SequenceExample.FromString(bytes)
+
     feature = {}
     for key in ['labels', 'label_index', 'label_score']:
-      if key in parsed_example.context.feature:
-        value = parsed_example.context.feature.pop(key)
+      if key in sequence_example.context.feature:
+        value = sequence_example.context.feature.pop(key)
         feature[key] = value
-    
+
     label_context = tf.train.Features(feature=feature)
-        
+
     label_sequence_example = tf.train.SequenceExample(
         context=label_context,
         feature_lists={})
-    
-    examples_writer.write(parsed_example.SerializeToString())
+
+    examples_writer.write(sequence_example.SerializeToString())
     labels_writer.write(label_sequence_example.SerializeToString())
-        
+
   examples_writer.close()
   labels_writer.close()
-  
+
   if not keep_old_file:
     os.remove(path_to_tfrecord)
-  
-  
+
+  return path_to_examples, path_to_labels
+
+
+def _get_context_keys(sequence_example):
+  return [x for x in sequence_example.context.feature]
+
+def _get_feature_lists_keys(sequence_example):
+  return [x for x in sequence_example.feature_lists.feature_list]
+
+def sanity_check(path_to_tfrecord):
+  """For a given TFRecord, check its consistency. Return its number
+  of examples and fields in `context` and `feature_lists`.
+  """
+  assert(os.path.exists(path_to_tfrecord))
+
+  context_keys = []
+  feature_lists_keys = []
+  num_examples = 0
+
+  for i, bytes in enumerate(tf.python_io.tf_record_iterator(path_to_tfrecord)):
+
+    sequence_example = tf.train.SequenceExample.FromString(bytes)
+    context_keys_new = sorted(_get_context_keys(sequence_example))
+    feature_lists_keys_new = sorted(_get_feature_lists_keys(sequence_example))
+
+    if context_keys:
+      if context_keys != context_keys_new:
+        raise ValueError("""Find inconsistent example at index {}.
+        Expect context keys {} but got {}."""\
+          .format(i, context_keys, context_keys_new))
+    else:
+      context_keys = context_keys_new
+
+    if feature_lists_keys:
+      if feature_lists_keys != feature_lists_keys_new:
+        raise ValueError("""Find inconsistent example at index {}.
+        Expect context keys {} but got {}."""\
+        .format(i, feature_lists_keys, feature_lists_keys_new))
+    else:
+      feature_lists_keys = feature_lists_keys_new
+
+    num_examples += 1
+
+  print("""Sanity check done! This TFRecord has {} examples with context {}
+  and feature lists {}"""\
+    .format(num_examples, context_keys, feature_lists_keys))
+  return num_examples, context_keys, feature_lists_keys
+
+
 if __name__ == "__main__":
+  # import convert_mnist_to_tfrecords as haha
+  # haha.main() # Download and write MNIST in TFRecords
+
   path_to_tfrecord = 'mnist/mnist-test.tfrecord'
-  separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
-  
-  shard_tfrecord(path_to_tfrecord='mnist/mnist-test-examples.tfrecord', 
-                 num_shards=2,
-                 keep_old_file=False)
-  shard_tfrecord(path_to_tfrecord='mnist/mnist-train.tfrecord', 
-                 num_shards=12,
-                 keep_old_file=False)
-  
-  
+
+  sanity_check(path_to_tfrecord)
+
+  # separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
+  #
+  # shard_tfrecord(path_to_tfrecord='mnist/mnist-test-examples.tfrecord',
+  #                num_shards=2,
+  #                keep_old_file=False)
+  # shard_tfrecord(path_to_tfrecord='mnist/mnist-train.tfrecord',
+  #                num_shards=12,
+  #                keep_old_file=False)

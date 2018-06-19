@@ -67,7 +67,7 @@ def convert_to_sequence_example_tfrecords(features, labels, filename):
       writer.write(sequence_example.SerializeToString())
 
 
-if __name__ == "__main__":
+def main():
   datasets = mnist.read_data_sets(train_dir='/tmp/data/', validation_size=0)
   print("Training data size:", datasets.train.images.shape)
   print("Validation data size:", datasets.validation.images.shape)
@@ -94,3 +94,6 @@ if __name__ == "__main__":
       filename=filename)
   print("Conversion done! Now you can read %s using Andre's dataset.py."\
         % filename)
+  
+if __name__ == "__main__":
+  main()
