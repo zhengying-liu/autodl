@@ -140,7 +140,7 @@ def _get_examples_and_labels_filenames(path_to_tfrecord):
 
 
 def separate_examples_and_labels(path_to_tfrecord, keep_old_file=True):
-  """Given a SequenceExample prot containing test data, separates labels from
+  """Given a SequenceExample proto containing test data, separates labels from
   examples.
 
   Args:
@@ -191,11 +191,12 @@ def _get_context_keys(sequence_example):
 def _get_feature_lists_keys(sequence_example):
   return [x for x in sequence_example.feature_lists.feature_list]
 
-def sanity_check(path_to_tfrecord):
+def check_file_consistency(path_to_tfrecord):
   """For a given TFRecord, check its consistency. Return its number
   of examples and fields in `context` and `feature_lists`.
   """
-  assert(os.path.exists(path_to_tfrecord))
+  if not os.path.exists(path_to_tfrecord):
+    raise ValueError("The path {} doesn't exist!".format(path_to_tfrecord))
 
   context_keys = []
   feature_lists_keys = []
@@ -225,10 +226,28 @@ def sanity_check(path_to_tfrecord):
 
     num_examples += 1
 
-  print("""Sanity check done! This TFRecord has {} examples with context {}
-  and feature lists {}"""\
-    .format(num_examples, context_keys, feature_lists_keys))
+  # print("""Consistency check done! This TFRecord has {} examples with context {}
+  # and feature lists {}"""\
+  #   .format(num_examples, context_keys, feature_lists_keys))
+
   return num_examples, context_keys, feature_lists_keys
+
+def all_identical(li):
+  """Given a list `li`, check if all its elements are identical"""
+  return li[1:] == li[:-1]
+
+def check_files_consistency(paths_to_tfrecord):
+  """Given a list of TFRecords, check its consistency. Return total number
+  of examples and fields in `context` and `feature_lists`."""
+  check_all = list(map(check_file_consistency, paths_to_tfrecord))
+  # print("check_all for {}: {}".format(paths_to_tfrecord, check_all))
+  nums_examples = [x for x,_,_ in check_all]
+  context_keys_list = [y for _,y,_ in check_all]
+  feature_lists_keys_list = [z for _,_,z in check_all]
+  assert(all_identical(context_keys_list))
+  assert(all_identical(feature_lists_keys_list))
+  return sum(nums_examples), context_keys_list[0], feature_lists_keys_list[0]
+
 
 
 if __name__ == "__main__":
@@ -237,7 +256,7 @@ if __name__ == "__main__":
 
   path_to_tfrecord = 'mnist/mnist-test.tfrecord'
 
-  sanity_check(path_to_tfrecord)
+  check_file_consistency(path_to_tfrecord)
 
   # separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
   #

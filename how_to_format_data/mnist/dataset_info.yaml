@@ -1,1 +1,17 @@
-# 
+consistency_check_done: false
+dataset_name: mnist
+metadata: metadata.textproto
+test_data:
+  examples: [mnist-test-examples-00000-of-00002.tfrecord, mnist-test-examples-00001-of-00002.tfrecord]
+  format: tfrecord
+  labels: [mnist-test-labels.tfrecord]
+  labels_separated: true
+training_data:
+  examples: &id001 [mnist-train-00010-of-00012.tfrecord, mnist-train-00009-of-00012.tfrecord,
+    mnist-train-00011-of-00012.tfrecord, mnist-train-00008-of-00012.tfrecord, mnist-train-00001-of-00012.tfrecord,
+    mnist-train-00004-of-00012.tfrecord, mnist-train-00000-of-00012.tfrecord, mnist-train-00005-of-00012.tfrecord,
+    mnist-train-00003-of-00012.tfrecord, mnist-train-00006-of-00012.tfrecord, mnist-train-00002-of-00012.tfrecord,
+    mnist-train-00007-of-00012.tfrecord]
+  format: tfrecord
+  labels: *id001
+  labels_separated: false
