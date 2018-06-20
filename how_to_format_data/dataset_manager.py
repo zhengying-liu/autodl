@@ -172,6 +172,11 @@ class DatasetManager(object):
     """
     pass
 
+  def train_test_split(self):
+    """Split the dataset to have training data and test data
+    """
+    pass
+
   def remove_all_irrelevant_files_in_dataset_dir(self):
     pass
 
