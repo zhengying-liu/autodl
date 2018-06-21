@@ -3,7 +3,7 @@ How to Format Data
 
 This is a tutorial made for participants/organizers of AutoDL challenge on how to format data into the standard data format adopted by this challenge.
 
-We strongly encourage enterprises and research laboratories to format their own data and contribute to this challenge, augmenting the database of datasets and making the challenge's judge on participants' algorithm more concrete, robust and convincing. Alsot in return, contributors of data can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. 
+We strongly encourage enterprises and research laboratories to format their own data and contribute to this challenge, augmenting the database of datasets and making the challenge's judge on participants' algorithm more concrete, robust and convincing. Also in return, contributors of data can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. 
 
 ## What is the data format used in this challenge?
 
