@@ -15,7 +15,7 @@ collaborators, since the participants will only see the result of this class.
 import yaml
 import os
 import sys
-# import tensorflow as tf
+import tensorflow as tf
 from tfrecord_utils import check_files_consistency
 
 class DatasetManager(object):
@@ -32,6 +32,7 @@ class DatasetManager(object):
     self._dataset_dir = ""  # Absolute path to dataset directory
     self._dataset_name = ""
 
+    # Assert `dataset_dir` is valid
     if os.path.isdir(dataset_dir):
       self._dataset_dir = os.path.abspath(dataset_dir)
     else:
@@ -42,12 +43,13 @@ class DatasetManager(object):
     self._path_to_yaml = os.path.join(self._dataset_dir,
                                       DatasetManager.global_filename)
 
+    # Set or infer dataset name
     if dataset_name:
       self._dataset_name = dataset_name
     else:
-      # Use folder name as dataset name
       self._dataset_name = os.path.basename(dataset_dir)
 
+    # Load or infer dataset info
     if os.path.exists(self._path_to_yaml):
       self.load_dataset_info()
       # If loaded void YAML
@@ -60,8 +62,8 @@ class DatasetManager(object):
 
   def save_dataset_info(self):
     with open(self._path_to_yaml, 'w') as f:
-      print("Writing dataset info to the file {}."\
-            .format(self._path_to_yaml))
+      print("Saving dataset info to the file {}."\
+            .format(self._path_to_yaml), end='')
       yaml.dump(self._dataset_info, f)
       print("Done!")
 
