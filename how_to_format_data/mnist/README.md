@@ -6,4 +6,4 @@ This directory shows an example dataset used in AutoDL. In this example, the dat
 - test data examples (`mnist-test-examples-*`)
 - test data labels (`mnist-test-labels-*`)
 
-All above 4 components are formatted into TFRecords, following [SequenceExample proto](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/example/example.proto#L292).
+All above 4 components are formatted into TFRecords, following [SequenceExample proto](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/example/example.proto#L292). They follow some naming pattern and they can be sharded *or not*.
