@@ -14,4 +14,5 @@ We encourage enterprises and research laboratories to format their own data and 
 
 ### Usefuls links:
 - Competitions on [CodaLab](https://competitions.codalab.org/competitions/)
+- [Wiki of CodaLab Competitions](https://github.com/codalab/codalab-competitions/wiki)
 - Info on [Protocol Buffers](https://developers.google.com/protocol-buffers/) and definition of [SequenceExample](https://github.com/tensorflow/tensorflow/blob/r1.7/tensorflow/core/example/example.proto) proto
