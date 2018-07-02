@@ -1,9 +1,10 @@
 How to Format Data
 ========
+(This directory is deprecated. Please refer to the new GitHub repo [`autodl-contrib`](https://github.com/zhengying-liu/autodl-contrib) for more details)
 
 This is a tutorial made for participants/organizers of AutoDL challenge on how to format data into the standard data format adopted by this challenge.
 
-We strongly encourage enterprises and research laboratories to format their own data and contribute to this challenge, augmenting the database of datasets and making the challenge's judge on participants' algorithm more concrete, robust and convincing. Also in return, contributors of data can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art. 
+We strongly encourage enterprises and research laboratories to format their own data and contribute to this challenge, augmenting the database of datasets and making the challenge's judge on participants' algorithm more concrete, robust and convincing. Also in return, contributors of data can benefit from a direct machine learning solution for their own problems, after a competitive challenge of the state of the art.
 
 ## What is the data format used in this challenge?
 
@@ -64,7 +65,7 @@ feature_lists {
 }
 </code></pre>
 
-We see that each sequence 
+We see that each sequence
 
 ## Readings (IMPORTANT)
 In order to understand what TFRecords are and how to work with them, we strongly recommend to read the following references:
