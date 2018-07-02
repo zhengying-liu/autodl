@@ -1,6 +1,6 @@
 How to Format Data
 ========
-(This directory is deprecated. Please refer to the new GitHub repo [`autodl-contrib`](https://github.com/zhengying-liu/autodl-contrib) for more details)
+**(This directory is deprecated. Please refer to the new GitHub repo [`autodl-contrib`](https://github.com/zhengying-liu/autodl-contrib) for more details)**
 
 This is a tutorial made for participants/organizers of AutoDL challenge on how to format data into the standard data format adopted by this challenge.
 
