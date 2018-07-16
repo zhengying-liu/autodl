@@ -123,10 +123,6 @@ class Model(algorithm.Algorithm):
 
     self.is_trained = True
 
-  def predict(self, *input_arg):
-    """Make prediction for one single example."""
-    return self.first_example_output
-
   def test(self, dataset):
     """
     Given a dataset, make predictions using self.classifier.predict() on
