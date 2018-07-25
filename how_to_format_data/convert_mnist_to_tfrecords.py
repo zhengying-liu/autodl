@@ -75,25 +75,63 @@ def main():
 
   input_sequence = datasets.train.images
   output_sequence = datasets.train.labels
-  filename = 'mnist/mnist-train.tfrecord'
+  filename_train = 'mnist/mnist-train.tfrecord'
 
   convert_to_sequence_example_tfrecords(
       features=input_sequence,
       labels=output_sequence,
-      filename=filename)
-  print("Conversion done! Now you can read %s using Andre's dataset.py."\
-        % filename)
-  
+      filename=filename_train)
+  print("Conversion for training set is done.")
+
   input_sequence = datasets.test.images
   output_sequence = datasets.test.labels
-  filename = 'mnist/mnist-test.tfrecord'
+  filename_test = 'mnist/mnist-test.tfrecord'
 
   convert_to_sequence_example_tfrecords(
       features=input_sequence,
       labels=output_sequence,
-      filename=filename)
-  print("Conversion done! Now you can read %s using Andre's dataset.py."\
-        % filename)
-  
+      filename=filename_test)
+  print("Conversion for test set is done.")
+
+
+  from tfrecord_utils import *
+  print("Separating labels from examples for test set...", end='')
+  separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
+  print("Done!")
+
+  print("Sharding training set and test set...", end='')
+  shard_tfrecord(path_to_tfrecord='mnist/mnist-test-examples.tfrecord',
+                 num_shards=2,
+                 keep_old_file=False)
+  shard_tfrecord(path_to_tfrecord='mnist/mnist-train.tfrecord',
+                 num_shards=12,
+                 keep_old_file=False)
+  print("Done!")
+
+  print("Adding metadata...", end='')
+  filename_metadata = 'mnist/metadata.textproto'
+  metadata =
+  """is_sequence: false
+sample_count: 60000
+output_dim: 10
+matrix_spec {
+  col_count: 28
+  row_count: 28
+  is_sequence_col: false
+  is_sequence_row: false
+  has_locality_col: true
+  has_locality_row: true
+  format: DENSE
+}
+"""
+  with open(filename_metadata, 'w') as f:
+    f.write(metadata)
+  print("Done!")
+
+  print("Finished creating MNIST dataset under TFRecord format. You can find"
+        "the dataset in the directory mnist/."
+  )
+
+
 if __name__ == "__main__":
   main()

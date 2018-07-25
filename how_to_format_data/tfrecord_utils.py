@@ -251,18 +251,18 @@ def check_files_consistency(paths_to_tfrecord):
 
 
 if __name__ == "__main__":
-  # import convert_mnist_to_tfrecords as haha
-  # haha.main() # Download and write MNIST in TFRecords
+  import convert_mnist_to_tfrecords as haha
+  haha.main() # Download and write MNIST in TFRecords
 
-  path_to_tfrecord = 'mnist/mnist-test.tfrecord'
-
-  check_file_consistency(path_to_tfrecord)
-
-  # separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
+  # path_to_tfrecord = 'mnist/mnist-test.tfrecord'
   #
-  # shard_tfrecord(path_to_tfrecord='mnist/mnist-test-examples.tfrecord',
-  #                num_shards=2,
-  #                keep_old_file=False)
-  # shard_tfrecord(path_to_tfrecord='mnist/mnist-train.tfrecord',
-  #                num_shards=12,
-  #                keep_old_file=False)
+  # check_file_consistency(path_to_tfrecord)
+
+  separate_examples_and_labels(path_to_tfrecord, keep_old_file=False)
+
+  shard_tfrecord(path_to_tfrecord='mnist/mnist-test-examples.tfrecord',
+                 num_shards=2,
+                 keep_old_file=False)
+  shard_tfrecord(path_to_tfrecord='mnist/mnist-train.tfrecord',
+                 num_shards=12,
+                 keep_old_file=False)
