@@ -93,6 +93,7 @@ def draw_learning_curve(solution_file, prediction_files,
     score = scoring_function(solution, prediction)
     scores.append(score)
     timestamps.append(timestamp)
+
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
   start = sorted_pairs[0][0]
