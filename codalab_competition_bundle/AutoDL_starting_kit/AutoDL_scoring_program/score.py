@@ -134,7 +134,9 @@ class Scorer():
     self.time_budget = 300 # TODO
 
 def write_scores_html(score_dir):
-  with open(os.path.join(score_dir, 'scores.html'), 'w+') as html_file:
+  filename = 'detailed_results.html'
+  # filename = 'scores.html'
+  with open(os.path.join(score_dir, filename), 'w+') as html_file:
     # Automatic refreshing the page every 5 seconds
     html_str = """<html>
     <head> <meta http-equiv="refresh" content="5"> </head>
