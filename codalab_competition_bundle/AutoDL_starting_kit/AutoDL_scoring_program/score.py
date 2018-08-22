@@ -156,6 +156,8 @@ def write_scores_html(score_dir):
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
+    if verbose:
+      print("sys.argv = ", argv)
     import datetime
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
