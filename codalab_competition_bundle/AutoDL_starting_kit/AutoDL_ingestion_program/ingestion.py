@@ -285,7 +285,8 @@ if __name__=="__main__" and debug_mode<4:
             # TODO:
             while(True):
               try:
-                while(time.time() < overall_start + time_budget/6*(i+1) + total_pause_time):
+                # Training budget on each dataset is equal to (time budget / number of datasets)
+                while(time.time() < overall_start + time_budget/len(datanames)*(i+1) + total_pause_time):
                   M.train(D_train.get_dataset())
                   # Make predictions using the most recent checkpoint
                   # Prediction files: mini.predict_0, mini.predict_1, ...
