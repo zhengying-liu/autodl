@@ -14,7 +14,7 @@ score = 0
 
 for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
     if not os.path.isdir(submit_dir):
-        print "%s doesn't exist" % submit_dir
+        print("%s doesn't exist" % submit_dir)
 
     if os.path.isdir(submit_dir):
         if not os.path.exists(output_dir):
