@@ -60,8 +60,8 @@ class Model(algorithm.Algorithm):
     # Construct a neural network with 0 hidden layer
     input_layer = tf.reshape(features['x'],
                              [-1, sequence_size*row_count*col_count])
-    # print("#"*50, "In model_fn, mode:", mode, "input shape:", input_layer.shape)
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
+
+    logits = tf.layers.dense(inputs=input_layer, units=output_dim)    
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -114,12 +114,10 @@ class Model(algorithm.Algorithm):
       return features, labels
 
     with tf.Session() as sess:
-      # print("@"*50, "Begin training!!!")
       self.classifier.train(
         input_fn=train_input_fn,
         steps=2000)#,
         # hooks=[logging_hook])
-      # print("@"*50, "Finished training.")
 
     self.is_trained = True
 
