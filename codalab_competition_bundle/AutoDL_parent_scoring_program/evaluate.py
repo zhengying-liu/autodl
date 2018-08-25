@@ -21,7 +21,7 @@ for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
             os.makedirs(output_dir)
 
         submission_score_file = os.path.join(submit_dir, "scores.txt")
-        submission_score = open(submission_score_file).read()
+        submission_score = open(submission_score_file).readline()
 
         # Score is written like so: "correct:<score>"
         score_text = submission_score.split(":")[1]
