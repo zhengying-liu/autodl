@@ -29,7 +29,7 @@ for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
         score += float(score_text)
 
 output_filename = os.path.join(output_dir, 'scores.txt')
-output_file = open(output_filename, 'wb')
+output_file = open(output_filename, 'w')
 output_file.write("correct:{}".format(score))
 output_file.close()
 
@@ -38,5 +38,6 @@ counter = 1
 detailed_results_path = os.path.join(output_dir, "detailed_results.html")
 
 # Refresh the page every second
-with open(detailed_results_path, 'a+') as detailed_results:
-    detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
+# with open(detailed_results_path, 'a+') as detailed_results:
+#     detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
+detailed_results.write("Oh yeah! Now it's good with real-time output and parallel tracks!")
