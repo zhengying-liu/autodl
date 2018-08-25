@@ -111,7 +111,7 @@ def draw_learning_curve(solution_file, prediction_files,
   plt.plot(X,Y,marker="o", label="Test score")
   plt.title("Task: " + basename + " - Current AUC: " + format(aulc, '.2f'))
   plt.xlabel('time/second')
-  plt.ylabel('score')
+  plt.ylabel('score (balanced accuracy)')
   plt.legend()
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
