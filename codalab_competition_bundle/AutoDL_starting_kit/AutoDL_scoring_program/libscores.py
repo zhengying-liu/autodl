@@ -1,7 +1,7 @@
 # Score library for NUMPY arrays
 # ChaLearn AutoML challenge
 
-# For regression: 
+# For regression:
 # solution and prediction are vectors of numerical values of the same dimension
 
 # For classification:
@@ -10,15 +10,15 @@
 
 # Isabelle Guyon and Arthur Pesah, ChaLearn, August-November 2014
 
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS". 
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
 # ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
-# WARRANTY OF NON-INFRINGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS. 
-# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL, 
+# WARRANTY OF NON-INFRINGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
 # INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
-# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
+# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
+# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
 import os
 from sys import stderr
@@ -67,9 +67,9 @@ def sanitize_array(array):
 
 def normalize_array(solution, prediction):
     ''' Use min and max of solution as scaling factors to normalize prediction,
-    then threshold it to [0, 1]. Binarize solution to {0, 1}. 
+    then threshold it to [0, 1]. Binarize solution to {0, 1}.
     This allows applying classification scores to all cases.
-    In principle, this should not do anything to properly formatted 
+    In principle, this should not do anything to properly formatted
     classification inputs and outputs.'''
     # Binarize solution
     sol = np.ravel(solution)  # convert to 1-d array
@@ -93,10 +93,10 @@ def normalize_array(solution, prediction):
 
 
 def binarize_predictions(array, task='binary.classification'):
-    ''' Turn predictions into decisions {0,1} by selecting the class with largest 
+    ''' Turn predictions into decisions {0,1} by selecting the class with largest
     score for multiclass problems and thresholding at 0.5 for other cases.'''
     # add a very small random value as tie breaker (a bit bad because this changes the score every time)
-    # so to make sure we get the same result every time, we seed it    
+    # so to make sure we get the same result every time, we seed it
     # eps = 1e-15
     # np.random.seed(sum(array.shape))
     # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
@@ -135,10 +135,10 @@ def tiedrank(a):
     sa = a[i]
     # Find unique values
     uval = np.unique(a)
-    # Test whether there are ties 
+    # Test whether there are ties
     R = np.arange(m, dtype=float) + 1  # Ranks with base 1
     if len(uval) != m:
-        # Average the ranks for the ties 
+        # Average the ranks for the ties
         oldval = sa[0]
         newval = sa[0]
         k0 = 0
@@ -170,42 +170,42 @@ def mvmean(R, axis=0):
     else:
         return np.array(map(average, R.transpose()))
 
-    
+
 # ======= Default metrics ========
-    
+
 def bac_binary(solution, prediction):
     return bac_metric(solution, prediction, task='binary.classification')
-    
+
 def bac_multiclass(solution, prediction):
     return bac_metric(solution, prediction, task='multiclass.classification')
-    
+
 def bac_multilabel(solution, prediction):
     return bac_metric(solution, prediction, task='multilabel.classification')
-    
+
 def auc_binary(solution, prediction):
     return auc_metric(solution, prediction, task='binary.classification')
-    
+
 def auc_multilabel(solution, prediction):
     return auc_metric(solution, prediction, task='multilabel.classification')
-    
+
 def pac_binary(solution, prediction):
     return pac_metric(solution, prediction, task='binary.classification')
-    
+
 def pac_multiclass(solution, prediction):
     return pac_metric(solution, prediction, task='multiclass.classification')
-    
+
 def pac_multilabel(solution, prediction):
     return pac_metric(solution, prediction, task='multilabel.classification')
-    
+
 def f1_binary(solution, prediction):
     return f1_metric(solution, prediction, task='binary.classification')
-    
+
 def f1_multilabel(solution, prediction):
     return f1_metric(solution, prediction, task='multilabel.classification')
 
 def abs_regression(solution, prediction):
     return a_metric(solution, prediction, task='regression')
-    
+
 def r2_regression(solution, prediction):
     return r2_metric(solution, prediction, task='regression')
 
@@ -231,13 +231,13 @@ def a_metric(solution, prediction, task='regression'):
     return mvmean(score)
 
 
-### END REGRESSION METRICS 
+### END REGRESSION METRICS
 
 ### CLASSIFICATION METRICS (work on solutions in {0, 1} and predictions in [0, 1])
 # These can be computed for regression scores only after running normalize_array
 
 def bac_metric(solution, prediction, task='binary.classification'):
-    ''' Compute the normalized balanced accuracy. The binarization and 
+    ''' Compute the normalized balanced accuracy. The binarization and
     the normalization differ for the multi-label and multi-class case. '''
     label_num = solution.shape[1]
     score = np.zeros(label_num)
@@ -264,7 +264,7 @@ def bac_metric(solution, prediction, task='binary.classification'):
 
 
 def pac_metric(solution, prediction, task='binary.classification'):
-    ''' Probabilistic Accuracy based on log_loss metric. 
+    ''' Probabilistic Accuracy based on log_loss metric.
     We assume the solution is in {0, 1} and prediction in [0, 1].
     Otherwise, run normalize_array.'''
     debug_flag = False
@@ -272,11 +272,11 @@ def pac_metric(solution, prediction, task='binary.classification'):
     if label_num == 1: task = 'binary.classification'
     eps = 1e-15
     the_log_loss = log_loss(solution, prediction, task)
-    # Compute the base log loss (using the prior probabilities)    
+    # Compute the base log loss (using the prior probabilities)
     pos_num = 1. * sum(solution)  # float conversion!
     frac_pos = pos_num / sample_num  # prior proba of positive class
     the_base_log_loss = prior_log_loss(frac_pos, task)
-    # Alternative computation of the same thing (slower)    
+    # Alternative computation of the same thing (slower)
     # Should always return the same thing except in the multi-label case
     # For which the analytic solution makes more sense
     if debug_flag:
@@ -288,18 +288,18 @@ def pac_metric(solution, prediction, task='binary.classification'):
         if (diff) > 1e-10:
             print('Arrggh {} != {}'.format(the_base_log_loss, base_log_loss))
     # Exponentiate to turn into an accuracy-like score.
-    # In the multi-label case, we need to average AFTER taking the exp 
+    # In the multi-label case, we need to average AFTER taking the exp
     # because it is an NL operation
     pac = mvmean(np.exp(-the_log_loss))
     base_pac = mvmean(np.exp(-the_base_log_loss))
-    # Normalize: 0 for random, 1 for perfect    
+    # Normalize: 0 for random, 1 for perfect
     score = (pac - base_pac) / sp.maximum(eps, (1 - base_pac))
     return score
 
 
 def f1_metric(solution, prediction, task='binary.classification'):
-    ''' Compute the normalized f1 measure. The binarization differs 
-        for the multi-label and multi-class case. 
+    ''' Compute the normalized f1 measure. The binarization differs
+        for the multi-label and multi-class case.
         A non-weighted average over classes is taken.
         The score is normalized.'''
     label_num = solution.shape[1]
@@ -334,7 +334,7 @@ def f1_metric(solution, prediction, task='binary.classification'):
         # the best is to assume that base_f1=0.5
         base_f1 = 0.5
     # For the multiclass case, this is not possible (though it does not make much sense to
-    # use f1 for multiclass problems), so the best would be to assign values at random to get 
+    # use f1 for multiclass problems), so the best would be to assign values at random to get
     # tpr=ppv=frac_pos, where frac_pos=1/label_num
     else:
         base_f1 = 1. / label_num
@@ -365,7 +365,7 @@ def auc_metric(solution, prediction, task='binary.classification'):
     return 2 * mvmean(auc) - 1
 
 
-### END CLASSIFICATION METRICS 
+### END CLASSIFICATION METRICS
 
 # ======= Specialized scores ========
 # We run all of them for all tasks even though they don't make sense for some tasks
@@ -418,7 +418,7 @@ def log_loss(solution, prediction, task='binary.classification'):
 
     # Bounding of predictions to avoid log(0),1/0,...
     pred = sp.minimum(1 - eps, sp.maximum(eps, pred))
-    # Compute the log loss    
+    # Compute the log loss
     pos_class_log_loss = - mvmean(sol * np.log(pred), axis=0)
     if (task != 'multiclass.classification') or (label_num == 1):
         # The multi-label case is a bunch of binary problems.
@@ -427,7 +427,7 @@ def log_loss(solution, prediction, task='binary.classification'):
         log_loss = pos_class_log_loss + neg_class_log_loss
         # Each column is an independent problem, so we average.
         # The probabilities in one line do not add up to one.
-        # log_loss = mvmean(log_loss) 
+        # log_loss = mvmean(log_loss)
         # print('binary {}'.format(log_loss))
         # In the multilabel case, the right thing i to AVERAGE not sum
         # We return all the scores so we can normalize correctly later on
@@ -651,7 +651,7 @@ if __name__ == "__main__":
     #    print('Correct (ours): ' +str(auc_metric(np.array([[1,0,0]]).transpose(),np.array([[1e-10,0,0]]).transpose())))
     #    print('Incorrect (sklearn): ' +str(metrics.roc_auc_score(np.array([1,0,0]),np.array([1e-10,0,0]))))
 
-    # This checks the binary and multi-class cases are well implemented 
+    # This checks the binary and multi-class cases are well implemented
     # In the 2-class case, all results should be identical, except for f1 because
     # this is a score that is not symmetric in the 2 classes.
     eps = 1e-15
