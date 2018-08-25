@@ -30,7 +30,7 @@ for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
 
 output_filename = os.path.join(output_dir, 'scores.txt')
 output_file = open(output_filename, 'w')
-output_file.write("correct:{}".format(score))
+output_file.write("score_sum:{}".format(score))
 output_file.close()
 
 # For testing realtime output, write to detailed results repeatedly

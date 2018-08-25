@@ -98,41 +98,11 @@ leaderboard:
             label: RESULTS
             rank: 1
     columns:
-        set1_score:
+        score_sum:
             leaderboard: *RESULTS
-            label: Set 1
+            label: Overall Score
             numeric_format: 4
             rank: 2
-        set2_score:
-            leaderboard: *RESULTS
-            label: Set 2
-            numeric_format: 4
-            rank: 3
-        set3_score:
-            leaderboard: *RESULTS
-            label: Set 3
-            numeric_format: 4
-            rank: 4
-        set4_score:
-            leaderboard: *RESULTS
-            label: Set 4
-            numeric_format: 4
-            rank: 5
-        set5_score:
-            leaderboard: *RESULTS
-            label: Set 5
-            numeric_format: 4
-            rank: 6
-        ave_score:
-            leaderboard: *RESULTS
-            label: <Rank>
-            numeric_format: 4
-            rank: 1
-            selection_default: 1
-            sorting: ascending
-            computed:
-                operation: Avg
-                fields: set1_score, set2_score, set3_score, set4_score, set5_score
         Duration:
             leaderboard: *RESULTS
             label: Duration
