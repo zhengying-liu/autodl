@@ -38,6 +38,6 @@ counter = 1
 detailed_results_path = os.path.join(output_dir, "detailed_results.html")
 
 # Refresh the page every second
-# with open(detailed_results_path, 'a+') as detailed_results:
+with open(detailed_results_path, 'a+') as detailed_results:
 #     detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
-detailed_results.write("Oh yeah! Now it's good with real-time output and parallel tracks!")
+    detailed_results.write("Oh yeah! Now it's good with real-time output and parallel tracks!")
