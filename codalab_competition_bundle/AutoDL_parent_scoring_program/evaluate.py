@@ -23,14 +23,14 @@ for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
         submission_score_file = os.path.join(submit_dir, "scores.txt")
         submission_score = open(submission_score_file).readline()
 
-        # Score is written like so: "correct:<score>"
+        # Score is written like so: "score:<score>\nDuration:11.11"
         score_text = submission_score.split(":")[1]
 
         score += float(score_text)
 
 output_filename = os.path.join(output_dir, 'scores.txt')
 output_file = open(output_filename, 'w')
-output_file.write("score_sum:{}".format(score))
+output_file.write("score:{}".format(score))
 output_file.close()
 
 # For testing realtime output, write to detailed results repeatedly
