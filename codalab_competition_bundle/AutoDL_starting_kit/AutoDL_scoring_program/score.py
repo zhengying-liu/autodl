@@ -239,7 +239,8 @@ if __name__ == "__main__":
 
     for i, solution_file in enumerate(solution_names):
         set_num = i + 1  # 1-indexed
-        score_name = 'set%s_score' % set_num
+        # score_name = 'set%s_score' % set_num
+        score_name = 'score'
 
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
