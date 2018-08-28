@@ -98,7 +98,7 @@ leaderboard:
             label: RESULTS
             rank: 1
     columns:
-        score_sum:
+        score:
             leaderboard: *RESULTS
             label: Overall Score
             numeric_format: 4
