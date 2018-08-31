@@ -136,7 +136,7 @@ class Scorer():
 def write_scores_html(score_dir):
   filename = 'detailed_results.html'
   # filename = 'scores.html'
-  with open(os.path.join(score_dir, filename), 'w+') as html_file:
+  with open(os.path.join(score_dir, filename), 'w') as html_file:
     # Automatic refreshing the page every 5 seconds
     html_str = """<html>
     <head> <meta http-equiv="refresh" content="5"> </head>
@@ -145,6 +145,8 @@ def write_scores_html(score_dir):
     """
     html_file.write(html_str)
     image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
+    if not image_paths: # If no learning curve image is found
+      html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
     for image_path in image_paths:
       with open(image_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
@@ -201,6 +203,9 @@ if __name__ == "__main__":
 
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
+
+    # Initiate scores.html
+    write_scores_html(score_dir)
 
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
