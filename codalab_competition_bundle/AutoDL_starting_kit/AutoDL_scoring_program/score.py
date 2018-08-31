@@ -137,9 +137,9 @@ def write_scores_html(score_dir):
   filename = 'detailed_results.html'
   # filename = 'scores.html'
   with open(os.path.join(score_dir, filename), 'w') as html_file:
-    # Automatic refreshing the page every 5 seconds
+    # Automatic refreshing the page on file change using Live.js
     html_str = """<html>
-    <head> <meta http-equiv="refresh" content="5"> </head>
+    <head> <script type="text/javascript" src="http://livejs.com/live.js"></script> </head>
     <body>
     <pre>
     """
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
 
-    # Initiate scores.html
+    # Initialize detailed_results.html
     write_scores_html(score_dir)
 
     # Moniter training processes while time budget is not attained
