@@ -72,7 +72,7 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-max_time = 300
+max_time = 60 #300
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -150,12 +150,11 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
         submission_dir = os.path.abspath(os.path.join(argv[4], '..', 'submission'))
 
-    if verbose:
+    if verbose: # For debugging
         print("Using input_dir: " + input_dir)
         print("Using output_dir: " + output_dir)
         print("Using program_dir: " + program_dir)
         print("Using submission_dir: " + submission_dir)
-    if verbose:
         print("In input_dir: ", os.listdir(input_dir))
         try:
           print("In output_dir: ", os.listdir(output_dir))
@@ -164,13 +163,13 @@ if __name__=="__main__" and debug_mode<4:
         print("In program_dir: ", os.listdir(program_dir))
         print("In submission_dir: ", os.listdir(submission_dir))
         print("Ingestion datetime:", the_date)
-    try:
-        print("In input_dir/res: ", os.listdir(os.path.join(input_dir, 'res')))
-        print("In input_dir/ref: ", os.listdir(os.path.join(input_dir, 'ref')))
-        print("In run/: ", os.listdir(os.path.join(input_dir, '..')))
-        print("In /: ", os.listdir('/'))
-    except:
-        pass
+        try:
+          print("In input_dir/res: ", os.listdir(os.path.join(input_dir, 'res')))
+          print("In input_dir/ref: ", os.listdir(os.path.join(input_dir, 'ref')))
+          print("In run/: ", os.listdir(os.path.join(input_dir, '..')))
+          print("In /: ", os.listdir('/'))
+        except:
+          pass
 
 	# Our libraries
     path.append (program_dir)
@@ -211,7 +210,7 @@ if __name__=="__main__" and debug_mode<4:
     time_left_over = 0
 
 
-    for i, basename in enumerate(datanames): # Loop over datasets
+    for i, basename in enumerate(datanames): # Loop over datasets (if several)
 
         vprint( verbose,  "\n========== Ingestion program version " + str(version) + " ==========\n")
         vprint( verbose,  "************************************************")
@@ -236,16 +235,17 @@ if __name__=="__main__" and debug_mode<4:
         vprint( verbose,  "[+] Size of uploaded data  %5.2f bytes" % data_io.total_size(D_train))
         # TODO: modify total_size
 
-        # ======== Keeping track of time
+        # ======== Keep track of time
         # TODO: different time budget for different dataset (mnist, cifar, ...)
         if debug_mode<1:
             time_budget = max_time
             #time_budget = D.info['time_budget']        # <== HERE IS THE TIME BUDGET!
         else:
             time_budget = max_time
+
         overall_time_budget = overall_time_budget + time_budget
         vprint( verbose,  "[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
-        # We do not add the time left over form previous dataset: time_budget += time_left_over
+        # We do not add the time left over from previous dataset: time_budget += time_left_over
         vprint( verbose,  "[+] Time budget for this task %5.2f sec" % time_budget)
         time_spent = time.time() - start
         vprint( verbose,  "[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
@@ -287,6 +287,7 @@ if __name__=="__main__" and debug_mode<4:
               try:
                 # Training budget on each dataset is equal to (time budget / number of datasets)
                 while(time.time() < overall_start + time_budget/len(datanames)*(i+1) + total_pause_time):
+                  # Train the model
                   M.train(D_train.get_dataset())
                   # Make predictions using the most recent checkpoint
                   # Prediction files: mini.predict_0, mini.predict_1, ...
@@ -295,17 +296,19 @@ if __name__=="__main__" and debug_mode<4:
                   vprint( verbose, "INFO:" + str(now)+ " ======== Saving results to: " + output_dir)
                   filename_test = basename[:-5] + '.predict_' +\
                     str(prediction_order_number)
+                  # Write predictions to output_dir
                   data_io.write(os.path.join(output_dir,filename_test), Y_test)
                   prediction_order_number += 1
 
                 # If training terminates normally then break the loop
                 break
 
-              # Ctrl+C for pause training and make predictions using present model
+              # Ctrl+C for pause training and make predictions using present
+              # model. Might be useless for the final competition, due to
+              # change of logic (now we want to kill training thread completely)
               except KeyboardInterrupt:
                 pause_start = time.time()
                 vprint(verbose, "\n======== User interrupt. Pause training.")
-
                 # User types 'y' to resume training, types others to quit
                 vprint(verbose, "======== Resume training? (y/n)")
                 input = sys.stdin.readline()[0].lower()
@@ -319,53 +322,19 @@ if __name__=="__main__" and debug_mode<4:
                 pause_end = time.time()
                 total_pause_time += pause_end - pause_start
 
-            vprint( verbose,  "[+] Fitting success, time spent so far %5.2f sec" % (time.time() - start))
-            # Save model
-            # ----------
-            # if save_model:
-            #     outname = os.path.join(submission_dir, basename)
-            #     vprint( verbose, "======== Saving model to: " + output_dir)
-            #     M.save(outname)
-            #     vprint( verbose,  "[+] Success!")
-
-        # Make predictions
-        # -----------------
-        # TODO: dataset
-
-        # Y_valid = M.predict(D.data['X_valid'])
-
-        ##### To show to Andre #####
-        # Y_train = M.test(D_train.get_dataset())
-        # Y_test = M.test(D_test.get_dataset())
-#        def compute_output(*arg):
-#            # arg[0] is the input
-#            return tf.map_fn(M.predict, arg[0])
-#
-#        Y_train = D_train.get_dataset().map(compute_output)
-#        Y_test = D_test.get_dataset().map(compute_output)
-        ##### To show to Andre #####
-
         vprint( verbose,  "[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-        # Write results
-        # -------------
-        # filename_train = basename + '_train.predict'
-        # filename_valid = basename + '_valid.predict'
-        # filename_test = basename + '_test.predict'
-
-        # filename_test = basename[:-5] + '.predict_' +\
-        #   str(prediction_order_number)
-
-        # vprint( verbose, "======== Saving results to: " + output_dir)
-        # # data_io.write(os.path.join(output_dir,filename_train), Y_train)
-        # # data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
-        # data_io.write(os.path.join(output_dir,filename_test), Y_test)
         vprint( verbose,  "[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
         time_spent = time.time() - start
         time_left_over = time_budget - time_spent
         vprint( verbose,  "[+] End cycle, time left %5.2f sec" % time_left_over)
         if time_left_over<=0: break
 
+    # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
+    # Write overall_time_spent to a duration.txt file
+    duration_filename =  'duration.txt'
+    with open(os.path.join(output_dir, duration_filename), 'w') as f:
+      f.write(str(overall_time_spent))
     if execution_success:
         vprint( verbose,  "[+] Done")
         vprint( verbose,  "[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
