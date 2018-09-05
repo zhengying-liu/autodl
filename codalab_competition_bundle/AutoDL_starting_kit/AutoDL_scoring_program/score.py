@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
     start = time.time()
     # TODO
-    TIME_BUDGET = 60 #300
+    TIME_BUDGET = 300
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
