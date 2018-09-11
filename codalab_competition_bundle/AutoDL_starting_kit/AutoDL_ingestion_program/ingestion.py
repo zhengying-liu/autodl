@@ -151,6 +151,10 @@ if __name__=="__main__" and debug_mode<4:
         submission_dir = os.path.abspath(os.path.join(argv[4], '..', 'submission'))
 
     if verbose: # For debugging
+        print("sys.argv = ", sys.argv)
+        with open(os.path.join(program_dir, 'metadata'), 'r') as f:
+          print("Content of the metadata file: ")
+          print(f.read())
         print("Using input_dir: " + input_dir)
         print("Using output_dir: " + output_dir)
         print("Using program_dir: " + program_dir)
