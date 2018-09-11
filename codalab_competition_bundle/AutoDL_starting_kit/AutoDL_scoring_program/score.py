@@ -139,7 +139,7 @@ def write_scores_html(score_dir):
   with open(os.path.join(score_dir, filename), 'w') as html_file:
     # Automatic refreshing the page on file change using Live.js
     html_str = """<html>
-    <head> <script type="text/javascript" src="http://livejs.com/live.js"></script> </head>
+    <head> <meta http-equiv="refresh" content="5"> </head>
     <body>
     <pre>
     """
