@@ -7,12 +7,19 @@ import time
 input_dir = sys.argv[1]
 output_dir = sys.argv[2]
 
-submit_dir_subphase_2 = os.path.join(input_dir, 'res_2')
-submit_dir_subphase_3 = os.path.join(input_dir, 'res_3')
+n_datasets = 2 # TODO: to be changed to 5
+
+# Parent phase has 1 as phase number by default
+
+submit_dirs = []
+
+for phase_number in range(2, 2 + n_datasets):
+  submit_dir = os.path.join(input_dir, 'res_' + str(phase_number))
+  submit_dirs.append(submit_dir)
 
 score = 0
 
-for submit_dir in [submit_dir_subphase_2, submit_dir_subphase_3]:
+for submit_dir in submit_dirs:
     if not os.path.isdir(submit_dir):
         print("%s doesn't exist" % submit_dir)
 
@@ -33,11 +40,9 @@ output_file = open(output_filename, 'w')
 output_file.write("score:{}".format(score))
 output_file.close()
 
-# For testing realtime output, write to detailed results repeatedly
-counter = 1
 detailed_results_path = os.path.join(output_dir, "detailed_results.html")
 
-# Refresh the page every second
+# Write to detailed results
 with open(detailed_results_path, 'a+') as detailed_results:
 #     detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
     detailed_results.write("Oh yeah! Now it's good with real-time output and parallel tracks!")
