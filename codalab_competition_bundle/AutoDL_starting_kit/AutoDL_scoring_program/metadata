@@ -1,2 +1,2 @@
-command: python $program/score.py $input $output
+command: python $program/score.py $input $output $hidden
 description: Compute scores for the competition
