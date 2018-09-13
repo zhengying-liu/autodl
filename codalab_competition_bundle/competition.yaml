@@ -14,7 +14,7 @@
 # ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS,
 # MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-title: "AutoDL :: competition mockup - TensorFlow"
+title: "AutoDL :: with cool new UI "
 description: "Create a fully Automatic Deep Learning solution."
 image: AutoDL.jpg
 has_registration: False                 # We do not check participants, registration is free
@@ -40,7 +40,7 @@ phases:
 
     1:
         phasenumber: 1
-        label: "Submission"
+        label: "All datasets"
         description: "Please make submissions by clicking on following 'Submit' button. Then you can view the submission results of your algorithm on each dataset in corresponding tab (Dataset 1, Dataset 2, etc)."
         color: orange # Tab colors (white, orange, yellow, green, blue, purple)
         start_date: 2018-08-25
