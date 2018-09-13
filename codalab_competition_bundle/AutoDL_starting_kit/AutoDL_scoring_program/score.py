@@ -15,6 +15,7 @@
 
 # Some libraries and options
 import os
+import sys
 from sys import argv
 from os import getcwd as pwd
 
@@ -155,11 +156,20 @@ def write_scores_html(score_dir):
         html_file.write(s + '<br>')
     html_file.write('</pre></body></html>')
 
+# List a tree structure of directories and files from startpath
+def list_files(startpath):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print('{}{}'.format(subindent, f))
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
-    if verbose:
-      print("sys.argv = ", argv)
+
     import datetime
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
@@ -180,15 +190,25 @@ if __name__ == "__main__":
         solution_dir = argv[1]
         prediction_dir = argv[2]
         score_dir = argv[3]
+        # TODO: to be tested and changed
+        solution_dir = os.path.join(argv[1], 'ref')
+        prediction_dir = os.path.join(argv[1], 'res')
+        score_dir = argv[2]
     else:
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
 
-    if verbose:
+    if verbose: # For debugging
+        print("sys.argv = ", sys.argv)
+        list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir)))
+        with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
+          print("Content of the metadata file: ")
+          print(f.read())
         print("Using solution_dir: " + solution_dir)
         print("Using prediction_dir: " + prediction_dir)
         print("Using score_dir: " + score_dir)
         print("Scoring datetime:", the_date)
+
 
     # Create the output directory, if it does not already exist and open output files
     mkdir(score_dir)
@@ -229,11 +249,15 @@ if __name__ == "__main__":
             print("INFO:", now, " ====== New prediction found. Now nb_preds =", nb_preds_new)
             # Draw the learning curve
             print("INFO:", now," ====== Refreshing learning curve for", basename)
-            aulc = draw_learning_curve(solution_file=solution_file,
-                                prediction_files=prediction_files,
-                                scoring_function=scoring_function,
-                                output_dir=score_dir,
-                                basename=basename)
+            # TODO: try-except pair to be deleted
+            try:
+              aulc = draw_learning_curve(solution_file=solution_file,
+                                  prediction_files=prediction_files,
+                                  scoring_function=scoring_function,
+                                  output_dir=score_dir,
+                                  basename=basename)
+            except:
+              print("Something wrong here. Prediction files are {}".format(prediction_files))
             nb_preds[solution_file] = nb_preds_new
 
             scores[solution_file] = aulc
@@ -267,6 +291,7 @@ if __name__ == "__main__":
         score_file.write(str_temp.encode('utf-8'))
         if verbose:
           print("Successfully write to {} from duration.txt".format(score_file))
+          print("duration = ", duration)
     except:
         str_temp = "Duration: 0\n"
         score_file.write(str_temp.encode('utf-8'))
