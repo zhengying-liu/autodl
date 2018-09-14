@@ -107,4 +107,4 @@ leaderboard:
             leaderboard: *RESULTS
             label: Duration
             numeric_format: 2
-            rank: 7
+            rank: 3

@@ -72,7 +72,8 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-max_time = 300
+max_time = 60 # For debugging
+# max_time = 300
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -108,6 +109,11 @@ default_input_dir = join(root_dir, "AutoDL_sample_data")
 default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_program_dir = join(root_dir, "AutoDL_ingestion_program")
 default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
+
+# Redirect stardant output to detailed_results.html to have live output
+# for debugging
+REDIRECT_STDOUT = False
+from functools import partial
 
 # =============================================================================
 # =========================== END USER OPTIONS ================================
@@ -148,7 +154,13 @@ if __name__=="__main__" and debug_mode<4:
         # Eric created run/submission to store participants' model.py
         input_dir = os.path.abspath(os.path.join(argv[1], 'ref'))
         output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
-        submission_dir = os.path.abspath(os.path.join(argv[4], '..', 'submission'))
+        submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
+
+        if REDIRECT_STDOUT:
+            score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
+            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'w+')
+            # Flush changes to the file to have instant update
+            print = partial(print, flush=True)
 
     if verbose: # For debugging
         print("sys.argv = ", sys.argv)
@@ -339,6 +351,9 @@ if __name__=="__main__" and debug_mode<4:
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
       f.write(str(overall_time_spent))
+      if verbose:
+          print("Successfully write duration to {}.".format(duration_filename))
+          print("duration = ", overall_time_spent)
     if execution_success:
         vprint( verbose,  "[+] Done")
         vprint( verbose,  "[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)

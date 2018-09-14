@@ -4,6 +4,8 @@ import os
 import os.path
 import time
 
+_start = time.time()
+
 input_dir = sys.argv[1]
 output_dir = sys.argv[2]
 
@@ -35,14 +37,17 @@ for submit_dir in submit_dirs:
 
         score += float(score_text)
 
-output_filename = os.path.join(output_dir, 'scores.txt')
-output_file = open(output_filename, 'w')
-output_file.write("score:{}".format(score))
-output_file.close()
 
 detailed_results_path = os.path.join(output_dir, "detailed_results.html")
-
 # Write to detailed results
 with open(detailed_results_path, 'a+') as detailed_results:
 #     detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
     detailed_results.write("Oh yeah! Now it's good with real-time output and parallel tracks!")
+
+_end = time.time()
+_duration = _start - _end
+
+output_filename = os.path.join(output_dir, 'scores.txt')
+with open(output_filename, 'w') as output_file:
+	output_file.write("score:{}\n".format(score))
+	output_file.write("Duration:{0:.6f}\n".format(_duration))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-# Scoring program for the AutoML challenge
-  # Isabelle Guyon and Arthur Pesah, ChaLearn, August 2014-November 2016
+# Scoring program for the AutoDL challenge
+# Isabelle Guyon and Zhengying Liu, ChaLearn, April 2018-
 
 # ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
@@ -54,6 +54,11 @@ default_score_dir = join(root_dir, "AutoDL_scoring_output")
 # Debug flag 0: no debug, 1: show all scores, 2: also show version amd listing of dir
 debug_mode = 1
 verbose = True
+
+# Redirect stardant output to detailed_results.html to have live output
+# for debugging
+REDIRECT_STDOUT = False
+from functools import partial
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -132,29 +137,30 @@ class Scorer():
     self.solution_dir = solution_dir
     self.prediction_dir = prediction_dir
     self.score_dir = score_dir
-    self.time_budget = 300 # TODO
+    self.time_budget = 300
 
 def write_scores_html(score_dir):
   filename = 'detailed_results.html'
   # filename = 'scores.html'
-  with open(os.path.join(score_dir, filename), 'w') as html_file:
-    # Automatic refreshing the page on file change using Live.js
-    html_str = """<html>
-    <head> <meta http-equiv="refresh" content="5"> </head>
-    <body>
-    <pre>
-    """
-    html_file.write(html_str)
-    image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
-    if not image_paths: # If no learning curve image is found
+  image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
+  html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
+  html_end = '</pre></body></html>'
+  if not image_paths: # If no learning curve image is found, show debugging info
+    with open(os.path.join(score_dir, filename), 'w+') as html_file:
+      html_file.write(html_head)
       html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
-    for image_path in image_paths:
-      with open(image_path, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-        encoded_string = encoded_string.decode('utf-8')
-        s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
-        html_file.write(s + '<br>')
-    html_file.write('</pre></body></html>')
+      html_file.write(html_end)
+  else:
+    with open(os.path.join(score_dir, filename), 'w') as html_file:
+        # Automatic refreshing the page on file change using Live.js
+        html_file.write(html_head)
+        for image_path in image_paths:
+          with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+            encoded_string = encoded_string.decode('utf-8')
+            s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
+            html_file.write(s + '<br>')
+        html_file.write(html_end)
 
 # List a tree structure of directories and files from startpath
 def list_files(startpath):
@@ -173,9 +179,11 @@ if __name__ == "__main__":
     import datetime
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
+    # For debugging
+    # TIME_BUDGET = 300
+    TIME_BUDGET = 60
+
     start = time.time()
-    # TODO
-    TIME_BUDGET = 300
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
@@ -190,13 +198,19 @@ if __name__ == "__main__":
         solution_dir = argv[1]
         prediction_dir = argv[2]
         score_dir = argv[3]
+
         # TODO: to be tested and changed
         solution_dir = os.path.join(argv[1], 'ref')
         prediction_dir = os.path.join(argv[1], 'res')
         score_dir = argv[2]
+        if REDIRECT_STDOUT:
+            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'w+')
+            # Flush changes to the file to have instant update
+            print = partial(print, flush=True)
     else:
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
+
 
     if verbose: # For debugging
         print("sys.argv = ", sys.argv)
@@ -212,7 +226,7 @@ if __name__ == "__main__":
 
     # Create the output directory, if it does not already exist and open output files
     mkdir(score_dir)
-    score_file = open(os.path.join(score_dir, 'scores.txt'), 'wb')
+    score_file = open(os.path.join(score_dir, 'scores.txt'), 'w')
 
     # Get the metric
     metric_name, scoring_function = _load_scoring_function()
@@ -232,8 +246,6 @@ if __name__ == "__main__":
       time.sleep(0.5)
       # Loop over files in solution directory and search for predictions with extension .predict having the same basename
       for i, solution_file in enumerate(solution_names):
-          set_num = i + 1  # 1-indexed
-          score_name = 'set%s_score' % set_num
 
           # Extract the dataset name from the file name
           basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
@@ -267,34 +279,43 @@ if __name__ == "__main__":
       write_scores_html(score_dir)
 
     for i, solution_file in enumerate(solution_names):
-        set_num = i + 1  # 1-indexed
 
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-        score_name = 'score_' + basename
+        # score_name = 'score_' + basename
+        score_name = 'score'
 
         score = scores[solution_file]
 
         # Write score corresponding to selected task and metric to the output file
         str_temp = score_name + ": %0.12f\n" % score
-        score_file.write(str_temp.encode('utf-8'))
+        score_file.write(str_temp)
 
     # End loop for solution_file in solution_names
 
     # Read the execution time and add it to the scores:
-    try:
-        # metadata = yaml.load(open(os.path.join(input_dir, 'res', 'metadata'), 'r')) # metadata => duration.txt generated by ingestion.py
-        duration_filename =  'duration.txt'
-        with open(os.path.join(prediction_dir, duration_filename), 'r') as f:
-          duration = float(f.read())
-        str_temp = "Duration: %0.6f\n" % duration
-        score_file.write(str_temp.encode('utf-8'))
-        if verbose:
-          print("Successfully write to {} from duration.txt".format(score_file))
-          print("duration = ", duration)
-    except:
-        str_temp = "Duration: 0\n"
-        score_file.write(str_temp.encode('utf-8'))
+    max_loop = 30
+    n_loop = 0
+    while n_loop < max_loop:
+        time.sleep(1)
+        try:
+            # metadata = yaml.load(open(os.path.join(input_dir, 'res', 'metadata'), 'r')) # metadata => duration.txt generated by ingestion.py
+            duration_filename =  'duration.txt'
+            with open(os.path.join(prediction_dir, duration_filename), 'r') as f:
+              duration = float(f.read())
+            str_temp = "Duration: %0.6f\n" % duration
+            score_file.write(str_temp)
+            if verbose:
+              print("Successfully write to {} from duration.txt".format(score_file))
+              print("duration = ", duration)
+            break
+        except Exception as e:
+            print(e)
+            # str_temp = "Duration: 0\n"
+            # score_file.write(str_temp)
+        n_loop += 1
+
+    score_file.close()
 
     # Lots of debug stuff
     if debug_mode > 1:
