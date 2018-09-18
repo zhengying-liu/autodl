@@ -9,7 +9,7 @@ _start = time.time()
 input_dir = sys.argv[1]
 output_dir = sys.argv[2]
 
-n_datasets = 2 # TODO: to be changed to 5
+n_datasets = 5 # TODO: to be changed to 5
 
 # Parent phase has 1 as phase number by default
 
