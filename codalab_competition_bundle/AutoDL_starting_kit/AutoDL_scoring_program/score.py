@@ -199,10 +199,8 @@ if __name__ == "__main__":
         prediction_dir = argv[2]
         score_dir = argv[3]
 
-        # TODO: to be tested and changed
-        solution_dir = os.path.join(argv[1], 'ref')
-        prediction_dir = os.path.join(argv[1], 'res')
-        score_dir = argv[2]
+        # TODO: to be tested and changed - 14/09
+        prediction_dir = os.path.join(argv[2], 'res')
         if REDIRECT_STDOUT:
             sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'w+')
             # Flush changes to the file to have instant update
@@ -234,6 +232,8 @@ if __name__ == "__main__":
 
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
+    if verbose:
+        print("Found solutions: ", solution_names)
 
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}

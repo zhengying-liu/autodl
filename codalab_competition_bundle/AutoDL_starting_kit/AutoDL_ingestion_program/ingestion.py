@@ -150,9 +150,9 @@ if __name__=="__main__" and debug_mode<4:
         program_dir = os.path.abspath(argv[3])
         submission_dir = os.path.abspath(argv[4])
         # TODO
-        # Now data are with reference data, in run/input/ref
+        # Now data are separate from reference data, in run/input_data/
         # Eric created run/submission to store participants' model.py
-        input_dir = os.path.abspath(os.path.join(argv[1], 'ref'))
+        input_dir = os.path.abspath(os.path.join(argv[1], '../input_data'))
         output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
 
@@ -171,21 +171,7 @@ if __name__=="__main__" and debug_mode<4:
         print("Using output_dir: " + output_dir)
         print("Using program_dir: " + program_dir)
         print("Using submission_dir: " + submission_dir)
-        print("In input_dir: ", os.listdir(input_dir))
-        try:
-          print("In output_dir: ", os.listdir(output_dir))
-        except:
-          print("In output_dir: ", "no output directory yet.")
-        print("In program_dir: ", os.listdir(program_dir))
-        print("In submission_dir: ", os.listdir(submission_dir))
         print("Ingestion datetime:", the_date)
-        try:
-          print("In input_dir/res: ", os.listdir(os.path.join(input_dir, 'res')))
-          print("In input_dir/ref: ", os.listdir(os.path.join(input_dir, 'ref')))
-          print("In run/: ", os.listdir(os.path.join(input_dir, '..')))
-          print("In /: ", os.listdir('/'))
-        except:
-          pass
 
 	# Our libraries
     path.append (program_dir)
