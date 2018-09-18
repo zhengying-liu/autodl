@@ -1,0 +1,13 @@
+sys.argv =  ['/tmp/codalab/tmpPOlxpO/run/ingestion_program/ingestion.py', '/tmp/codalab/tmpPOlxpO/run/input', '/tmp/codalab/tmpPOlxpO/run/output', '/tmp/codalab/tmpPOlxpO/run/ingestion_program', '/tmp/codalab/tmpPOlxpO/run/program']
+Content of the metadata file: 
+command: python $ingestion_program/ingestion.py $input $output $ingestion_program $submission_program
+Using input_dir: /tmp/codalab/tmpPOlxpO/run/input/ref
+Using output_dir: /tmp/codalab/tmpPOlxpO/run/input/res
+Using program_dir: /tmp/codalab/tmpPOlxpO/run/ingestion_program
+Using submission_dir: /tmp/codalab/tmpPOlxpO/run/submission
+Ingestion datetime: 18-09-14 16:39:08
+WARNING: Inventory data - No data file found
+Successfully write duration to duration.txt.
+duration =  1.690169334411621
+[+] Done
+[+] Overall time spent  1.69 sec ::  Overall time budget  0.00 sec
