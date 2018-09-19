@@ -72,8 +72,8 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-max_time = 60 # For debugging
-# max_time = 300
+# max_time = 60 # For debugging
+max_time = 300
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -112,7 +112,7 @@ default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
 
 # Redirect stardant output to detailed_results.html to have live output
 # for debugging
-REDIRECT_STDOUT = False
+REDIRECT_STDOUT = True # TODO: to be changed to False for prod
 from functools import partial
 
 # =============================================================================
@@ -132,6 +132,12 @@ from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
+def print_log(content):
+  if verbose:
+    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+    print("INGESTION INFO:" + str(now)+ " ======== " + content)
+
+
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
@@ -144,6 +150,12 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = default_output_dir
         program_dir= default_program_dir
         submission_dir= default_submission_dir
+        if REDIRECT_STDOUT:
+            score_dir = join(root_dir, "AutoDL_scoring_output")
+            os.mkdir(score_dir)
+            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
+            # Flush changes to the file to have instant update
+            print = partial(print, flush=True)
     else:
         input_dir = os.path.abspath(argv[1])
         output_dir = os.path.abspath(argv[2])
@@ -158,7 +170,7 @@ if __name__=="__main__" and debug_mode<4:
 
         if REDIRECT_STDOUT:
             score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
-            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'w+')
+            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
             # Flush changes to the file to have instant update
             print = partial(print, flush=True)
 
@@ -172,6 +184,8 @@ if __name__=="__main__" and debug_mode<4:
         print("Using program_dir: " + program_dir)
         print("Using submission_dir: " + submission_dir)
         print("Ingestion datetime:", the_date)
+
+
 
 	# Our libraries
     path.append (program_dir)
@@ -214,17 +228,17 @@ if __name__=="__main__" and debug_mode<4:
 
     for i, basename in enumerate(datanames): # Loop over datasets (if several)
 
-        vprint( verbose,  "\n========== Ingestion program version " + str(version) + " ==========\n")
-        vprint( verbose,  "************************************************")
-        vprint( verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
-        vprint( verbose,  "************************************************")
+        print_log("\n Ingestion program version " + str(version) + " ==========\n")
+        print_log("************************************************")
+        print_log("******** Processing dataset " + basename.capitalize() + " ********")
+        print_log("************************************************")
 
         # ======== Learning on a time budget:
         # Keep track of time not to exceed your time budget. Time spent to inventory data neglected.
         start = time.time()
 
         # ======== Creating a data object with data, informations about it
-        vprint( verbose,  "========= Reading and converting data ==========")
+        print_log("Reading and converting data")
         # TODO: Read data : 2 datasets: train, test
 
         ##### To show to Andre #####
@@ -234,7 +248,7 @@ if __name__=="__main__" and debug_mode<4:
         D_test.init(batch_size=1000, repeat=False)
         ##### To show to Andre #####
 
-        vprint( verbose,  "[+] Size of uploaded data  %5.2f bytes" % data_io.total_size(D_train))
+        print_log("[+] Size of uploaded data  %5.2f bytes" % data_io.total_size(D_train))
         # TODO: modify total_size
 
         # ======== Keep track of time
@@ -246,18 +260,18 @@ if __name__=="__main__" and debug_mode<4:
             time_budget = max_time
 
         overall_time_budget = overall_time_budget + time_budget
-        vprint( verbose,  "[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
+        print_log("[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
         # We do not add the time left over from previous dataset: time_budget += time_left_over
-        vprint( verbose,  "[+] Time budget for this task %5.2f sec" % time_budget)
+        print_log("[+] Time budget for this task %5.2f sec" % time_budget)
         time_spent = time.time() - start
-        vprint( verbose,  "[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
+        print_log("[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
         if time_spent >= time_budget:
-            vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
+            print_log("[-] Sorry, time budget exceeded, skipping this task")
             execution_success = False
             continue
 
         # ========= Creating a model
-        vprint( verbose,  "======== Creating model ==========")
+        print_log("Creating model")
 
         ##### To show to Andre #####
         M = Model(D_train.get_metadata())
@@ -281,21 +295,32 @@ if __name__=="__main__" and debug_mode<4:
 
         # ========= Train if needed only
         if you_must_train:
-            # vprint( verbose, "======== Trained model not found, proceeding to train!")
-            vprint(verbose, "======== Begin training. Use Ctrl+C to pause.")
+            print_log("Trained model not found, proceeding to train!")
+            print_log("Begin training. Use Ctrl+C to pause.")
             start = time.time()
             # TODO:
             while(True):
               try:
                 # Training budget on each dataset is equal to (time budget / number of datasets)
                 while(time.time() < overall_start + time_budget/len(datanames)*(i+1) + total_pause_time):
+                  if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
+                    Y_test = M.test(D_test.get_dataset())
+                    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                    print_log("Saving results to: " + output_dir)
+                    filename_test = basename[:-5] + '.predict_' +\
+                      str(prediction_order_number)
+                    # Write predictions to output_dir
+                    data_io.write(os.path.join(output_dir,filename_test), Y_test)
+                    prediction_order_number += 1
+
                   # Train the model
+                  print_log("Training the model.")
                   M.train(D_train.get_dataset())
                   # Make predictions using the most recent checkpoint
                   # Prediction files: mini.predict_0, mini.predict_1, ...
                   Y_test = M.test(D_test.get_dataset())
                   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-                  vprint( verbose, "INFO:" + str(now)+ " ======== Saving results to: " + output_dir)
+                  print_log("Saving results to: " + output_dir)
                   filename_test = basename[:-5] + '.predict_' +\
                     str(prediction_order_number)
                   # Write predictions to output_dir
@@ -310,25 +335,24 @@ if __name__=="__main__" and debug_mode<4:
               # change of logic (now we want to kill training thread completely)
               except KeyboardInterrupt:
                 pause_start = time.time()
-                vprint(verbose, "\n======== User interrupt. Pause training.")
+                print_log("User interrupt. Pause training.")
                 # User types 'y' to resume training, types others to quit
-                vprint(verbose, "======== Resume training? (y/n)")
+                print_log("Resume training? (y/n)")
                 input = sys.stdin.readline()[0].lower()
                 if input == 'y':
-                  vprint(verbose, "======== Continue training...")
+                  print_log("Continue training...")
                   continue
                 else:
-                  vprint(verbose,
-                    "======== Stop training and make final predictions...")
+                  print_log("Stop training and make final predictions...")
                   break
                 pause_end = time.time()
                 total_pause_time += pause_end - pause_start
 
-        vprint( verbose,  "[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-        vprint( verbose,  "[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
+        print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
+        print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
         time_spent = time.time() - start
         time_left_over = time_budget - time_spent
-        vprint( verbose,  "[+] End cycle, time left %5.2f sec" % time_left_over)
+        print_log( "[+] End cycle, time left %5.2f sec" % time_left_over)
         if time_left_over<=0: break
 
     # Finishing ingestion program
@@ -341,8 +365,8 @@ if __name__=="__main__" and debug_mode<4:
           print("Successfully write duration to {}.".format(duration_filename))
           print("duration = ", overall_time_spent)
     if execution_success:
-        vprint( verbose,  "[+] Done")
-        vprint( verbose,  "[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
+        print_log("[+] Done")
+        print_log("[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
     else:
-        vprint( verbose,  "[-] Done, but some tasks aborted because time limit exceeded")
-        vprint( verbose,  "[-] Overall time spent %5.2f sec " % overall_time_spent + " > Overall time budget %5.2f sec" % overall_time_budget)
+        print_log("[-] Done, but some tasks aborted because time limit exceeded")
+        print_log("[-] Overall time spent %5.2f sec " % overall_time_spent + " > Overall time budget %5.2f sec" % overall_time_budget)

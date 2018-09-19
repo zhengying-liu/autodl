@@ -26,6 +26,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import datetime
 
 # To compute area under learning curve
 from sklearn.metrics import auc
@@ -57,7 +58,7 @@ verbose = True
 
 # Redirect stardant output to detailed_results.html to have live output
 # for debugging
-REDIRECT_STDOUT = False
+REDIRECT_STDOUT = False # TODO: to be changed for prod version
 from functools import partial
 
 # Constant used for a missing score
@@ -89,7 +90,7 @@ def get_fig_name(basename):
   return fig_name
 
 def draw_learning_curve(solution_file, prediction_files,
-                        scoring_function, output_dir, basename):
+                        scoring_function, output_dir, basename, start):
   """Draw learning curve for one task."""
   solution = read_array(solution_file) # numpy array
   scores = []
@@ -139,28 +140,33 @@ class Scorer():
     self.score_dir = score_dir
     self.time_budget = 300
 
+def init_scores_html(detailed_results_filepath):
+  html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
+  html_end = '</pre></body></html>'
+  with open(detailed_results_filepath, 'a') as html_file:
+    html_file.write(html_head)
+    html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
+    html_file.write(html_end)
+
 def write_scores_html(score_dir):
   filename = 'detailed_results.html'
-  # filename = 'scores.html'
   image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
   html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
   html_end = '</pre></body></html>'
-  if not image_paths: # If no learning curve image is found, show debugging info
-    with open(os.path.join(score_dir, filename), 'w+') as html_file:
+  with open(os.path.join(score_dir, filename), 'a') as html_file:
+      # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
-      html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
+      for image_path in image_paths:
+        with open(image_path, "rb") as image_file:
+          encoded_string = base64.b64encode(image_file.read())
+          encoded_string = encoded_string.decode('utf-8')
+          s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
+          html_file.write(s + '<br>')
       html_file.write(html_end)
-  else:
-    with open(os.path.join(score_dir, filename), 'w') as html_file:
-        # Automatic refreshing the page on file change using Live.js
-        html_file.write(html_head)
-        for image_path in image_paths:
-          with open(image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-            encoded_string = encoded_string.decode('utf-8')
-            s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
-            html_file.write(s + '<br>')
-        html_file.write(html_end)
+
+def append_to_detailed_results_page(detailed_results_filepath, content):
+  with open(detailed_results_filepath, 'a') as html_file:
+    html_file.write(content)
 
 # List a tree structure of directories and files from startpath
 def list_files(startpath):
@@ -172,16 +178,20 @@ def list_files(startpath):
         for f in files:
             print('{}{}'.format(subindent, f))
 
+def print_log(content):
+  if verbose:
+    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+    print("SCORING INFO:" + str(now)+ " ======== " + content)
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
 
-    import datetime
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
     # For debugging
-    # TIME_BUDGET = 300
-    TIME_BUDGET = 60
+    TIME_BUDGET = 300
+    # TIME_BUDGET = 60
 
     start = time.time()
 
@@ -202,7 +212,7 @@ if __name__ == "__main__":
         # TODO: to be tested and changed - 14/09
         prediction_dir = os.path.join(argv[2], 'res')
         if REDIRECT_STDOUT:
-            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'w+')
+            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
             # Flush changes to the file to have instant update
             print = partial(print, flush=True)
     else:
@@ -225,6 +235,7 @@ if __name__ == "__main__":
     # Create the output directory, if it does not already exist and open output files
     mkdir(score_dir)
     score_file = open(os.path.join(score_dir, 'scores.txt'), 'w')
+    detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
 
     # Get the metric
     metric_name, scoring_function = _load_scoring_function()
@@ -232,14 +243,12 @@ if __name__ == "__main__":
 
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
-    if verbose:
-        print("Found solutions: ", solution_names)
 
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
 
     # Initialize detailed_results.html
-    write_scores_html(score_dir)
+    init_scores_html(detailed_results_filepath)
 
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
@@ -256,18 +265,27 @@ if __name__ == "__main__":
           nb_preds_old = nb_preds[solution_file]
           nb_preds_new = len(prediction_files)
 
+          if verbose:
+            content = "Found prediction_files in {}: {}<br>".format(prediction_dir, prediction_files)
+            content += "Dataset basename: {}<br>".format(basename)
+            content += "nb_preds_old: {}, nb_preds_new: {}<br>".format(nb_preds_old, nb_preds_new)
+            content += "solution_names: {}<br>".format(solution_names)
+            print_log(content)
+
           if(nb_preds_new > nb_preds_old):
             now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
             print("INFO:", now, " ====== New prediction found. Now nb_preds =", nb_preds_new)
             # Draw the learning curve
             print("INFO:", now," ====== Refreshing learning curve for", basename)
             # TODO: try-except pair to be deleted
+            aulc = 0
             try:
               aulc = draw_learning_curve(solution_file=solution_file,
                                   prediction_files=prediction_files,
                                   scoring_function=scoring_function,
                                   output_dir=score_dir,
-                                  basename=basename)
+                                  basename=basename,
+                                  start=start)
             except:
               print("Something wrong here. Prediction files are {}".format(prediction_files))
             nb_preds[solution_file] = nb_preds_new
@@ -275,8 +293,10 @@ if __name__ == "__main__":
             scores[solution_file] = aulc
             print("INFO:", now," ====== Current area under learning curve for", basename, ":", scores[solution_file])
 
-      # Update scores.html
-      write_scores_html(score_dir)
+            # Update scores.html
+            write_scores_html(score_dir)
+
+
 
     for i, solution_file in enumerate(solution_names):
 
@@ -325,6 +345,6 @@ if __name__ == "__main__":
         show_version(scoring_version)
 
     if verbose:
-        print("In solution_dir: ", os.listdir(solution_dir))
-        print("In prediction_dir: ", os.listdir(prediction_dir))
-        print("In score_dir: ", os.listdir(score_dir))
+        print_log("In solution_dir: ", os.listdir(solution_dir))
+        print_log("In prediction_dir: ", os.listdir(prediction_dir))
+        print_log("In score_dir: ", os.listdir(score_dir))
