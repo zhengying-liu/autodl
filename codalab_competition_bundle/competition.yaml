@@ -14,7 +14,7 @@
 # ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS,
 # MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-title: "AutoDL :: with cool new UI & hidden solution"
+title: "AutoDL :: 5 datasets"
 description: "Create a fully Automatic Deep Learning solution."
 image: AutoDL.jpg
 has_registration: False                 # We do not check participants, registration is free
@@ -106,7 +106,7 @@ phases:
 
 
     5:
-        phasenumber: 4              # NO submission, auto-migration
+        phasenumber: 5              # NO submission, auto-migration
         label: "Dataset 4"
         description: "This tab contains submission results of your algorithm on Dataset 4."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
@@ -123,7 +123,7 @@ phases:
 
 
     6:
-        phasenumber: 5              # NO submission, auto-migration
+        phasenumber: 6              # NO submission, auto-migration
         label: "Dataset 5"
         description: "This tab contains submission results of your algorithm on Dataset 5."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
