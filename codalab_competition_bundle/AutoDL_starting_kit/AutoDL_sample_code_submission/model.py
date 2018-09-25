@@ -61,7 +61,11 @@ class Model(algorithm.Algorithm):
     input_layer = tf.reshape(features['x'],
                              [-1, sequence_size*row_count*col_count])
 
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)    
+    # Replace missing values by 0
+    input_layer = tf.where(tf.is_nan(input_layer),
+                           tf.zeros_like(input_layer), input_layer)
+
+    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
