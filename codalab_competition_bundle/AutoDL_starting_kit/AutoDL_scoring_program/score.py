@@ -18,6 +18,7 @@ import os
 import sys
 from sys import argv
 from os import getcwd as pwd
+import shutil
 
 # Solve the Tkinter display issue of matplotlib.pyplot
 import matplotlib
@@ -173,15 +174,15 @@ def list_files(startpath):
     for root, dirs, files in os.walk(startpath):
         level = root.replace(startpath, '').count(os.sep)
         indent = ' ' * 4 * (level)
-        print('{}{}/'.format(indent, os.path.basename(root)))
+        print_log('{}{}/'.format(indent, os.path.basename(root)))
         subindent = ' ' * 4 * (level + 1)
         for f in files:
-            print('{}{}'.format(subindent, f))
+            print_log('{}{}'.format(subindent, f))
 
 def print_log(*content):
   if verbose:
     now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("SCORING INFO: " + str(now)+ " ======== ", end='')
+    print("SCORING INFO: " + str(now)+ " ", end='')
     print(*content)
 
 # =============================== MAIN ========================================
@@ -220,17 +221,23 @@ if __name__ == "__main__":
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
 
+    # Clean existing scoring output of possible last execution
+    if os.path.isdir(score_dir):
+      if verbose:
+        print_log("Cleaning existing score_dir: {}".format(score_dir))
+      shutil.rmtree(score_dir)
+
 
     if verbose: # For debugging
-        print("sys.argv = ", sys.argv)
+        print_log("sys.argv = ", sys.argv)
         list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir)))
         with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
-          print("Content of the metadata file: ")
-          print(f.read())
-        print("Using solution_dir: " + solution_dir)
-        print("Using prediction_dir: " + prediction_dir)
-        print("Using score_dir: " + score_dir)
-        print("Scoring datetime:", the_date)
+          print_log("Content of the metadata file: ")
+          print_log(f.read())
+        print_log("Using solution_dir: " + solution_dir)
+        print_log("Using prediction_dir: " + prediction_dir)
+        print_log("Using score_dir: " + score_dir)
+        print_log("Scoring datetime:", the_date)
 
 
     # Create the output directory, if it does not already exist and open output files
@@ -268,9 +275,9 @@ if __name__ == "__main__":
 
           if(nb_preds_new > nb_preds_old):
             now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-            print("INFO:", now, " ====== New prediction found. Now nb_preds =", nb_preds_new)
+            print_log("New prediction found. Now nb_preds =", nb_preds_new)
             # Draw the learning curve
-            print("INFO:", now," ====== Refreshing learning curve for", basename)
+            print_log("Refreshing learning curve for", basename)
             # TODO: try-except pair to be deleted
             aulc = 0
             try:
@@ -281,11 +288,11 @@ if __name__ == "__main__":
                                   basename=basename,
                                   start=start)
             except:
-              print("Something wrong here. Prediction files are {}".format(prediction_files))
+              print_log("Something wrong here. Prediction files are {}".format(prediction_files))
             nb_preds[solution_file] = nb_preds_new
 
             scores[solution_file] = aulc
-            print("INFO:", now," ====== Current area under learning curve for", basename, ":", scores[solution_file])
+            print_log("Current area under learning curve for", basename, ":", scores[solution_file])
 
             # Update scores.html
             write_scores_html(score_dir)
@@ -320,11 +327,11 @@ if __name__ == "__main__":
             str_temp = "Duration: %0.6f\n" % duration
             score_file.write(str_temp)
             if verbose:
-              print("Successfully write to {} from duration.txt".format(score_file))
-              print("duration = ", duration)
+              print_log("Successfully write to {} from duration.txt".format(score_file))
+              print_log("duration = ", duration)
             break
         except Exception as e:
-            print(e)
+            print_log(e)
             # str_temp = "Duration: 0\n"
             # score_file.write(str_temp)
         n_loop += 1

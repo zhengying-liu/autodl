@@ -97,6 +97,9 @@ save_previous_results = False
 import os
 from os import getcwd as pwd
 from os.path import join
+import shutil # for deleting a whole directory
+import tensorflow as tf
+
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -135,8 +138,24 @@ the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 def print_log(*content):
   if verbose:
     now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("INGESTION INFO: " + str(now)+ " ======== ", end='')
+    print("INGESTION INFO: " + str(now)+ " ", end='')
     print(*content)
+
+def clean_last_output(output_dir):
+  # Clean existing output_dir of possible last execution
+  if os.path.isdir(output_dir):
+    if verbose:
+      print_log("Cleaning existing output_dir: {}".format(output_dir))
+    shutil.rmtree(output_dir)
+  # Clean existing checkpoints
+  checkpoints_glob =\
+    os.path.abspath(os.path.join(output_dir, os.pardir, 'checkpoints*'))
+  checkpoints_dirs = tf.gfile.Glob(checkpoints_glob)
+  for checkpoints_dir in checkpoints_dirs:
+    if verbose:
+      print_log("Cleaning existing checkpoints_dir: {}"\
+                .format(checkpoints_dir))
+    shutil.rmtree(checkpoints_dir)
 
 
 # =========================== BEGIN PROGRAM ================================
@@ -176,15 +195,17 @@ if __name__=="__main__" and debug_mode<4:
             print = partial(print, flush=True)
 
     if verbose: # For debugging
-        print("sys.argv = ", sys.argv)
+        print_log("sys.argv = ", sys.argv)
         with open(os.path.join(program_dir, 'metadata'), 'r') as f:
-          print("Content of the metadata file: ")
-          print(f.read())
-        print("Using input_dir: " + input_dir)
-        print("Using output_dir: " + output_dir)
-        print("Using program_dir: " + program_dir)
-        print("Using submission_dir: " + submission_dir)
-        print("Ingestion datetime:", the_date)
+          print_log("Content of the metadata file: ")
+          print_log(f.read())
+        print_log("Using input_dir: " + input_dir)
+        print_log("Using output_dir: " + output_dir)
+        print_log("Using program_dir: " + program_dir)
+        print_log("Using submission_dir: " + submission_dir)
+        print_log("Ingestion datetime:", the_date)
+
+    clean_last_output(output_dir)
 
 
 
@@ -194,9 +215,9 @@ if __name__=="__main__" and debug_mode<4:
     path.append (submission_dir + '/AutoDL_sample_code_submission') #IG: to allow submitting the starting kit as sample submission
     import data_io
     from data_io import vprint
-    import tensorflow as tf
     from model import Model
     from dataset import AutoDLDataset
+
 
     if debug_mode >= 4: # Show library version and directory structure
         data_io.show_dir(".")
@@ -218,7 +239,7 @@ if __name__=="__main__" and debug_mode<4:
     if debug_mode>=3:
         data_io.show_version()
         data_io.show_io(input_dir, output_dir)
-        print('\n****** Ingestion program version ' + str(version) + ' ******\n\n' + '========== DATASETS ==========\n')
+        print_log('****** Ingestion program version ' + str(version) + ' ******\n\n' + '========== DATASETS ==========\n')
         data_io.write_list(datanames)
         datanames = [] # Do not proceed with learning and testing
 
@@ -229,7 +250,7 @@ if __name__=="__main__" and debug_mode<4:
 
     for i, basename in enumerate(datanames): # Loop over datasets (if several)
 
-        print_log("\n Ingestion program version " + str(version) + " ==========\n")
+        print_log("========== Ingestion program version " + str(version) + " ==========")
         print_log("************************************************")
         print_log("******** Processing dataset " + basename.capitalize() + " ********")
         print_log("************************************************")
@@ -279,15 +300,16 @@ if __name__=="__main__" and debug_mode<4:
         ##### To show to Andre #####
 
         # ========= Reload trained model if it exists
-        vprint( verbose,  "**********************************************************")
-        vprint( verbose,  "****** Attempting to reload model to avoid training ******")
-        vprint( verbose,  "**********************************************************")
+        if verbose:
+            print_log( "**********************************************************")
+            print_log( "****** Attempting to reload model to avoid training ******")
+            print_log( "**********************************************************")
         you_must_train=1
         modelname = os.path.join(submission_dir,basename)
         # if os.path.isfile(modelname + '_model.pickle'):
         #     M = M.load(modelname)
         #     you_must_train=0
-        #     vprint( verbose,  "[+] Model reloaded, no need to train!")
+        #     print_log( verbose,  "[+] Model reloaded, no need to train!")
 
         total_pause_time = 0
         prediction_order_number = 0
@@ -364,8 +386,8 @@ if __name__=="__main__" and debug_mode<4:
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
       f.write(str(overall_time_spent))
       if verbose:
-          print("Successfully write duration to {}.".format(duration_filename))
-          print("duration = ", overall_time_spent)
+          print_log("Successfully write duration to {}.".format(duration_filename))
+          print_log("duration = ", overall_time_spent)
     if execution_success:
         print_log("[+] Done")
         print_log("[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
