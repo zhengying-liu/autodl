@@ -72,8 +72,8 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-# max_time = 60 # For debugging
-max_time = 300
+max_time = 60 # For debugging
+# max_time = 300
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -112,7 +112,7 @@ default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
 
 # Redirect stardant output to detailed_results.html to have live output
 # for debugging
-REDIRECT_STDOUT = True # TODO: to be changed to False for prod
+REDIRECT_STDOUT = False # TODO: to be changed to False for prod
 from functools import partial
 
 # =============================================================================
@@ -132,10 +132,11 @@ from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
-def print_log(content):
+def print_log(*content):
   if verbose:
     now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("INGESTION INFO:" + str(now)+ " ======== " + content)
+    print("INGESTION INFO: " + str(now)+ " ======== ", end='')
+    print(*content)
 
 
 # =========================== BEGIN PROGRAM ================================
@@ -277,8 +278,6 @@ if __name__=="__main__" and debug_mode<4:
         M = Model(D_train.get_metadata())
         ##### To show to Andre #####
 
-        # 2 metadata files for model? Not a problem!
-
         # ========= Reload trained model if it exists
         vprint( verbose,  "**********************************************************")
         vprint( verbose,  "****** Attempting to reload model to avoid training ******")
@@ -304,8 +303,11 @@ if __name__=="__main__" and debug_mode<4:
                 # Training budget on each dataset is equal to (time budget / number of datasets)
                 while(time.time() < overall_start + time_budget/len(datanames)*(i+1) + total_pause_time):
                   if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
-                    Y_test = M.test(D_test.get_dataset())
-                    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                    print_log("Making first trivial predictions without training...")
+                    test_metadata = D_test.get_metadata()
+                    sample_count = test_metadata.size()
+                    output_dim = test_metadata.get_output_size()
+                    Y_test = np.zeros((sample_count, output_dim))
                     print_log("Saving results to: " + output_dir)
                     filename_test = basename[:-5] + '.predict_' +\
                       str(prediction_order_number)
