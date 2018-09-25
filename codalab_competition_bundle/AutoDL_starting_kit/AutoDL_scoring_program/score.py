@@ -209,6 +209,12 @@ if __name__ == "__main__":
         solution_dir = default_solution_dir
         prediction_dir = default_prediction_dir
         score_dir = default_score_dir
+     # the case for indicating special input data dir
+     # this is used especially in `test_with_baseline.py`
+    elif len(argv) == 2:
+        solution_dir = argv[1]
+        prediction_dir = default_prediction_dir
+        score_dir = default_score_dir
     elif len(argv) == 3: # The current default configuration of Codalab
         solution_dir = os.path.join(argv[1], 'ref')
         prediction_dir = os.path.join(argv[1], 'res')
@@ -313,6 +319,7 @@ if __name__ == "__main__":
 
         # Write score corresponding to selected task and metric to the output file
         str_temp = score_name + ": %0.12f\n" % score
+        print_log("The score of current run is: ", score)
         score_file.write(str_temp)
 
     # End loop for solution_file in solution_names
