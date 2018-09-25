@@ -38,6 +38,9 @@ class Model(algorithm.Algorithm):
 
     # IMPORTANT: directory to store checkpoints of the model
     self.checkpoints_dir = 'checkpoints_' + self.dataset_name
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    self.checkpoints_dir = os.path.join(current_dir, os.pardir,
+                                        self.checkpoints_dir)
 
     # Classifier
     self.classifier = tf.estimator.Estimator(
