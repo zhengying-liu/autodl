@@ -176,6 +176,11 @@ if __name__=="__main__" and debug_mode<4:
             sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
             # Flush changes to the file to have instant update
             print = partial(print, flush=True)
+    elif len(argv)==2: # the case for indicating special input_dir
+        input_dir = argv[1]
+        output_dir = default_output_dir
+        program_dir= default_program_dir
+        submission_dir= default_submission_dir
     else:
         input_dir = os.path.abspath(argv[1])
         output_dir = os.path.abspath(argv[2])
