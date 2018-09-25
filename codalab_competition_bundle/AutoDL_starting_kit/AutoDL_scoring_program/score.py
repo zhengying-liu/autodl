@@ -116,7 +116,7 @@ def draw_learning_curve(solution_file, prediction_files,
   # Draw learning curve
   plt.clf()
   plt.plot(X,Y,marker="o", label="Test score")
-  plt.title("Task: " + basename + " - Current AUC: " + format(aulc, '.2f'))
+  plt.title("Task: " + basename + " - Current ALC: " + format(aulc, '.2f'))
   plt.xlabel('time/second')
   plt.ylabel('score (balanced accuracy)')
   plt.legend()
@@ -153,7 +153,7 @@ def write_scores_html(score_dir):
   image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
   html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
   html_end = '</pre></body></html>'
-  with open(os.path.join(score_dir, filename), 'a') as html_file:
+  with open(os.path.join(score_dir, filename), 'w') as html_file:
       # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
       for image_path in image_paths:
@@ -178,10 +178,11 @@ def list_files(startpath):
         for f in files:
             print('{}{}'.format(subindent, f))
 
-def print_log(content):
+def print_log(*content):
   if verbose:
     now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("SCORING INFO:" + str(now)+ " ======== " + content)
+    print("SCORING INFO: " + str(now)+ " ======== ", end='')
+    print(*content)
 
 # =============================== MAIN ========================================
 
@@ -190,8 +191,8 @@ if __name__ == "__main__":
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
     # For debugging
-    TIME_BUDGET = 300
-    # TIME_BUDGET = 60
+    # TIME_BUDGET = 300
+    TIME_BUDGET = 60
 
     start = time.time()
 
@@ -264,13 +265,6 @@ if __name__ == "__main__":
 
           nb_preds_old = nb_preds[solution_file]
           nb_preds_new = len(prediction_files)
-
-          if verbose:
-            content = "Found prediction_files in {}: {}<br>".format(prediction_dir, prediction_files)
-            content += "Dataset basename: {}<br>".format(basename)
-            content += "nb_preds_old: {}, nb_preds_new: {}<br>".format(nb_preds_old, nb_preds_new)
-            content += "solution_names: {}<br>".format(solution_names)
-            print_log(content)
 
           if(nb_preds_new > nb_preds_old):
             now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
@@ -345,6 +339,6 @@ if __name__ == "__main__":
         show_version(scoring_version)
 
     if verbose:
-        print_log("In solution_dir: ", os.listdir(solution_dir))
-        print_log("In prediction_dir: ", os.listdir(prediction_dir))
-        print_log("In score_dir: ", os.listdir(score_dir))
+        print_log("In solution_dir: {}".format(os.listdir(solution_dir)))
+        print_log("In prediction_dir: {}".format(os.listdir(prediction_dir)))
+        print_log("In score_dir: {}".format(os.listdir(score_dir)))
