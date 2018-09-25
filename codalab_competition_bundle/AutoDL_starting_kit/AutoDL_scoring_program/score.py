@@ -185,6 +185,13 @@ def print_log(*content):
     print("SCORING INFO: " + str(now)+ " ", end='')
     print(*content)
 
+def clean_last_output(score_dir):
+  # Clean existing scoring output of possible last execution
+  if os.path.isdir(score_dir):
+    if verbose:
+      print_log("Cleaning existing score_dir: {}".format(score_dir))
+    shutil.rmtree(score_dir)
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
@@ -221,11 +228,7 @@ if __name__ == "__main__":
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
 
-    # Clean existing scoring output of possible last execution
-    if os.path.isdir(score_dir):
-      if verbose:
-        print_log("Cleaning existing score_dir: {}".format(score_dir))
-      shutil.rmtree(score_dir)
+    clean_last_output(score_dir)
 
 
     if verbose: # For debugging
