@@ -130,7 +130,7 @@ class AutoDLDataset(object):
             i, "sparse_row_index")] = tf.VarLenFeature(tf.int64)
         sequence_features[self._feature_key(
             i, "sparse_value")] = tf.VarLenFeature(tf.float32)
-      if self.metadata_.is_compressed(i):
+      elif self.metadata_.is_compressed(i):
         sequence_features[self._feature_key(
             i, "compressed")] = tf.VarLenFeature(tf.string)
       else:
