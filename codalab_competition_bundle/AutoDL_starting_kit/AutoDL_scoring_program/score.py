@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # For debugging
     # TIME_BUDGET = 300
-    TIME_BUDGET = 60
+    TIME_BUDGET = 70
 
     start = time.time()
 
