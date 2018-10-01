@@ -199,8 +199,8 @@ if __name__ == "__main__":
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
     # For debugging
-    # TIME_BUDGET = 300
-    TIME_BUDGET = 70
+    TIME_BUDGET = 300
+    # TIME_BUDGET = 70
 
     start = time.time()
 

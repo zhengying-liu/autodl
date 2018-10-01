@@ -72,8 +72,8 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-max_time = 70 # For debugging
-# max_time = 300
+# max_time = 70 # For debugging
+max_time = 300
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
