@@ -31,7 +31,13 @@ from sklearn.preprocessing import *
 
 swrite = stderr.write
 from os import getcwd as pwd
-from pip import get_installed_distributions as lib
+
+# get_installed_distributions has gone from pip v10
+try:
+    from pip._internal.utils.misc import get_installed_distributions as lib
+except ImportError:  # pip < 10
+    from pip import get_installed_distributions as lib
+
 from glob import glob
 import platform
 import psutil
