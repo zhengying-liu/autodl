@@ -60,9 +60,12 @@ class Model(algorithm.Algorithm):
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
+    # Sum over time axis
+    input_layer = tf.reduce_sum(features['x'], axis=1)
+
     # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(features['x'],
-                             [-1, sequence_size*row_count*col_count])
+    input_layer = tf.reshape(input_layer,
+                             [-1, row_count*col_count])
 
     # Replace missing values by 0
     input_layer = tf.where(tf.is_nan(input_layer),
