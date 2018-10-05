@@ -8,24 +8,30 @@
 # This is the "ingestion program" written by the organizers.
 # This program also runs on the challenge platform to test your code.
 #
-# The input directory input_dir (e.g. sample_data/) contains the dataset(s), including:
-#   dataname/metadata.textproto # A
-#       metadata.textproto
-#       sample-00000-of-00007
-#       sample-00001-of-00007
-#       sample-00002-of-00007
-#       sample-00003-of-00007
-#       sample-00004-of-00007
-#       sample-00005-of-00007
-#       sample-00006-of-00007
+# The input directory input_dir (e.g. AutoDL_sample_data/) contains one dataset
+# folder (e.g. adult.data/) with the training set (train/)  and test set (test/),
+# each containing an some tfrecords data with a `metadata.textproto` file of
+# metadata on the dataset. So one AutoDL dataset will look like
 #
-# The output directory output_dir (e.g. sample_result_submission/)
-# will receive the predicted values (no subdirectories):
-# 	dataname_test.predict
-# 	dataname_valid.predict
+#   adult.data
+#   ├── test
+#   │   ├── metadata.textproto
+#   │   └── sample-adult-test.tfrecord
+#   └── train
+#       ├── metadata.textproto
+#       └── sample-adult-train.tfrecord
 #
-# The code directory submission_program_dir (e.g. sample_code_submission/) should contain your
-# code submission model.py (an possibly other functions it depends upon).
+# The output directory output_dir (e.g. AutoDL_sample_result_submission/)
+# will receive all predictions made during the whole train/predict process
+# (thus this directory is updated when a new prediction is made):
+# 	adult.predict_0
+# 	adult.predict_1
+# 	adult.predict_2
+#        ...
+#
+# The code directory submission_program_dir (e.g. AutoDL_sample_code_submission/)
+# should contain your code submission model.py (and possibly other functions
+# it depends upon).
 #
 # We implemented several classes:
 # 1) DATA LOADING:
@@ -36,7 +42,7 @@
 # 2) LEARNING MACHINE:
 #    ----------------
 # model.py
-# model.Model.train
+# model.Model.train #TODO
 # model.Model.test
 #
 # ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
@@ -87,10 +93,15 @@ max_cycle = 1
 max_estimators = 1000
 max_samples = float('Inf')
 
+# Redirect stardant output to live results page (detailed_results.html)
+# to have live output for debugging
+REDIRECT_STDOUT = False
+
 # I/O defaults
 ##############
 # If true, the previous output directory is not overwritten, it changes name
 save_previous_results = False
+
 # Use default location for the input and output data:
 # If no arguments to run.py are provided, this is where the data will be found
 # and the results written to. Change the root_dir to your local directory.
@@ -98,6 +109,7 @@ import os
 from os import getcwd as pwd
 from os.path import join
 import shutil # for deleting a whole directory
+from functools import partial
 import tensorflow as tf
 
 
@@ -113,10 +125,7 @@ default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_program_dir = join(root_dir, "AutoDL_ingestion_program")
 default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
 
-# Redirect stardant output to detailed_results.html to have live output
-# for debugging
-REDIRECT_STDOUT = False # TODO: to be changed to False for prod
-from functools import partial
+
 
 # =============================================================================
 # =========================== END USER OPTIONS ================================
@@ -136,13 +145,24 @@ import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
 def print_log(*content):
+  """Logging function. (could've also used `import logging`.)"""
   if verbose:
     now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
     print("INGESTION INFO: " + str(now)+ " ", end='')
     print(*content)
 
 def clean_last_output(output_dir):
-  # Clean existing output_dir of possible last execution
+  """Clean existing output_dir of possible last execution.
+
+  This includes directories such as:
+    AutoDL_sample_result_submission/
+    AutoDL_scoring_output/
+    checkpoints_adult/
+    ...
+
+  Using this function, the user doesn't need to worry about the generated
+  folders of last execution.
+  """
   if os.path.isdir(output_dir):
     if verbose:
       print_log("Cleaning existing output_dir: {}".format(output_dir))
@@ -170,36 +190,33 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = default_output_dir
         program_dir= default_program_dir
         submission_dir= default_submission_dir
-        if REDIRECT_STDOUT:
-            score_dir = join(root_dir, "AutoDL_scoring_output")
-            os.mkdir(score_dir)
-            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
-            # Flush changes to the file to have instant update
-            print = partial(print, flush=True)
+        score_dir = join(root_dir, "AutoDL_scoring_output")
     elif len(argv)==2: # the case for indicating special input_dir
         input_dir = argv[1]
         output_dir = default_output_dir
         program_dir= default_program_dir
         submission_dir= default_submission_dir
-    else:
-        input_dir = os.path.abspath(argv[1])
-        output_dir = os.path.abspath(argv[2])
-        program_dir = os.path.abspath(argv[3])
-        submission_dir = os.path.abspath(argv[4])
-        # TODO
-        # Now data are separate from reference data, in run/input_data/
-        # Eric created run/submission to store participants' model.py
+        score_dir = join(root_dir, "AutoDL_scoring_output")
+    elif len(argv)==3: # the case for indicating special input_dir and submission_dir
+        input_dir = argv[1]
+        output_dir = default_output_dir
+        program_dir= default_program_dir
+        submission_dir= argv[2]
+        score_dir = join(root_dir, "AutoDL_scoring_output")
+    else: # the case on CodaLab platform
         input_dir = os.path.abspath(os.path.join(argv[1], '../input_data'))
         output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
+        program_dir = os.path.abspath(argv[3])
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
+        score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
 
-        if REDIRECT_STDOUT:
-            score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
-            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
-            # Flush changes to the file to have instant update
-            print = partial(print, flush=True)
+    # Redirect standard output to have live debugging info (esp. on CodaLab)
+    if REDIRECT_STDOUT:
+        sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
+        print = partial(print, flush=True)
 
-    if verbose: # For debugging
+    # Print environment info for debugging
+    if verbose:
         print_log("sys.argv = ", sys.argv)
         with open(os.path.join(program_dir, 'metadata'), 'r') as f:
           print_log("Content of the metadata file: ")
@@ -210,19 +227,18 @@ if __name__=="__main__" and debug_mode<4:
         print_log("Using submission_dir: " + submission_dir)
         print_log("Ingestion datetime:", the_date)
 
+    # Clear potentiablly results of previous execution (for local run)
     clean_last_output(output_dir)
 
-
-
 	# Our libraries
-    path.append (program_dir)
-    path.append (submission_dir)
-    path.append (submission_dir + '/AutoDL_sample_code_submission') #IG: to allow submitting the starting kit as sample submission
+    path.append(program_dir)
+    path.append(submission_dir)
+    #IG: to allow submitting the starting kit as sample submission
+    path.append(submission_dir + '/AutoDL_sample_code_submission')
     import data_io
     from data_io import vprint
     from model import Model
     from dataset import AutoDLDataset
-
 
     if debug_mode >= 4: # Show library version and directory structure
         data_io.show_dir(".")
@@ -234,11 +250,9 @@ if __name__=="__main__" and debug_mode<4:
 
     #### INVENTORY DATA (and sort dataset names alphabetically)
     datanames = data_io.inventory_data(input_dir)
-    # Overwrite the "natural" order
 
     #### Delete zip files and metadata file
-    datanames = [x for x in datanames
-      if x!='metadata' and x.endswith('.data') and not x.endswith('.zip')] # TODO: change .endswith('.data')
+    datanames = [x for x in datanames if x.endswith('.data')]
 
     #### DEBUG MODE: Show dataset list and STOP
     if debug_mode>=3:
