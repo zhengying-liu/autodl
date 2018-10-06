@@ -26,6 +26,10 @@ class Algorithm(object):
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
 
+    This method will be called REPEATEDLY during the whole training/predicting
+    process. So your `train` method should be able to handle repeated calls and
+    hopefully improve your model performance after each call.
+
     Args:
       dataset: a `tf.data.Dataset` object. Each example is of the form
             (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
