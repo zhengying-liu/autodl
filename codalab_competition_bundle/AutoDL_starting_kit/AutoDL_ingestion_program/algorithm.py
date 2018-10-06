@@ -14,7 +14,7 @@
 
 """Class for supervised machine learning algorithms for the autodl project.
 
-This is the API; see algorithm.py, algorithm_scikit.py for implementations.
+This is the API; see model.py, algorithm_scikit.py for implementations.
 """
 
 class Algorithm(object):
@@ -23,29 +23,34 @@ class Algorithm(object):
   def __init__(self, metadata):
     self.metadata_ = metadata # An AutoDLMetadata object
 
-  def train_by_time(self, dataset, max_time):
-    del max_time
-    return self.train(dataset)
-
-  def train(self, dataset):
-    """Train this algorithm on the tensorflow |dataset|."""
-    raise NotImplementedError("Algorithm class does not have any training.")
-
-  def predict(self, *input_arg):
-    """Get the output of this algorithm on a single input (list of matrices).
+  def train(self, dataset, remaining_time_budget=None):
+    """Train this algorithm on the tensorflow |dataset|.
 
     Args:
-      *input_arg: variable list of input matrices, one argument is one matrix.
-        The number of matrices is given by metadata.get_bundle_size() and the
-        size of each argument is given by metadata.get_matrix_size(arg_index).
+      dataset: a `tf.data.Dataset` object. Each example is of the form
+            (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
+          where each matrix bundle is a tf.Tensor of shape
+            (batch_size, sequence_size, row_count, col_count)
+          and `labels` is a tf.Tensor of shape
+            (batch_size, output_dim)
+          The variable `output_dim` represents number of classes of this
+          multilabel classification task. For the first version of AutoDL
+          challenge, the number of bundles `N` will be set to 1.
 
-    Returns:
-      * a 1D array encoding the multi-class output of this algorithm on
-        input_arg.
+      remaining_time_budget: a `float`, the name should be clear. If not `None`,
+          this `train` method should terminate within this time budget.
+          Otherwise the submission will fail.
     """
-    raise NotImplementedError("Algorithm class does not have any testing.")
+    raise NotImplementedError("Algorithm class does not have any training.")
 
+  def test(self, dataset, remaining_time_budget=None):
+    """Test this algorithm on the tensorflow |dataset|.
 
-  def test(self, dataset):
-    """Test this algorithm on the tensorflow |dataset|."""
+    Args:
+      Same as that of `train` method, except that the `labels` will be empty.
+    Returns:
+      predictions: A `numpy.ndarray` matrix of shape (sample_count, output_dim).
+          here `sample_count` is the number of examples in this dataset as test
+          set.
+    """
     raise NotImplementedError("Algorithm class does not have any test.")
