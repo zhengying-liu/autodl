@@ -79,6 +79,7 @@ debug_mode = 0
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
 max_time = 300
+# max_time = 60
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -314,7 +315,7 @@ if __name__=="__main__" and debug_mode<4:
         # ========= Creating a model
         print_log("Creating model")
         ##### To show to Andre #####
-        M = Model(D_train.get_metadata())
+        M = Model(D_test.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
         ##### To show to Andre #####
 
         # # ========= Reload trained model if it exists
@@ -333,26 +334,20 @@ if __name__=="__main__" and debug_mode<4:
 
         # Start training and testing
         start = time.time()
-        # Training budget on each dataset is equal to (time budget / number of datasets)
-        while(time.time() < start + time_budget/len(datanames)*(i+1)):
-          if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
-            print_log("Making first trivial predictions of zeros without training...")
-            test_metadata = D_test.get_metadata()
-            sample_count = test_metadata.size()
-            output_dim = test_metadata.get_output_size()
-            Y_test = np.zeros((sample_count, output_dim))
-          else:
-            # Train the model
-            print_log("Training the model...")
-            remaining_time_budget = start + time_budget - time.time()
-            M.train(D_train.get_dataset(),
-                    remaining_time_budget=remaining_time_budget)
-            # Make predictions using the most recent checkpoint
-            # Prediction files: adult.predict_0, adult.predict_1, ...
-            remaining_time_budget = start + time_budget - time.time()
-            Y_test = M.test(D_test.get_dataset(),
-                            remaining_time_budget=remaining_time_budget)
-          print_log("Saving results to: " + output_dir)
+        while(True): # Start the CORE PART: training/predicting process
+          # Train the model
+          remaining_time_budget = start + time_budget - time.time()
+          print_log("Training the model...")
+          print_log(f"Remaing time budget: {remaining_time_budget:.2f} sec")
+          M.train(D_train.get_dataset(),
+                  remaining_time_budget=remaining_time_budget)
+          # Make predictions using the most recent checkpoint
+          # Prediction files: adult.predict_0, adult.predict_1, ...
+          remaining_time_budget = start + time_budget - time.time()
+          Y_test = M.test(D_test.get_dataset(),
+                          remaining_time_budget=remaining_time_budget)
+          print_log("Saving results to: ", output_dir, "...")
+          print_log(f"Remaing time budget: {remaining_time_budget:.2f} sec")
           filename_test = basename[:-5] + '.predict_' +\
             str(prediction_order_number)
           # Write predictions to output_dir
@@ -361,10 +356,9 @@ if __name__=="__main__" and debug_mode<4:
 
           print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
           print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
-          time_spent = time.time() - start
-          time_left_over = time_budget - time_spent
-          print_log( "[+] Time left %5.2f sec" % time_left_over)
-          if time_left_over<=0: break
+          remaining_time_budget = start + time_budget - time.time()
+          print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
+          if remaining_time_budget<=0: break
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
@@ -374,10 +368,9 @@ if __name__=="__main__" and debug_mode<4:
       f.write(str(overall_time_spent))
       if verbose:
           print_log("Successfully write duration to {}.".format(duration_filename))
-          print_log("duration = ", overall_time_spent)
     if execution_success:
         print_log("[+] Done")
-        print_log("[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
+        print_log("[+] Overall time spent %5.2f sec " % overall_time_spent)
     else:
         print_log("[-] Done, but some tasks aborted because time limit exceeded")
-        print_log("[-] Overall time spent %5.2f sec " % overall_time_spent + " > Overall time budget %5.2f sec" % overall_time_budget)
+        print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
