@@ -18,7 +18,7 @@
 It implements the 3 methods (i.e. __init__, train, test) described in
 algorithm.py, which specifies the competition protocol in the comments.
 
-Participants is encouraged to look closely at this script algorithm.py in the
+It is EXTREMELY RECOMMENDED to look closely at this script algorithm.py in the
 ingestion program folder (AutoDL_ingestion_program/), since any submission will
 be consisted of a model.py script implementing a concrete class of
     algorithm.Algorithm
@@ -30,12 +30,25 @@ can be a zip file zipping all CONTENT of AutoDL_starting_kit/.
 
 import tensorflow as tf
 import algorithm
-import numpy as np
 import os
+import time
+import numpy as np
+np.random.seed(42)
 
 class Model(algorithm.Algorithm):
-  """A neural network with no hidden layer."""
+  """A neural network with no hidden layer.
 
+  Remarks:
+    1. Adam Optimizer with default setting is used as optimizer;
+    2. No validation set is used to control number of steps to train;
+    3. After each call of self.train, update self.cumulated_num_steps and an
+        estimated time per step;
+    4. Number of steps to train for each call of self.train is chosen randomly
+        according to remaining time budget and estimated time per step;
+    5. Make all-zero prediction at beginning.
+  """
+
+  #
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
 
@@ -55,11 +68,21 @@ class Model(algorithm.Algorithm):
     self.checkpoints_dir = os.path.join(current_dir, os.pardir,
                                         self.checkpoints_dir)
 
-    # Classifier
+    # Classifier using model_fn
     self.classifier = tf.estimator.Estimator(
       model_fn=self.model_fn,
       model_dir=self.checkpoints_dir,
       config=self.my_checkpointing_config)
+
+    # Prediction made last time
+    self.last_prediction = None
+
+    # Attributes for managing time budget
+    # Cumulated number of training steps
+    self.total_train_time = 0
+    self.cumulated_num_steps = 0
+    self.total_test_time = 0
+    self.cumulated_num_tests = 0
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -73,7 +96,8 @@ class Model(algorithm.Algorithm):
             (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
           where each matrix bundle is a tf.Tensor of shape
             (batch_size, sequence_size, row_count, col_count)
-          and `labels` is a tf.Tensor of shape
+          with default `batch_size`=30 (if you wish you can unbatch and have any
+          batch size you want). `labels` is a tf.Tensor of shape
             (batch_size, output_dim)
           The variable `output_dim` represents number of classes of this
           multilabel classification task. For the first version of AutoDL
@@ -84,27 +108,59 @@ class Model(algorithm.Algorithm):
           Otherwise the submission will fail.
     """
 
-    # Turn `features` in the tensor pair (features_0,...,feautures_N, labels)
+    # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
     # to a dict. This example model only uses the first matrix bundle
-    # (i.e. features_0)
+    # (i.e. matrix_bundle_0)
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
-
-    # # Set up logging for predictions
-    # # Log the values in the "Softmax" tensor with label "probabilities"
-    # tensors_to_log = {"probabilities": "softmax_tensor"}
-    # logging_hook = tf.train.LoggingTensorHook(
-    #     tensors=tensors_to_log, every_n_iter=50)
 
     def train_input_fn():
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
       return features, labels
 
-    with tf.Session() as sess:
-      self.classifier.train(
-        input_fn=train_input_fn,
-        steps=2000)#,
-        # hooks=[logging_hook])
+    if not remaining_time_budget:
+      remaining_time_budget = 1200 # if no time limit is given, set to 20min
+
+    # The following snippet of code intends to do
+    # 1. If no training is done before, train for 1 step (one batch);
+    # 2. Otherwise, estimate training time per step and time needed for test,
+    #    then compare to remaining time budget to compute a potential maximum
+    #    number of steps (max_steps) that can be trained within time budget;
+    # 3. Choose a number (steps_to_train) randomly between 0 and max_steps and
+    #    train for this many steps.
+    if not self.cumulated_num_steps:
+      steps_to_train = 1
+    else:
+      estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
+      if self.cumulated_num_tests:
+        estimated_time_test = self.total_test_time / self.cumulated_num_tests
+      else:
+        estimated_time_test = 0
+      max_steps = int((remaining_time_budget - estimated_time_test) / estimated_time_per_step)
+      # Choose random number of steps < max_steps for training
+      steps_to_train = np.random.randint(0, max_steps)
+    if steps_to_train == 0:
+      time.sleep(remaining_time_budget) # Sleep 1 second if remaing time budget to small
+    else:
+      # Start training
+      print(f"MODEL INFO: Begin training for {steps_to_train} steps...")
+      train_start = time.time()
+      with tf.Session() as sess:
+        self.classifier.train(
+          input_fn=train_input_fn,
+          steps=steps_to_train)#,
+          # hooks=[logging_hook])
+      train_end = time.time()
+      # Update for time budget managing
+      train_duration = train_end - train_start
+      self.total_train_time += train_duration
+      self.cumulated_num_steps += steps_to_train
+      estimated_time_per_step =\
+          self.total_train_time / self.cumulated_num_steps
+      print(f"MODEL INFO: {steps_to_train} steps trained. "
+            f"Now total steps trained: {self.cumulated_num_steps}. "
+            f"Total time used for training: {self.total_train_time:.2f}. "
+            f"Current estimated time per step: {estimated_time_per_step:.2e}.")
 
   def test(self, dataset, remaining_time_budget=None):
     """Test this algorithm on the tensorflow |dataset|.
@@ -124,10 +180,38 @@ class Model(algorithm.Algorithm):
       features, labels = iterator.get_next()
       return features, labels
 
-    res = []
+    # The following snippet of code intends to do:
+    # 1. If there is time budget limit, and some testing has already been done,
+    #    but not enough remaining time for testing, then return last prediction
+    # 2. If there is time budget limit, and no testing has already been done,
+    #    make an all-zero prediction
+    # 3. In all other cases: make predictions normally, and update some
+    #    variables for time managing
+    if remaining_time_budget: # if there is time limit for predicting
+      if self.cumulated_num_tests: # if some predictions are made previously
+        estimated_time_test = self.total_test_time / self.cumulated_num_tests
+        if estimated_time_test > remaining_time_budget: # if not enough time to make predictions
+          print("Not enough time for test. Waiting for the training/predicting "
+                "process to end and will use the last prediction...")
+          time.sleep(remaining_time_budget)
+          return self.last_prediction
+      else:
+        test_metadata = self.metadata_
+        sample_count = test_metadata.size()
+        output_dim = test_metadata.get_output_size()
+        predictions = np.zeros((sample_count, output_dim))
+        self.cumulated_num_tests += 1
+        return predictions
+    print("MODEL INFO: Begin testing...")
+    test_begin = time.time()
     test_results = self.classifier.predict(input_fn=test_input_fn)
+    test_end = time.time()
+    test_duration = test_end - test_begin
+    self.total_test_time += test_duration
+    self.cumulated_num_tests += 1
     predictions = [x['probabilities'] for x in test_results] #TODO: make binary predictions
     predictions = np.array(predictions)
+    self.last_prediction = predictions # Update last_prediction
     return predictions
 
   def model_fn(self, features, labels, mode):
