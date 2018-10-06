@@ -35,7 +35,8 @@ class Algorithm(object):
             (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
           where each matrix bundle is a tf.Tensor of shape
             (batch_size, sequence_size, row_count, col_count)
-          and `labels` is a tf.Tensor of shape
+          with default `batch_size`=30 (if you wish you can unbatch and have any
+          batch size you want). `labels` is a tf.Tensor of shape
             (batch_size, output_dim)
           The variable `output_dim` represents number of classes of this
           multilabel classification task. For the first version of AutoDL
