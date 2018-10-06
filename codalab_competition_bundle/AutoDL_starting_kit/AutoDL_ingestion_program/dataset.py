@@ -27,27 +27,19 @@ import dataset_utils
 from data_pb2 import DataSpecification
 from data_pb2 import MatrixSpec
 
-# FLAGS = flags.FLAGS
-#
-# flags.DEFINE_string("dataset_dir", "",
-#                     "absolute path to data directory.")
-#
-# def metadata_filename(dataset_name):
-#   return os.path.join(FLAGS.dataset_dir, dataset_name,
-#                       "metadata.textproto")
-#
-#
-# def dataset_file_pattern(dataset_name):
-#   return os.path.join(FLAGS.dataset_dir, dataset_name, "sample*")
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string("dataset_dir", "",
+                    "absolute path to data directory.")
 
 def metadata_filename(dataset_name):
-  return os.path.join("", dataset_name,
+  return os.path.join(FLAGS.dataset_dir, dataset_name,
                       "metadata.textproto")
 
 
 def dataset_file_pattern(dataset_name):
-  return os.path.join("", dataset_name, "sample*")
-
+  return os.path.join(FLAGS.dataset_dir, dataset_name, "sample*")
+  
 
 class AutoDLMetadata(object):
   """AutoDL data specification."""
