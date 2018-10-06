@@ -177,6 +177,11 @@ def clean_last_output(output_dir):
                 .format(checkpoints_dir))
     shutil.rmtree(checkpoints_dir)
 
+def get_time_budget(autodl_dataset):
+  """Time budget for a given AutoDLDataset."""
+  # TODO: decision to make on time budget
+  return max_time
+
 
 # =========================== BEGIN PROGRAM ================================
 
@@ -266,7 +271,6 @@ if __name__=="__main__" and debug_mode<4:
     overall_time_budget = 0
     time_left_over = 0
 
-
     for i, basename in enumerate(datanames): # Loop over datasets (if several)
 
         print_log("========== Ingestion program version " + str(version) + " ==========")
@@ -291,70 +295,65 @@ if __name__=="__main__" and debug_mode<4:
         # ======== Keep track of time
         # TODO: different time budget for different dataset (mnist, cifar, ...)
         if debug_mode<1:
-            time_budget = max_time
-            #time_budget = D.info['time_budget']        # <== HERE IS THE TIME BUDGET!
+            # time_budget = max_time
+            time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
         else:
             time_budget = max_time
 
-        overall_time_budget = overall_time_budget + time_budget
-        print_log("[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
-        # We do not add the time left over from previous dataset: time_budget += time_left_over
-        print_log("[+] Time budget for this task %5.2f sec" % time_budget)
-        time_spent = time.time() - start
-        print_log("[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
-        if time_spent >= time_budget:
-            print_log("[-] Sorry, time budget exceeded, skipping this task")
-            execution_success = False
-            continue
+        # overall_time_budget = overall_time_budget + time_budget
+        # print_log("[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
+        # # We do not add the time left over from previous dataset: time_budget += time_left_over
+        # print_log("[+] Time budget for this task %5.2f sec" % time_budget)
+        # time_spent = time.time() - start
+        # print_log("[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
+        # if time_spent >= time_budget:
+        #     print_log("[-] Sorry, time budget exceeded, skipping this task")
+        #     execution_success = False
+        #     continue
 
         # ========= Creating a model
         print_log("Creating model")
-
         ##### To show to Andre #####
         M = Model(D_train.get_metadata())
         ##### To show to Andre #####
 
-        # ========= Reload trained model if it exists
-        if verbose:
-            print_log( "**********************************************************")
-            print_log( "****** Attempting to reload model to avoid training ******")
-            print_log( "**********************************************************")
-        you_must_train=1
-        modelname = os.path.join(submission_dir,basename)
-        # if os.path.isfile(modelname + '_model.pickle'):
-        #     M = M.load(modelname)
-        #     you_must_train=0
-        #     print_log( verbose,  "[+] Model reloaded, no need to train!")
+        # # ========= Reload trained model if it exists
+        # if verbose:
+        #     print_log( "**********************************************************")
+        #     print_log( "****** Attempting to reload model to avoid training ******")
+        #     print_log( "**********************************************************")
+        # you_must_train=1
+        # modelname = os.path.join(submission_dir,basename)
+        # # if os.path.isfile(modelname + '_model.pickle'):
+        # #     M = M.load(modelname)
+        # #     you_must_train=0
+        # #     print_log( verbose,  "[+] Model reloaded, no need to train!")
 
-        total_pause_time = 0
         prediction_order_number = 0
 
-        # ========= Train if needed only
-        if you_must_train:
-            print_log("Trained model not found, proceeding to train!")
-            print_log("Begin training. Use Ctrl+C to pause.")
-            start = time.time()
-            # Training budget on each dataset is equal to (time budget / number of datasets)
-            while(time.time() < start + time_budget/len(datanames)*(i+1) + total_pause_time):
-              if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
-                print_log("Making first trivial predictions of zeros without training...")
-                test_metadata = D_test.get_metadata()
-                sample_count = test_metadata.size()
-                output_dim = test_metadata.get_output_size()
-                Y_test = np.zeros((sample_count, output_dim))
-              else:
-                # Train the model
-                print_log("Training the model.")
-                M.train(D_train.get_dataset())
-                # Make predictions using the most recent checkpoint
-                # Prediction files: mini.predict_0, mini.predict_1, ...
-                Y_test = M.test(D_test.get_dataset())
-              print_log("Saving results to: " + output_dir)
-              filename_test = basename[:-5] + '.predict_' +\
-                str(prediction_order_number)
-              # Write predictions to output_dir
-              data_io.write(os.path.join(output_dir,filename_test), Y_test)
-              prediction_order_number += 1
+        # Start training and testing
+        start = time.time()
+        # Training budget on each dataset is equal to (time budget / number of datasets)
+        while(time.time() < start + time_budget/len(datanames)*(i+1)):
+          if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
+            print_log("Making first trivial predictions of zeros without training...")
+            test_metadata = D_test.get_metadata()
+            sample_count = test_metadata.size()
+            output_dim = test_metadata.get_output_size()
+            Y_test = np.zeros((sample_count, output_dim))
+          else:
+            # Train the model
+            print_log("Training the model.")
+            M.train(D_train.get_dataset())
+            # Make predictions using the most recent checkpoint
+            # Prediction files: mini.predict_0, mini.predict_1, ...
+            Y_test = M.test(D_test.get_dataset())
+          print_log("Saving results to: " + output_dir)
+          filename_test = basename[:-5] + '.predict_' +\
+            str(prediction_order_number)
+          # Write predictions to output_dir
+          data_io.write(os.path.join(output_dir,filename_test), Y_test)
+          prediction_order_number += 1
 
 
         print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
