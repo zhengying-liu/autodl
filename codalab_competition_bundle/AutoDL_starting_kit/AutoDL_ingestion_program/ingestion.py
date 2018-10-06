@@ -78,7 +78,6 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-# max_time = 70 # For debugging
 max_time = 300
 
 # Maximum number of cycles, number of samples, and estimators
@@ -111,6 +110,7 @@ from os.path import join
 import shutil # for deleting a whole directory
 from functools import partial
 import tensorflow as tf
+
 
 
 def _HERE(*args):
@@ -343,11 +343,15 @@ if __name__=="__main__" and debug_mode<4:
             Y_test = np.zeros((sample_count, output_dim))
           else:
             # Train the model
-            print_log("Training the model.")
-            M.train(D_train.get_dataset())
+            print_log("Training the model...")
+            remaining_time_budget = start + time_budget - time.time()
+            M.train(D_train.get_dataset(),
+                    remaining_time_budget=remaining_time_budget)
             # Make predictions using the most recent checkpoint
-            # Prediction files: mini.predict_0, mini.predict_1, ...
-            Y_test = M.test(D_test.get_dataset())
+            # Prediction files: adult.predict_0, adult.predict_1, ...
+            remaining_time_budget = start + time_budget - time.time()
+            Y_test = M.test(D_test.get_dataset(),
+                            remaining_time_budget=remaining_time_budget)
           print_log("Saving results to: " + output_dir)
           filename_test = basename[:-5] + '.predict_' +\
             str(prediction_order_number)
@@ -355,13 +359,12 @@ if __name__=="__main__" and debug_mode<4:
           data_io.write(os.path.join(output_dir,filename_test), Y_test)
           prediction_order_number += 1
 
-
-        print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-        print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
-        time_spent = time.time() - start
-        time_left_over = time_budget - time_spent
-        print_log( "[+] End cycle, time left %5.2f sec" % time_left_over)
-        if time_left_over<=0: break
+          print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
+          print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
+          time_spent = time.time() - start
+          time_left_over = time_budget - time_spent
+          print_log( "[+] Time left %5.2f sec" % time_left_over)
+          if time_left_over<=0: break
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
