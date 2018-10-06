@@ -13,6 +13,12 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
+# Time budget for ingestion program.
+# This is needed since scoring program is running all along with ingestion
+# program in parallel. So we need to know how long ingestion program will run.
+TIME_BUDGET = 300
+# TIME_BUDGET = 60
+
 # Some libraries and options
 import os
 import sys
@@ -54,7 +60,7 @@ default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_score_dir = join(root_dir, "AutoDL_scoring_output")
 
 # Debug flag 0: no debug, 1: show all scores, 2: also show version amd listing of dir
-debug_mode = 1
+debug_mode = 0
 verbose = True
 
 # Redirect stardant output to detailed_results.html to have live output
@@ -187,10 +193,6 @@ if __name__ == "__main__":
 
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
-    # For debugging
-    TIME_BUDGET = 300
-    # TIME_BUDGET = 70
-
     start = time.time()
 
     #### INPUT/OUTPUT: Get input and output directory names
@@ -312,7 +314,10 @@ if __name__ == "__main__":
         print_log("The score of current run is: ", score)
         score_file.write(str_temp)
 
-    # End loop for solution_file in solution_names
+    if verbose:
+        print_log("In solution_dir: {}".format(os.listdir(solution_dir)))
+        print_log("In prediction_dir: {}".format(os.listdir(prediction_dir)))
+        print_log("In score_dir: {}".format(os.listdir(score_dir)))
 
     # Read the execution time and add it to the scores:
     max_loop = 30
@@ -344,8 +349,3 @@ if __name__ == "__main__":
         show_platform()
         show_io(prediction_dir, score_dir)
         show_version(scoring_version)
-
-    if verbose:
-        print_log("In solution_dir: {}".format(os.listdir(solution_dir)))
-        print_log("In prediction_dir: {}".format(os.listdir(prediction_dir)))
-        print_log("In score_dir: {}".format(os.listdir(score_dir)))
