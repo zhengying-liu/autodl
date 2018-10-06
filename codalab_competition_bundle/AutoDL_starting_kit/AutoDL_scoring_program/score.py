@@ -90,6 +90,7 @@ def get_fig_name(basename):
   fig_name = "learning-curve-" + basename + ".png"
   return fig_name
 
+# TODO: change this function to avoid repeated computing
 def draw_learning_curve(solution_file, prediction_files,
                         scoring_function, output_dir, basename, start):
   """Draw learning curve for one task."""
@@ -128,18 +129,6 @@ def draw_learning_curve(solution_file, prediction_files,
 
 def area_under_learning_curve(X,Y):
   return auc(X,Y)
-
-# TODO: transform this whole score.py script in an object-oriented manner
-class Scorer():
-  """A class for scoring one single task"""
-
-  def ___init__(data_dir, solution_dir, prediction_dir, score_dir):
-    self.birth_time = time.time()
-
-    self.solution_dir = solution_dir
-    self.prediction_dir = prediction_dir
-    self.score_dir = score_dir
-    self.time_budget = 300
 
 def init_scores_html(detailed_results_filepath):
   html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
@@ -284,7 +273,7 @@ if __name__ == "__main__":
 
           if(nb_preds_new > nb_preds_old):
             now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-            print_log("New prediction found. Now nb_preds =", nb_preds_new)
+            print_log("New prediction found. Now number of predictions made =", nb_preds_new)
             # Draw the learning curve
             print_log("Refreshing learning curve for", basename)
             # TODO: try-except pair to be deleted
@@ -297,11 +286,12 @@ if __name__ == "__main__":
                                   basename=basename,
                                   start=start)
             except:
-              print_log("Something wrong here. Prediction files are {}".format(prediction_files))
+              print_log("Something wrong happened when drawing learning curve."
+                        " Prediction files are {}".format(prediction_files))
             nb_preds[solution_file] = nb_preds_new
 
             scores[solution_file] = aulc
-            print_log("Current area under learning curve for", basename, ":", scores[solution_file])
+            print_log(f"Current area under learning curve for {basename}: {scores[solution_file]:.4f}")
 
             # Update scores.html
             write_scores_html(score_dir)
