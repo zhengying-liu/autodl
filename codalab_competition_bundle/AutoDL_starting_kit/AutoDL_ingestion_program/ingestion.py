@@ -42,7 +42,7 @@
 # 2) LEARNING MACHINE:
 #    ----------------
 # model.py
-# model.Model.train #TODO
+# model.Model.train
 # model.Model.test
 #
 # ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
@@ -238,7 +238,7 @@ if __name__=="__main__" and debug_mode<4:
     import data_io
     from data_io import vprint
     from model import Model
-    from dataset import AutoDLDataset
+    from dataset import AutoDLDataset # THE class of AutoDL datasets
 
     if debug_mode >= 4: # Show library version and directory structure
         data_io.show_dir(".")
@@ -280,17 +280,13 @@ if __name__=="__main__" and debug_mode<4:
 
         # ======== Creating a data object with data, informations about it
         print_log("Reading and converting data")
-        # TODO: Read data : 2 datasets: train, test
 
         ##### To show to Andre #####
         D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
         D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
-        D_train.init()
+        D_train.init(batch_size=30, repeat=True)
         D_test.init(batch_size=1000, repeat=False)
         ##### To show to Andre #####
-
-        print_log("[+] Size of uploaded data  %5.2f bytes" % data_io.total_size(D_train))
-        # TODO: modify total_size
 
         # ======== Keep track of time
         # TODO: different time budget for different dataset (mnist, cifar, ...)
@@ -338,58 +334,28 @@ if __name__=="__main__" and debug_mode<4:
             print_log("Trained model not found, proceeding to train!")
             print_log("Begin training. Use Ctrl+C to pause.")
             start = time.time()
-            # TODO:
-            while(True):
-              try:
-                # Training budget on each dataset is equal to (time budget / number of datasets)
-                while(time.time() < overall_start + time_budget/len(datanames)*(i+1) + total_pause_time):
-                  if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
-                    print_log("Making first trivial predictions without training...")
-                    test_metadata = D_test.get_metadata()
-                    sample_count = test_metadata.size()
-                    output_dim = test_metadata.get_output_size()
-                    Y_test = np.zeros((sample_count, output_dim))
-                    print_log("Saving results to: " + output_dir)
-                    filename_test = basename[:-5] + '.predict_' +\
-                      str(prediction_order_number)
-                    # Write predictions to output_dir
-                    data_io.write(os.path.join(output_dir,filename_test), Y_test)
-                    prediction_order_number += 1
+            # Training budget on each dataset is equal to (time budget / number of datasets)
+            while(time.time() < start + time_budget/len(datanames)*(i+1) + total_pause_time):
+              if prediction_order_number == 0: # TODO: A copy of code for making predictions before training
+                print_log("Making first trivial predictions of zeros without training...")
+                test_metadata = D_test.get_metadata()
+                sample_count = test_metadata.size()
+                output_dim = test_metadata.get_output_size()
+                Y_test = np.zeros((sample_count, output_dim))
+              else:
+                # Train the model
+                print_log("Training the model.")
+                M.train(D_train.get_dataset())
+                # Make predictions using the most recent checkpoint
+                # Prediction files: mini.predict_0, mini.predict_1, ...
+                Y_test = M.test(D_test.get_dataset())
+              print_log("Saving results to: " + output_dir)
+              filename_test = basename[:-5] + '.predict_' +\
+                str(prediction_order_number)
+              # Write predictions to output_dir
+              data_io.write(os.path.join(output_dir,filename_test), Y_test)
+              prediction_order_number += 1
 
-                  # Train the model
-                  print_log("Training the model.")
-                  M.train(D_train.get_dataset())
-                  # Make predictions using the most recent checkpoint
-                  # Prediction files: mini.predict_0, mini.predict_1, ...
-                  Y_test = M.test(D_test.get_dataset())
-                  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-                  print_log("Saving results to: " + output_dir)
-                  filename_test = basename[:-5] + '.predict_' +\
-                    str(prediction_order_number)
-                  # Write predictions to output_dir
-                  data_io.write(os.path.join(output_dir,filename_test), Y_test)
-                  prediction_order_number += 1
-
-                # If training terminates normally then break the loop
-                break
-
-              # Ctrl+C for pause training and make predictions using present
-              # model. Might be useless for the final competition, due to
-              # change of logic (now we want to kill training thread completely)
-              except KeyboardInterrupt:
-                pause_start = time.time()
-                print_log("User interrupt. Pause training.")
-                # User types 'y' to resume training, types others to quit
-                print_log("Resume training? (y/n)")
-                input = sys.stdin.readline()[0].lower()
-                if input == 'y':
-                  print_log("Continue training...")
-                  continue
-                else:
-                  print_log("Stop training and make final predictions...")
-                  break
-                pause_end = time.time()
-                total_pause_time += pause_end - pause_start
 
         print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
         print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
