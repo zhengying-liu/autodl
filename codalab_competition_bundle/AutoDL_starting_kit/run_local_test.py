@@ -9,6 +9,12 @@ python run_local_test.py -dataset_dir='./AutoDL_sample_data/' -code_dir='./AutoD
 in the starting kit directory. If you want to test the performance of a
 different algorithm on a different dataset, please specify them using respective
 arguments (flags).
+
+If you want to use default folders (i.e. those in above command line), simply
+run
+```
+python run_local_test.py
+```
 """
 
 import tensorflow as tf
