@@ -16,7 +16,7 @@
 # Time budget for ingestion program (and thus for scoring)
 # This is needed since scoring program is running all along with ingestion
 # program in parallel. So we need to know how long ingestion program will run.
-TIME_BUDGET = 300
+TIME_BUDGET = 7200
 
 # Some libraries and options
 import os
@@ -171,7 +171,7 @@ def draw_learning_curve(solution_file, prediction_files,
   plt.xlabel('time/second (log scale)')
   plt.xlim(left=1, right=X_max)
   plt.xscale('log')
-  plt.ylabel('score (balanced accuracy)')
+  plt.ylabel('score (2*BAC - 1)')
   plt.ylim(bottom=0, top=1)
   ax.grid(True, zorder=5)
   plt.legend()
