@@ -70,7 +70,7 @@ verbose = True # outputs messages to stdout and stderr for debug purposes
 # 2: run everything, but do not train, generate random outputs in max_time
 # 3: stop before the loop on datasets
 # 4: just list the directories and program version
-debug_mode = 0
+debug_mode = 1
 
 # Time budget
 #############
@@ -176,8 +176,9 @@ def clean_last_output(output_dir):
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
-  # TODO: decision to make on time budget
-  return max_time
+  # TODO: decision to make on time budget.
+  # Now it's 2 hours for any dataset (to be discussed).
+  return 7200
 
 # =========================== BEGIN PROGRAM ================================
 
@@ -307,9 +308,9 @@ if __name__=="__main__" and debug_mode<4:
         # Keeping track of how many predictions are made
         prediction_order_number = 0
 
-        # Start training and testing
+        # Start the CORE PART: train/predict process
         start = time.time()
-        while(True): # Start the CORE PART: train/predict process
+        while(True):
           remaining_time_budget = start + time_budget - time.time()
           print_log("Training the model...")
           # Train the model
