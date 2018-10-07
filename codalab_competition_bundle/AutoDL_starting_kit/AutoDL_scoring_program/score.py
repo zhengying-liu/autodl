@@ -285,11 +285,12 @@ if __name__ == "__main__":
     # Use 'duration.txt' file to detect if ingestion program exits early
     duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
 
-
+    # Begin scoring process, along with ingestion program
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
       time.sleep(0.5)
 
+      # Use 'duration.txt' file to detect if ingestion program exits early
       if os.path.isfile(duration_filepath):
         print_log("Detected early stop of ingestion program. Stop scoring now.")
         break
@@ -320,15 +321,6 @@ if __name__ == "__main__":
         # Update scores.html
         write_scores_html(score_dir)
 
-
-    # score = 0
-    # score_name = 'score'
-    score = scores[solution_file]
-    # Write score corresponding to selected task and metric to the output file
-    # str_temp = score_name + ": %0.12f\n" % score
-    score_file.write("score: {score:.12f}\n")
-    print_log("[+] Successfully finished scoring! The score of current run is: ", score)
-
     # Read the execution time and add it to score_file (scores.txt):
     max_loop = 30
     n_loop = 0
@@ -340,12 +332,15 @@ if __name__ == "__main__":
               duration = float(f.read())
             str_temp = "Duration: %0.6f\n" % duration
             score_file.write(str_temp)
-            if verbose:
-              print_log("duration = ", duration)
             break
         n_loop += 1
 
+    score = scores[solution_file]
+    score_file.write("score: {score:.12f}\n")
     score_file.close()
+    print_log("[+] Successfully finished scoring! "
+              f"The score of current run is: {score:.12f}. "
+              f"Duration used: {duration:.2f}.")
 
     # Lots of debug stuff
     if debug_mode > 1:
