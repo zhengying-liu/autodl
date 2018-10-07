@@ -79,7 +79,6 @@ debug_mode = 0
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
 max_time = 300
-# max_time = 60
 
 # Maximum number of cycles, number of samples, and estimators
 #############################################################
@@ -112,8 +111,6 @@ import shutil # for deleting a whole directory
 from functools import partial
 import tensorflow as tf
 
-
-
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(h, *args)
@@ -125,7 +122,6 @@ default_input_dir = join(root_dir, "AutoDL_sample_data")
 default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_program_dir = join(root_dir, "AutoDL_ingestion_program")
 default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
-
 
 
 # =============================================================================
@@ -182,7 +178,6 @@ def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
   # TODO: decision to make on time budget
   return max_time
-
 
 # =========================== BEGIN PROGRAM ================================
 
@@ -256,7 +251,6 @@ if __name__=="__main__" and debug_mode<4:
 
     #### INVENTORY DATA (and sort dataset names alphabetically)
     datanames = data_io.inventory_data(input_dir)
-
     #### Delete zip files and metadata file
     datanames = [x for x in datanames if x.endswith('.data')]
 
@@ -272,11 +266,14 @@ if __name__=="__main__" and debug_mode<4:
     overall_time_budget = 0
     time_left_over = 0
 
-    for i, basename in enumerate(datanames): # Loop over datasets (if several)
+    # Loop over datasets (if several)
+    # For AutoDL challenge, there only 1 dataset for each track, so this loop
+    # can actually be ignored. Here basename is e.g. 'adult.data'
+    for i, basename in enumerate(datanames):
 
         print_log("========== Ingestion program version " + str(version) + " ==========")
         print_log("************************************************")
-        print_log("******** Processing dataset " + basename.capitalize() + " ********")
+        print_log("******** Processing dataset " + basename[:-5].capitalize() + " ********")
         print_log("************************************************")
 
         # ======== Learning on a time budget:
@@ -284,61 +281,38 @@ if __name__=="__main__" and debug_mode<4:
         start = time.time()
 
         # ======== Creating a data object with data, informations about it
-        print_log("Reading and converting data")
+        print_log("Reading training set and test set...")
 
-        ##### To show to Andre #####
+        ##### Begin creating training set and test set #####
+        ## default batch size for training set is 30
+        ## for test test is 1000
         D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
         D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
         D_train.init(batch_size=30, repeat=True)
         D_test.init(batch_size=1000, repeat=False)
-        ##### To show to Andre #####
+        ##### End creating training set and test set #####
 
         # ======== Keep track of time
-        # TODO: different time budget for different dataset (mnist, cifar, ...)
         if debug_mode<1:
-            # time_budget = max_time
             time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
         else:
             time_budget = max_time
 
-        # overall_time_budget = overall_time_budget + time_budget
-        # print_log("[+] Cumulated time budget (all tasks so far)  %5.2f sec" % (overall_time_budget))
-        # # We do not add the time left over from previous dataset: time_budget += time_left_over
-        # print_log("[+] Time budget for this task %5.2f sec" % time_budget)
-        # time_spent = time.time() - start
-        # print_log("[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
-        # if time_spent >= time_budget:
-        #     print_log("[-] Sorry, time budget exceeded, skipping this task")
-        #     execution_success = False
-        #     continue
-
         # ========= Creating a model
-        print_log("Creating model")
+        print_log("Creating model...")
         ##### To show to Andre #####
         M = Model(D_test.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
         ##### To show to Andre #####
 
-        # # ========= Reload trained model if it exists
-        # if verbose:
-        #     print_log( "**********************************************************")
-        #     print_log( "****** Attempting to reload model to avoid training ******")
-        #     print_log( "**********************************************************")
-        # you_must_train=1
-        # modelname = os.path.join(submission_dir,basename)
-        # # if os.path.isfile(modelname + '_model.pickle'):
-        # #     M = M.load(modelname)
-        # #     you_must_train=0
-        # #     print_log( verbose,  "[+] Model reloaded, no need to train!")
-
+        # Keeping track of how many predictions are made
         prediction_order_number = 0
 
         # Start training and testing
         start = time.time()
-        while(True): # Start the CORE PART: training/predicting process
-          # Train the model
+        while(True): # Start the CORE PART: train/predict process
           remaining_time_budget = start + time_budget - time.time()
           print_log("Training the model...")
-          print_log(f"Remaing time budget: {remaining_time_budget:.2f} sec")
+          # Train the model
           M.train(D_train.get_dataset(),
                   remaining_time_budget=remaining_time_budget)
           # Make predictions using the most recent checkpoint
@@ -346,19 +320,18 @@ if __name__=="__main__" and debug_mode<4:
           remaining_time_budget = start + time_budget - time.time()
           Y_test = M.test(D_test.get_dataset(),
                           remaining_time_budget=remaining_time_budget)
-          print_log("Saving results to: ", output_dir, "...")
-          print_log(f"Remaing time budget: {remaining_time_budget:.2f} sec")
+          if Y_test is None: # Stop train/predict process if Y_test is None
+            break
           filename_test = basename[:-5] + '.predict_' +\
             str(prediction_order_number)
           # Write predictions to output_dir
           data_io.write(os.path.join(output_dir,filename_test), Y_test)
           prediction_order_number += 1
-
           print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-          print_log("[+] Results saved, time spent so far %5.2f sec" % (time.time() - start))
           remaining_time_budget = start + time_budget - time.time()
           print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
-          if remaining_time_budget<=0: break
+          if remaining_time_budget<=0:
+            break
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
