@@ -205,7 +205,7 @@ class Model(algorithm.Algorithm):
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
     #    variables for time managing
-    if np.random.rand() < 0.01: # TODO: to change back to 0.1
+    if np.random.rand() < 0.1: # TODO: to change back to 0.1
       print_log("Oops! Choose to stop early!")
       self.done_training = True
       return None
