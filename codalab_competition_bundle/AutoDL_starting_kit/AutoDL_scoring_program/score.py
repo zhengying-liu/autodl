@@ -17,7 +17,6 @@
 # This is needed since scoring program is running all along with ingestion
 # program in parallel. So we need to know how long ingestion program will run.
 TIME_BUDGET = 300
-# TIME_BUDGET = 60
 
 # Some libraries and options
 import os
@@ -38,10 +37,7 @@ import datetime
 # To compute area under learning curve
 from sklearn.metrics import auc
 
-import libscores
-import my_metric
-import yaml
-from libscores import *
+from libscores import read_array, sp, ls, mvmean
 
 # Convert images to Base64 to show in scores.html
 import base64
@@ -74,15 +70,33 @@ missing_score = -0.999999
 # Version number
 scoring_version = 1.0
 
-def _load_scoring_function():
-    with open(_HERE('metric.txt'), 'r') as f:
-        metric_name = f.readline().strip()
-        try:
-            score_func = getattr(libscores, metric_name)
-        except:
-            score_func = getattr(my_metric, metric_name)
-        return metric_name, score_func
-
+# Metric used to compute the score of a point on the learning curve
+def autodl_bac(solution, prediction):
+  ''' Compute the normalized balanced accuracy. '''
+  label_num = solution.shape[1]
+  score = np.zeros(label_num)
+  # Binarize prediction by thresholding at 0.5 (assumes predictions are like probabilities; we can also threshold at 0 if we want but we need to lest the participants know)
+  bin_prediction = np.zeros(prediction.shape)
+  bin_prediction[prediction >= 0.5] = 1
+  # Compute the confusion matrix statistics
+  tn = sum(np.multiply((1 - solution), (1 - bin_prediction)))
+  fn = sum(np.multiply(solution, (1 - bin_prediction)))
+  tp = sum(np.multiply(solution, bin_prediction))
+  fp = sum(np.multiply((1 - solution), bin_prediction))
+  # Bounding to avoid division by 0
+  eps = 1e-15
+  tp = sp.maximum(eps, tp)
+  pos_num = sp.maximum(eps, tp + fn)
+  tpr = tp / pos_num  # true positive rate (sensitivity)
+  tn = sp.maximum(eps, tn)
+  neg_num = sp.maximum(eps, tn + fp)
+  tnr = tn / neg_num  # true negative rate (specificity)
+  # Compute bac
+  bac = 0.5 * (tpr + tnr)
+  bac = mvmean(bac)  # average over all classes using moving average (better for numerical reasons)
+  # Normalize: 0 for random, 1 for perfect
+  score = 2*bac - 1
+  return score
 
 def get_prediction_files(prediction_dir, basename):
   """Return prediction files for the task <basename>.
@@ -95,6 +109,15 @@ def get_prediction_files(prediction_dir, basename):
 def get_fig_name(basename):
   fig_name = "learning-curve-" + basename + ".png"
   return fig_name
+
+def get_basename(solution_file):
+  """
+  Args:
+    solution_file: string, e.g. '..../haha/munster.solution'
+  Returns:
+    basename: string, e.g. 'munster'
+  """
+  return solution_file.split(os.sep)[-1].split('.')[0]
 
 # TODO: change this function to avoid repeated computing
 def draw_learning_curve(solution_file, prediction_files,
@@ -117,21 +140,20 @@ def draw_learning_curve(solution_file, prediction_files,
   X = [t - start for t,_ in sorted_pairs]
   Y = [s for _,s in sorted_pairs]
   if len(X) > 1:
-    aulc = area_under_learning_curve(X,Y)
+    alc = area_under_learning_curve(X,Y)
   else:
-    aulc = 0
-
+    alc = 0
   # Draw learning curve
   plt.clf()
   plt.plot(X,Y,marker="o", label="Test score")
-  plt.title("Task: " + basename + " - Current ALC: " + format(aulc, '.2f'))
+  plt.title("Task: " + basename + " - Current ALC: " + format(alc, '.2f'))
   plt.xlabel('time/second')
   plt.ylabel('score (balanced accuracy)')
   plt.legend()
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
-  return aulc
+  return alc
 
 def area_under_learning_curve(X,Y):
   return auc(X,Y)
@@ -227,118 +249,100 @@ if __name__ == "__main__":
 
     clean_last_output(score_dir)
 
-
-    if verbose: # For debugging
-        print_log("sys.argv = ", sys.argv)
-        list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir)))
-        with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
-          print_log("Content of the metadata file: ")
-          print_log(f.read())
-        print_log("Using solution_dir: " + solution_dir)
-        print_log("Using prediction_dir: " + prediction_dir)
-        print_log("Using score_dir: " + score_dir)
-        print_log("Scoring datetime:", the_date)
+    # if verbose: # For debugging
+    #     print_log("sys.argv = ", sys.argv)
+    #     list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir)))
+    #     with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
+    #       print_log("Content of the metadata file: ")
+    #       print_log(f.read())
+    #     print_log("Using solution_dir: " + solution_dir)
+    #     print_log("Using prediction_dir: " + prediction_dir)
+    #     print_log("Using score_dir: " + score_dir)
+    #     print_log("Scoring datetime:", the_date)
 
 
     # Create the output directory, if it does not already exist and open output files
-    mkdir(score_dir)
+    os.makedirs(score_dir, exist_ok=True)
     score_file = open(os.path.join(score_dir, 'scores.txt'), 'w')
     detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
+    # Initialize detailed_results.html
+    init_scores_html(detailed_results_filepath)
 
     # Get the metric
-    metric_name, scoring_function = _load_scoring_function()
-    metric_name = "Area Under Learning Curve"
+    scoring_function = autodl_bac
+    metric_name = "Area under Learning Curve"
 
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
-
+    if not len(solution_names) == 1: # Assert only one file is found
+      raise ValueError("Multiple solution file found!")
+    solution_file = solution_names[0]
+    # Extract the dataset name from the file name
+    basename = get_basename(solution_file)
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
 
-    # Initialize detailed_results.html
-    init_scores_html(detailed_results_filepath)
+    # Use 'duration.txt' file to detect if ingestion program exits early
+    duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
+
 
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
       time.sleep(0.5)
-      # Loop over files in solution directory and search for predictions with extension .predict having the same basename
-      for i, solution_file in enumerate(solution_names):
 
-          # Extract the dataset name from the file name
-          basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
+      if os.path.isfile(duration_filepath):
+        print_log("Detected early stop of ingestion program. Stop scoring now.")
+        break
 
-          # Give list of prediction files
-          prediction_files = get_prediction_files(prediction_dir, basename)
+      # Give list of prediction files
+      prediction_files = get_prediction_files(prediction_dir, basename)
 
-          nb_preds_old = nb_preds[solution_file]
-          nb_preds_new = len(prediction_files)
+      nb_preds_old = nb_preds[solution_file]
+      nb_preds_new = len(prediction_files)
 
-          if(nb_preds_new > nb_preds_old):
-            now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-            print_log("New prediction found. Now number of predictions made =", nb_preds_new)
-            # Draw the learning curve
-            print_log("Refreshing learning curve for", basename)
-            # TODO: try-except pair to be deleted
-            aulc = 0
-            try:
-              aulc = draw_learning_curve(solution_file=solution_file,
+      if(nb_preds_new > nb_preds_old):
+        now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+        print_log("New prediction found. Now number of predictions made =", nb_preds_new)
+        # Draw the learning curve
+        print_log("Refreshing learning curve for", basename)
+        alc = 0
+        alc =draw_learning_curve(solution_file=solution_file,
                                   prediction_files=prediction_files,
                                   scoring_function=scoring_function,
                                   output_dir=score_dir,
                                   basename=basename,
                                   start=start)
-            except:
-              print_log("Something wrong happened when drawing learning curve."
-                        " Prediction files are {}".format(prediction_files))
-            nb_preds[solution_file] = nb_preds_new
+        nb_preds[solution_file] = nb_preds_new
 
-            scores[solution_file] = aulc
-            print_log(f"Current area under learning curve for {basename}: {scores[solution_file]:.4f}")
+        scores[solution_file] = alc
+        print_log(f"Current area under learning curve for {basename}: {scores[solution_file]:.4f}")
 
-            # Update scores.html
-            write_scores_html(score_dir)
+        # Update scores.html
+        write_scores_html(score_dir)
 
 
+    # score = 0
+    # score_name = 'score'
+    score = scores[solution_file]
+    # Write score corresponding to selected task and metric to the output file
+    # str_temp = score_name + ": %0.12f\n" % score
+    score_file.write("score: {score:.12f}\n")
+    print_log("[+] Successfully finished scoring! The score of current run is: ", score)
 
-    for i, solution_file in enumerate(solution_names):
-
-        # Extract the dataset name from the file name
-        basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.') - 1]
-        # score_name = 'score_' + basename
-        score_name = 'score'
-
-        score = scores[solution_file]
-
-        # Write score corresponding to selected task and metric to the output file
-        str_temp = score_name + ": %0.12f\n" % score
-        print_log("The score of current run is: ", score)
-        score_file.write(str_temp)
-
-    if verbose:
-        print_log("In solution_dir: {}".format(os.listdir(solution_dir)))
-        print_log("In prediction_dir: {}".format(os.listdir(prediction_dir)))
-        print_log("In score_dir: {}".format(os.listdir(score_dir)))
-
-    # Read the execution time and add it to the scores:
+    # Read the execution time and add it to score_file (scores.txt):
     max_loop = 30
     n_loop = 0
     while n_loop < max_loop:
         time.sleep(1)
-        try:
+        if os.path.isfile(duration_filepath):
             # metadata = yaml.load(open(os.path.join(input_dir, 'res', 'metadata'), 'r')) # metadata => duration.txt generated by ingestion.py
-            duration_filename =  'duration.txt'
-            with open(os.path.join(prediction_dir, duration_filename), 'r') as f:
+            with open(duration_filepath, 'r') as f:
               duration = float(f.read())
             str_temp = "Duration: %0.6f\n" % duration
             score_file.write(str_temp)
             if verbose:
-              print_log("Successfully write to {} from duration.txt".format(score_file))
               print_log("duration = ", duration)
             break
-        except Exception as e:
-            print_log(e)
-            # str_temp = "Duration: 0\n"
-            # score_file.write(str_temp)
         n_loop += 1
 
     score_file.close()
