@@ -10,18 +10,18 @@
 <h3>Evaluation protocol</h3>
 <p>Here is some pseudo-code of the evaluation protocol:</p>
 <pre><code># For each dataset, our evaluation program calls the model constructor:
-M =&nbsp;<strong>model</strong>(parameters = dataset_meta_data, time_budget=overall_time_budget)
+M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
 # Initialize
 remaining_time budget = overall_time_budget
 start_time = time()
-# Ingestion program calls multiple times train at test:
-repeat until remaining_time budget &lt; 0
+# Ingestion program calls multiple times train and test:
+repeat until remaining_time_budget &lt; 0
 {
-<strong>M.train</strong> (training data, remaining_time_budget)
-remaining_time budget = remaining_time budget - (time() - start_time)
-results = <strong>M.test</strong>(test data, remaining_time_budget) 
-remaining_time budget = remaining_time budget - (time() - start_time)<br /># Results made available to scoring program (run in separate container)
-save(results) 
+<strong>M.train</strong> (training_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()
+results = <strong>M.test</strong>(test_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
+save(results)
 }
 </code></pre>
 <p>It belongs to the participants to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
