@@ -87,6 +87,7 @@ class Model(algorithm.Algorithm):
     self.total_test_time = 0
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
+    self.done_training = False
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -111,6 +112,8 @@ class Model(algorithm.Algorithm):
           this `train` method should terminate within this time budget.
           Otherwise the submission will fail.
     """
+    if self.done_training:
+      return
 
     # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
     # to a dict. This example model only uses the first matrix bundle
@@ -150,6 +153,7 @@ class Model(algorithm.Algorithm):
             f"and for test: {tentative_estimated_time_test}, "
             f"but remaining time budget is: {remaining_time_budget:.2f}. "
             "Skipping...")
+      self.done_training = True
     else:
       msg_est = ""
       if self.estimated_time_per_step:
@@ -168,7 +172,7 @@ class Model(algorithm.Algorithm):
       self.total_train_time += train_duration
       self.cumulated_num_steps += steps_to_train
       self.estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
-      print_log(f"{steps_to_train} steps trained. {train_duration:.2f} sec used."
+      print_log(f"{steps_to_train} steps trained. {train_duration:.2f} sec used. "
             f"Now total steps trained: {self.cumulated_num_steps}. "
             f"Total time used for training: {self.total_train_time:.2f}. "
             f"Current estimated time per step: {self.estimated_time_per_step:.2e}.")
@@ -183,6 +187,9 @@ class Model(algorithm.Algorithm):
           here `sample_count` is the number of examples in this dataset as test
           set.
     """
+    if self.done_training:
+      return None
+
     # Turn `features` in the tensor pair (features, labels) to a dict
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
@@ -197,8 +204,9 @@ class Model(algorithm.Algorithm):
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
     #    variables for time managing
-    if np.random.rand() < 0.1:
+    if np.random.rand() < 0.1: # TODO: to change back to 0.1
       print_log("Oops! Choose to stop early!")
+      self.done_training = True
       return None
     else:
       if remaining_time_budget and self.estimated_time_test and\
@@ -222,8 +230,8 @@ class Model(algorithm.Algorithm):
       predictions = [x['probabilities'] for x in test_results]
       predictions = np.array(predictions)
       print_log(f"[+] Successfully made one prediction. {test_duration:.2f} sec used."
-            f"[+] Total time used for testing: {self.total_test_time:.2f}. "
-            f"[+] Current estimated time per test: {self.estimated_time_test:.2e}.")
+            f"Total time used for testing: {self.total_test_time:.2f}. "
+            f"Current estimated time for test: {self.estimated_time_test:.2e}.")
       return predictions
 
   def model_fn(self, features, labels, mode):
