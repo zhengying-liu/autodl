@@ -15,23 +15,30 @@
 
 """A baseline method for the AutoDL challenge.
 
-It implements the 3 methods (i.e. __init__, train, test) described in
-algorithm.py, which specifies the competition protocol in the comments.
+It implements the 3 methods (i.e. __init__, train, test) whose abstract
+definition can be found in algorithm.py, which specifies the competition
+protocol in the comments.
 
-It is EXTREMELY RECOMMENDED to look closely at this script algorithm.py in the
-ingestion program folder (AutoDL_ingestion_program/), since any submission will
+It is STRONGLY RECOMMENDED to closely look at this script algorithm.py in the
+ingestion program folder (AutoDL_ingestion_program/) since any submission will
 be consisted of a model.py script implementing a concrete class of
     algorithm.Algorithm
 The submission can be done by uploading a zip file with model.py and an empty
 file called `metadata`, like what we have in the folder
 AutoDL_sample_code_submission/. And we also provide the option that a submission
-can be a zip file zipping all CONTENT of AutoDL_starting_kit/.
+can be a zip file zipping all CONTENT (i.e. not the directory) of
+AutoDL_starting_kit/.
 """
 
 import tensorflow as tf
-import algorithm
 import os
+
+# Import the challenge algorithm (model) API from algorithm.py
+import algorithm
+
+# Utility packages
 import time
+import datetime
 import numpy as np
 np.random.seed(42)
 
@@ -47,8 +54,6 @@ class Model(algorithm.Algorithm):
         according to remaining time budget and estimated time per step;
     5. Make all-zero prediction at beginning.
   """
-
-  #
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
 
@@ -74,15 +79,14 @@ class Model(algorithm.Algorithm):
       model_dir=self.checkpoints_dir,
       config=self.my_checkpointing_config)
 
-    # Prediction made last time
-    self.last_prediction = None
-
     # Attributes for managing time budget
     # Cumulated number of training steps
     self.total_train_time = 0
     self.cumulated_num_steps = 0
+    self.estimated_time_per_step = None
     self.total_test_time = 0
     self.cumulated_num_tests = 0
+    self.estimated_time_test = None
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -126,41 +130,48 @@ class Model(algorithm.Algorithm):
     # 2. Otherwise, estimate training time per step and time needed for test,
     #    then compare to remaining time budget to compute a potential maximum
     #    number of steps (max_steps) that can be trained within time budget;
-    # 3. Choose a number (steps_to_train) randomly between 0 and max_steps and
-    #    train for this many steps.
-    if not self.cumulated_num_steps:
+    # 3. Choose a number (steps_to_train) randomly between 0 and max_steps / 2
+    #    and train for this many steps.
+    if not self.estimated_time_per_step:
       steps_to_train = 1
     else:
-      estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
-      if self.cumulated_num_tests:
-        estimated_time_test = self.total_test_time / self.cumulated_num_tests
+      if self.estimated_time_test:
+        tentative_estimated_time_test = self.estimated_time_test
       else:
-        estimated_time_test = 0
-      max_steps = int((remaining_time_budget - estimated_time_test) / estimated_time_per_step)
+        tentative_estimated_time_test = 50 # conservative estimation for test
+      max_steps = int((remaining_time_budget - tentative_estimated_time_test) / self.estimated_time_per_step)
+      max_steps /= 2 # Halve it to make more predictions
+      max_steps = max(max_steps, 0)
       # Choose random number of steps < max_steps for training
-      steps_to_train = np.random.randint(0, max_steps)
-    if steps_to_train == 0:
-      time.sleep(remaining_time_budget) # Sleep 1 second if remaing time budget to small
+      steps_to_train = np.random.randint(0, max_steps + 1)
+    if steps_to_train <= 0:
+      print_log("Not enough time remaining for training. "
+            f"Estimated time for training per step: {self.estimated_time_per_step:.2f}, "
+            f"and for test: {tentative_estimated_time_test}, "
+            f"but remaining time budget is: {remaining_time_budget:.2f}. "
+            "Skipping...")
     else:
-      # Start training
-      print(f"MODEL INFO: Begin training for {steps_to_train} steps...")
+      msg_est = ""
+      if self.estimated_time_per_step:
+        msg_est = f"estimated time: " +\
+                  f"{steps_to_train * self.estimated_time_per_step:.2f} sec."
+      print_log(f"Begin training for {steps_to_train} steps...",msg_est)
       train_start = time.time()
+      # Start training
       with tf.Session() as sess:
         self.classifier.train(
           input_fn=train_input_fn,
-          steps=steps_to_train)#,
-          # hooks=[logging_hook])
+          steps=steps_to_train)
       train_end = time.time()
       # Update for time budget managing
       train_duration = train_end - train_start
       self.total_train_time += train_duration
       self.cumulated_num_steps += steps_to_train
-      estimated_time_per_step =\
-          self.total_train_time / self.cumulated_num_steps
-      print(f"MODEL INFO: {steps_to_train} steps trained. "
+      self.estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
+      print_log(f"{steps_to_train} steps trained. {train_duration:.2f} sec used."
             f"Now total steps trained: {self.cumulated_num_steps}. "
             f"Total time used for training: {self.total_train_time:.2f}. "
-            f"Current estimated time per step: {estimated_time_per_step:.2e}.")
+            f"Current estimated time per step: {self.estimated_time_per_step:.2e}.")
 
   def test(self, dataset, remaining_time_budget=None):
     """Test this algorithm on the tensorflow |dataset|.
@@ -181,38 +192,39 @@ class Model(algorithm.Algorithm):
       return features, labels
 
     # The following snippet of code intends to do:
+    # 0. With probability 0.1, stop the whole train/predict process immediately
     # 1. If there is time budget limit, and some testing has already been done,
-    #    but not enough remaining time for testing, then return last prediction
-    # 2. If there is time budget limit, and no testing has already been done,
-    #    make an all-zero prediction
-    # 3. In all other cases: make predictions normally, and update some
+    #    but not enough remaining time for testing, then return None to stop
+    # 2. Otherwise: make predictions normally, and update some
     #    variables for time managing
-    if remaining_time_budget: # if there is time limit for predicting
-      if self.cumulated_num_tests: # if some predictions are made previously
-        estimated_time_test = self.total_test_time / self.cumulated_num_tests
-        if estimated_time_test > remaining_time_budget: # if not enough time to make predictions
-          print("Not enough time for test. Waiting for the training/predicting "
-                "process to end and will use the last prediction...")
-          time.sleep(remaining_time_budget)
-          return self.last_prediction
-      else:
-        test_metadata = self.metadata_
-        sample_count = test_metadata.size()
-        output_dim = test_metadata.get_output_size()
-        predictions = np.zeros((sample_count, output_dim))
-        self.cumulated_num_tests += 1
-        return predictions
-    print("MODEL INFO: Begin testing...")
-    test_begin = time.time()
-    test_results = self.classifier.predict(input_fn=test_input_fn)
-    test_end = time.time()
-    test_duration = test_end - test_begin
-    self.total_test_time += test_duration
-    self.cumulated_num_tests += 1
-    predictions = [x['probabilities'] for x in test_results] #TODO: make binary predictions
-    predictions = np.array(predictions)
-    self.last_prediction = predictions # Update last_prediction
-    return predictions
+    if np.random.rand() < 0.1:
+      print_log("Oops! Choose to stop early!")
+      return None
+    else:
+      if remaining_time_budget and self.estimated_time_test and\
+          self.estimated_time_test > remaining_time_budget:
+        print_log("Not enough time for test. "
+              f"Estimated time for test: {self.estimated_time_test:.2e}, "
+              f"But remaining time budget is: {remaining_time_budget:.2f}. "
+              "Stop train/predict process by returning None.")
+        return None
+      msg_est = ""
+      if self.estimated_time_test:
+        msg_est = "estimated time: " + f"{self.estimated_time_test:.2e} sec."
+      print_log(f"Begin testing...",msg_est)
+      test_begin = time.time()
+      test_results = self.classifier.predict(input_fn=test_input_fn)
+      test_end = time.time()
+      test_duration = test_end - test_begin
+      self.total_test_time += test_duration
+      self.cumulated_num_tests += 1
+      self.estimated_time_test = self.total_test_time / self.cumulated_num_tests
+      predictions = [x['probabilities'] for x in test_results]
+      predictions = np.array(predictions)
+      print_log(f"[+] Successfully made one prediction. {test_duration:.2f} sec used."
+            f"[+] Total time used for testing: {self.total_test_time:.2f}. "
+            f"[+] Current estimated time per test: {self.estimated_time_test:.2e}.")
+      return predictions
 
   def model_fn(self, features, labels, mode):
     """Model function to construct TensorFlow estimator.
@@ -275,3 +287,9 @@ class Model(algorithm.Algorithm):
             labels=labels, predictions=predictions["classes"])}
     return tf.estimator.EstimatorSpec(
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+def print_log(*content):
+  """Logging function. (could've also used `import logging`.)"""
+  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+  print("MODEL INFO: " + str(now)+ " ", end='')
+  print(*content)
