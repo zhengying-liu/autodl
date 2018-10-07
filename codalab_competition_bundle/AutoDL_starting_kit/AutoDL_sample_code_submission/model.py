@@ -147,7 +147,7 @@ class Model(algorithm.Algorithm):
       max_steps = max(max_steps, 0)
       # Choose random number of steps < max_steps for training
       steps_to_train = np.random.randint(0, max_steps + 1)
-      # steps_to_train = 100
+      # steps_to_train = 100 # Or set a constant steps
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. "
             f"Estimated time for training per step: {self.estimated_time_per_step:.2f}, "
@@ -259,16 +259,19 @@ class Model(algorithm.Algorithm):
 
     logits = tf.layers.dense(inputs=input_layer, units=output_dim)
 
-    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
+    # For multi-label classification, the correct loss is actually sigmoid with
+    # sigmoid_cross_entropy_with_logits, not softmax with
+    # softmax_cross_entropy.
     softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
 
-    threshold = 0.5
-
-    binary_predictions = tf.cast(tf.greater(sigmoid_tensor, threshold), tf.int32)
+    # sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
+    # threshold = 0.5
+    # binary_predictions = tf.cast(tf.greater(sigmoid_tensor, threshold), tf.int32)
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
-      "classes": binary_predictions,
+      "classes": tf.argmax(input=logits, axis=1),
+      # "classes": binary_predictions,
       # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
       # `logging_hook`.
       "probabilities": softmax_tensor
