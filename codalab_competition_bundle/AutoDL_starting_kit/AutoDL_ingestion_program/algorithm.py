@@ -58,4 +58,4 @@ class Algorithm(object):
           here `sample_count` is the number of examples in this dataset as test
           set.
     """
-    raise NotImplementedError("Algorithm class does not have any test.")
+    raise NotImplementedError("Algorithm class does not have any testing.")
