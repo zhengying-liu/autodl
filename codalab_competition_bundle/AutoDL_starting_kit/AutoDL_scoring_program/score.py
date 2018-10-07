@@ -13,7 +13,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-# Time budget for ingestion program.
+# Time budget for ingestion program (and thus for scoring)
 # This is needed since scoring program is running all along with ingestion
 # program in parallel. So we need to know how long ingestion program will run.
 TIME_BUDGET = 300
@@ -110,6 +110,10 @@ def get_fig_name(basename):
   fig_name = "learning-curve-" + basename + ".png"
   return fig_name
 
+def get_normalized_fig_name(basename):
+  fig_name = "normalized-learning-curve-" + basename + ".png"
+  return fig_name
+
 def get_basename(solution_file):
   """
   Args:
@@ -137,18 +141,39 @@ def draw_learning_curve(solution_file, prediction_files,
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
   start = sorted_pairs[0][0]
-  X = [t - start for t,_ in sorted_pairs]
+  X = [t - start + 1 for t,_ in sorted_pairs] # Since X on log scale, set first x=1
   Y = [s for _,s in sorted_pairs]
-  if len(X) > 1:
-    alc = area_under_learning_curve(X,Y)
-  else:
-    alc = 0
+  # Add origin as the first point of the curve
+  X.insert(0, 1)
+  Y.insert(0, 0)
+  # Truncate X using X_max
+  X_max = TIME_BUDGET
+  Y_max = 1
+  log_X = [np.log(x+1)/np.log(X_max+1) for x in X if x <= X_max] # log_X \in [0, 1]
+  log_X_max = 1
+  X = X[:len(log_X)]
+  Y = Y[:len(log_X)]
   # Draw learning curve
   plt.clf()
-  plt.plot(X,Y,marker="o", label="Test score")
-  plt.title("Task: " + basename + " - Current ALC: " + format(alc, '.2f'))
-  plt.xlabel('time/second')
+  fig, ax = plt.subplots(figsize=(7, 7))
+  ax.plot(X, Y, marker="o", label="Test score", markersize=3)
+  # Add a point on the final line using last prediction
+  X.append(TIME_BUDGET)
+  Y.append(Y[-1])
+  log_X.append(1)
+  if len(log_X) >= 2:
+    alc = area_under_learning_curve(log_X,Y)
+  else:
+    alc = 0
+  ax.fill_between(X, Y, color='cyan')
+  ax.plot(X[-2:], Y[-2:], '--') # Draw a dotted line from last prediction
+  plt.title("Task: " + basename + " - Current normalized ALC: " + format(alc, '.4f'))
+  plt.xlabel('time/second (log scale)')
+  plt.xlim(left=1, right=X_max)
+  plt.xscale('log')
   plt.ylabel('score (balanced accuracy)')
+  plt.ylim(bottom=0, top=1)
+  ax.grid(True, zorder=5)
   plt.legend()
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
@@ -339,8 +364,8 @@ if __name__ == "__main__":
     score_file.write("score: {score:.12f}\n")
     score_file.close()
     print_log("[+] Successfully finished scoring! "
-              f"The score of current run is: {score:.12f}. "
-              f"Duration used: {duration:.2f}.")
+              f"Duration used: {duration:.2f} sec. "
+              f"The score of your algorithm on this task ({basename}) is: {score:.6f}.")
 
     # Lots of debug stuff
     if debug_mode > 1:
