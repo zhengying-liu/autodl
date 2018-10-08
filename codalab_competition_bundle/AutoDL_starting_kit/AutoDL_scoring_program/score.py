@@ -341,7 +341,7 @@ if __name__ == "__main__":
         nb_preds[solution_file] = nb_preds_new
 
         scores[solution_file] = alc
-        print_log(f"Current area under learning curve for {basename}: {scores[solution_file]:.4f}")
+        print_log("Current area under learning curve for {}: {:.4f}".format(basename, scores[solution_file]))
 
         # Update scores.html
         write_scores_html(score_dir)
@@ -361,11 +361,11 @@ if __name__ == "__main__":
         n_loop += 1
 
     score = scores[solution_file]
-    score_file.write("score: {score:.12f}\n")
+    score_file.write("score: {:.12f}\n".format(score))
     score_file.close()
-    print_log("[+] Successfully finished scoring! "
-              f"Duration used: {duration:.2f} sec. "
-              f"The score of your algorithm on this task ({basename}) is: {score:.6f}.")
+    print_log("[+] Successfully finished scoring! " +\
+              "Duration used: {:.2f} sec. ".format(duration) +\
+              "The score of your algorithm on this task ({}) is: {:.6f}.".format(basename, score))
 
     # Lots of debug stuff
     if debug_mode > 1:

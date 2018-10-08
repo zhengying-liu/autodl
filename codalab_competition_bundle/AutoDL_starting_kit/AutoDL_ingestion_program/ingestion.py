@@ -70,7 +70,7 @@ verbose = True # outputs messages to stdout and stderr for debug purposes
 # 2: run everything, but do not train, generate random outputs in max_time
 # 3: stop before the loop on datasets
 # 4: just list the directories and program version
-debug_mode = 1
+debug_mode = 0
 
 # Time budget
 #############
