@@ -63,11 +63,11 @@ class Model(algorithm.Algorithm):
       keep_checkpoint_max = 5,       # Retain the 5 most recent checkpoints.
     )
 
-    # Get dataset name. To be changed.
+    # Get dataset name. To be tested.
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    # IMPORTANT: directory to store checkpoints of the model
+    # Directory to store checkpoints of the model
     self.checkpoints_dir = 'checkpoints_' + self.dataset_name
     current_dir = os.path.dirname(os.path.realpath(__file__))
     self.checkpoints_dir = os.path.join(current_dir, os.pardir,
@@ -81,6 +81,7 @@ class Model(algorithm.Algorithm):
 
     # Attributes for managing time budget
     # Cumulated number of training steps
+    self.birthday = time.time()
     self.total_train_time = 0
     self.cumulated_num_steps = 0
     self.estimated_time_per_step = None
@@ -91,7 +92,7 @@ class Model(algorithm.Algorithm):
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.early_stop_proba = 0.5
+    self.early_stop_proba = 0.05
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -210,7 +211,7 @@ class Model(algorithm.Algorithm):
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
     #    variables for time managing
-    if np.random.rand() < self.early_stop_proba:
+    if self.choose_to_stop_early():
       print_log("Oops! Choose to stop early for next call!")
       self.done_training = True
 
@@ -310,6 +311,16 @@ class Model(algorithm.Algorithm):
             labels=labels, predictions=predictions["classes"])}
     return tf.estimator.EstimatorSpec(
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+  def age(self):
+    return time.time() - self.birthday
+
+  def choose_to_stop_early(self):
+    """The criterion to stop further training (thus finish train/predict
+    process).
+    """
+    # return self.cumulated_num_tests > 10 # Limit to make 10 predictions
+    return np.random.rand() < self.early_stop_proba
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
