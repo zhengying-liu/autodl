@@ -60,7 +60,7 @@ phases:
         start_date: 2018-08-25
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
-        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
@@ -79,7 +79,7 @@ phases:
         start_date: 2018-08-25
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
-        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
@@ -98,7 +98,7 @@ phases:
         start_date: 2018-08-25
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
-        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
@@ -117,7 +117,7 @@ phases:
         start_date: 2018-08-25
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
-        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
@@ -136,7 +136,7 @@ phases:
         start_date: 2018-08-25
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
-        execution_time_limit: 600  # (in sec) must be given when code submission enabled
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
@@ -157,11 +157,6 @@ leaderboard:
             label: RESULTS
             rank: 1
     columns:
-        score:
-            leaderboard: *RESULTS
-            label: Overall Score
-            numeric_format: 4
-            rank: 2
         set1_score:
             leaderboard: *RESULTS
             label: Dataset 1
