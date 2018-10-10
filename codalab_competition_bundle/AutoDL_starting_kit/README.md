@@ -5,7 +5,9 @@ ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 UNIVERSITE PARIS SUD, INRIA, CHALEARN, AND/OR OTHER ORGANIZERS
 OR CODE AUTHORS DISCLAIM ANY EXPRESSED OR IMPLIED WARRANTIES.
 
-## Usage
+## 
+
+## How to prepare a ZIP file for submission
 Zip the contents of AutoDL_sample_code_submission (without the directory structure)
 ```
 zip mysubmission.zip AutoDL_sample_code_submission/*
@@ -18,9 +20,9 @@ and use the "Upload a Submission" button for make a submission to CodaLab.
 To make your own submission, you need to modify the file `model.py` in
 `AutoDL_sample_code_submission/`, which implements the logic of your AutoDL
 algorithm. You can then test it in the exact same environment as the CodaLab
-environment using Docker. *(You can choose to run local test out of the Docker
+environment using Docker. (You can choose to run local test out of the Docker
 image, but it's possible that certain Python packages you use are not installed
-in the Docker image used in the competition.)*
+in the Docker image used in the competition.)
 
 If you are new to docker, install docker from https://docs.docker.com/get-started/.
 Then, at the shell, run:
