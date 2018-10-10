@@ -29,6 +29,7 @@ html:
     evaluation: evaluation.html
     terms: terms.html
     data: data.html
+    credits: credits.html
 
 # ----------------------------------------------------------------------------------------
 # ----------------------                PHASES                   -------------------------
@@ -103,10 +104,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: True        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: ad367a65-fc58-4647-b53c-b6dd0a26f429 # AutoDL_input_data_3.zip
+        input_data: b1ad71fe-b597-4f8d-8b56-afff66002c62 # AutoDL_input_data_3.zip
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data: b78d686d-9f47-4cbc-8f25-ede55e0b1eee # AutoDL_reference_data_3.zip
+        reference_data: 8436224e-e958-457e-bd8d-7c18ac43a6c0 # AutoDL_reference_data_3.zip
 
 
     5:
@@ -157,6 +158,11 @@ leaderboard:
             label: RESULTS
             rank: 1
     columns:
+        score:
+            leaderboard: *RESULTS
+            label: Score
+            numeric_format: 4
+            rank: 2
         set1_score:
             leaderboard: *RESULTS
             label: Dataset 1
