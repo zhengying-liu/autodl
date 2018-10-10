@@ -8,7 +8,7 @@ OR CODE AUTHORS DISCLAIM ANY EXPRESSED OR IMPLIED WARRANTIES.
 ## Usage
 Zip the contents of AutoDL_sample_code_submission (without the directory structure)
 ```
-	zip mysubmission.zip AutoDL_sample_code_submission/*
+zip mysubmission.zip AutoDL_sample_code_submission/*
 ```
 and use the "Upload a Submission" button for make a submission to CodaLab.
 
@@ -25,8 +25,8 @@ in the Docker image used in the competition.)*
 If you are new to docker, install docker from https://docs.docker.com/get-started/.
 Then, at the shell, run:
 ```
-	cd path/to/AutoDL_starting_kit/
-  docker run -it -u root -v $(pwd):/app/codalab evariste/autodl:dockerfile bash
+cd path/to/AutoDL_starting_kit/
+docker run -it -u root -v $(pwd):/app/codalab evariste/autodl:dockerfile bash
 ```
 You will then be able to run the ingestion program (to produce predictions) and
 the scoring program (to evaluate your predictions) on toy sample data. In AutoDL
