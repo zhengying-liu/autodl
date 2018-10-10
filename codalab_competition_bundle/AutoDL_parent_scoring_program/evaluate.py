@@ -1,8 +1,35 @@
 #!/usr/bin/env python
+"""For testing parent scoring program locally.
+
+To do this, run
+```
+python evaluate.py test_input/ test_output/
+```
+"""
 import sys
 import os
 import os.path
 import time
+from glob import glob
+import base64
+import yaml
+
+def write_scores_html(output_dir, image_paths):
+  filename = 'detailed_results.html'
+  detailed_results_path = os.path.join(output_dir, filename)
+  html_head = """<html><body><pre>"""
+  html_end = '</pre></body></html>'
+  with open(detailed_results_path, 'w') as html_file:
+      # Automatic refreshing the page on file change using Live.js
+      html_file.write(html_head)
+      html_file.write("Oh yeah! Now AutoDL is ready for beta testing!<br>")
+      for image_path in image_paths:
+        with open(image_path, "rb") as image_file:
+          encoded_string = base64.b64encode(image_file.read())
+          encoded_string = encoded_string.decode('utf-8')
+          s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
+          html_file.write(s + '<br>')
+      html_file.write(html_end)
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -16,36 +43,35 @@ output_dir = sys.argv[2]
 n_datasets = 5
 
 # Parent phase has 1 as phase number by default
-
 submit_dirs = []
 score_names = []
+image_paths = []
 
 for phase_number in range(2, 2 + n_datasets):
   submit_dir = os.path.join(input_dir, 'res_' + str(phase_number))
   submit_dirs.append(submit_dir)
   score_name = 'set{}_score'.format(phase_number - 1)
   score_names.append(score_name)
+  image_paths.append(glob(os.path.join(submit_dir,'learning-curve-*.png'))[0])
 
 scores = []
 
+score_name_yaml = 'score'
 for submit_dir in submit_dirs:
     if os.path.isdir(submit_dir):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         submission_score_file = os.path.join(submit_dir, "scores.txt")
-        submission_score = open(submission_score_file).readline()
-        # Score is written like so: "score:<score>\nDuration:11.11"
-        score_text = submission_score.split(":")[1]
-        scores.append(float(score_text))
+        # submission_score = open(submission_score_file).readline()
+        with open(submission_score_file, 'r') as f:
+          score_info = yaml.load(f)
+        score_text = score_info[score_name_yaml] # might be already float
+        scores.append(float(score_text)) # but to be sure
     else:
         print("{} doesn't exist. Use missing score.".format(submit_dir))
         scores.append(missing_score)
 
-detailed_results_path = os.path.join(output_dir, "detailed_results.html")
-# Write to detailed results
-with open(detailed_results_path, 'a+') as detailed_results:
-#     detailed_results.write('<head> <meta http-equiv="refresh" content="1"> </head>')
-    detailed_results.write("Oh yeah! Now AutoDL is ready for beta testing!")
+write_scores_html(output_dir, image_paths)
 
 _end = time.time()
 _duration = _start - _end
