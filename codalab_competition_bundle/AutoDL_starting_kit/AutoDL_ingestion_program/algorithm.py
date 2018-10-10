@@ -56,6 +56,6 @@ class Algorithm(object):
     Returns:
       predictions: A `numpy.ndarray` matrix of shape (sample_count, output_dim).
           here `sample_count` is the number of examples in this dataset as test
-          set.
+          set and `output_dim` is the number of labels to be predicted.
     """
     raise NotImplementedError("Algorithm class does not have any testing.")

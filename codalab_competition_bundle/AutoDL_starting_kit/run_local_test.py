@@ -4,7 +4,7 @@
 downloaded starting kit folder (to avoid using submission quota on CodaLab). To
 do this, run:
 ```
-python run_local_test.py -dataset_dir='./AutoDL_sample_data/' -code_dir='./AutoDL_sample_code_submission'
+python run_local_test.py -dataset_dir='./AutoDL_sample_data/' -code_dir='./AutoDL_sample_code_submission/'
 ```
 in the starting kit directory. If you want to test the performance of a
 different algorithm on a different dataset, please specify them using respective

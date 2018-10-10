@@ -13,21 +13,15 @@
 # limitations under the License.
 # Modified by: Zhengying Liu, Isabelle Guyon
 
-"""A baseline method for the AutoDL challenge.
+"""An example of code submission for the AutoDL challenge.
 
-It implements the 3 methods (i.e. __init__, train, test) whose abstract
-definition can be found in algorithm.py, which specifies the competition
-protocol in the comments.
+It implements 3 compulsory methods: __init__, train, and test.
+model.py follows the template of the abstract class algorithm.py found
+in folder AutoDL_ingestion_program/.
 
-It is STRONGLY RECOMMENDED to closely look at this script algorithm.py in the
-ingestion program folder (AutoDL_ingestion_program/) since any submission will
-be consisted of a model.py script implementing a concrete class of
-    algorithm.Algorithm
-The submission can be done by uploading a zip file with model.py and an empty
-file called `metadata`, like what we have in the folder
-AutoDL_sample_code_submission/. And we also provide the option that a submission
-can be a zip file zipping all CONTENT (i.e. not the directory) of
-AutoDL_starting_kit/.
+To create a valid submission, zip model.py together with an empty
+file called metadata (this just indicates your submission is a code submission
+and has nothing to do with the dataset metadata.
 """
 
 import tensorflow as tf
@@ -57,27 +51,13 @@ class Model(algorithm.Algorithm):
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
 
-    # Checkpoints configuration
-    self.my_checkpointing_config = tf.estimator.RunConfig(
-      save_checkpoints_secs = 600,  # Save checkpoints every 10 minutes.
-      keep_checkpoint_max = 5,       # Retain the 5 most recent checkpoints.
-    )
-
     # Get dataset name. To be tested.
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    # Directory to store checkpoints of the model
-    self.checkpoints_dir = 'checkpoints_' + self.dataset_name
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    self.checkpoints_dir = os.path.join(current_dir, os.pardir,
-                                        self.checkpoints_dir)
-
     # Classifier using model_fn
     self.classifier = tf.estimator.Estimator(
-      model_fn=self.model_fn,
-      model_dir=self.checkpoints_dir,
-      config=self.my_checkpointing_config)
+      model_fn=self.model_fn)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -113,9 +93,9 @@ class Model(algorithm.Algorithm):
           multilabel classification task. For the first version of AutoDL
           challenge, the number of bundles `N` will be set to 1.
 
-      remaining_time_budget: a `float`, the name should be clear. If not `None`,
-          this `train` method should terminate within this time budget.
-          Otherwise the submission will fail.
+      remaining_time_budget: time remaining to execute train(). The method
+          should keep track of its execution time to avoid exceeding its time
+          budget. If remaining_time_budget is None, no time budget is imposed.
     """
     if self.done_training:
       return
@@ -249,7 +229,6 @@ class Model(algorithm.Algorithm):
   ##############################################################################
 
   # Some helper functions
-
   def model_fn(self, features, labels, mode):
     """Model function to construct TensorFlow estimator.
 
