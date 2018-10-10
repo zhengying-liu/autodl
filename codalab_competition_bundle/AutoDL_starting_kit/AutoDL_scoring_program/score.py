@@ -331,9 +331,7 @@ if __name__ == "__main__":
 
       if(nb_preds_new > nb_preds_old):
         now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-        print_log("New prediction found. Now number of predictions made =", nb_preds_new)
-        # Draw the learning curve
-        print_log("Refreshing learning curve for", basename)
+        print_log("[+] New prediction found. Now number of predictions made =", nb_preds_new)
         alc = 0
         alc =draw_learning_curve(solution_file=solution_file,
                                   prediction_files=prediction_files,
