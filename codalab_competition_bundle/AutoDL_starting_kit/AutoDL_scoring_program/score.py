@@ -155,7 +155,7 @@ def draw_learning_curve(solution_file, prediction_files,
   Y = Y[:len(log_X)]
   # Draw learning curve
   plt.clf()
-  fig, ax = plt.subplots(figsize=(7, 7.7))
+  fig, ax = plt.subplots(figsize=(7, 7.07))
   ax.plot(X, Y, marker="o", label="Test score", markersize=3)
   # Add a point on the final line using last prediction
   X.append(TIME_BUDGET)
@@ -172,7 +172,7 @@ def draw_learning_curve(solution_file, prediction_files,
   plt.xlim(left=1, right=X_max)
   plt.xscale('log')
   plt.ylabel('score (2*BAC - 1)')
-  plt.ylim(bottom=-0.1, top=1)
+  plt.ylim(bottom=-0.01, top=1)
   ax.grid(True, zorder=5)
   plt.legend()
   fig_name = get_fig_name(basename)
