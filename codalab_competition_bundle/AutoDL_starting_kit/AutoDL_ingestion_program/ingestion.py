@@ -217,17 +217,17 @@ if __name__=="__main__" and debug_mode<4:
         sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
         print = partial(print, flush=True)
 
-    # Print environment info for debugging
-    if verbose:
-        print_log("sys.argv = ", sys.argv)
-        with open(os.path.join(program_dir, 'metadata'), 'r') as f:
-          print_log("Content of the metadata file: ")
-          print_log(f.read())
-        print_log("Using input_dir: " + input_dir)
-        print_log("Using output_dir: " + output_dir)
-        print_log("Using program_dir: " + program_dir)
-        print_log("Using submission_dir: " + submission_dir)
-        print_log("Ingestion datetime:", the_date)
+    # # Print environment info for debugging
+    # if verbose:
+    #     print_log("sys.argv = ", sys.argv)
+    #     with open(os.path.join(program_dir, 'metadata'), 'r') as f:
+    #       print_log("Content of the metadata file: ")
+    #       print_log(f.read())
+    #     print_log("Using input_dir: " + input_dir)
+    #     print_log("Using output_dir: " + output_dir)
+    #     print_log("Using program_dir: " + program_dir)
+    #     print_log("Using submission_dir: " + submission_dir)
+    #     print_log("Ingestion datetime:", the_date)
 
     # Clear potentiablly results of previous execution (for local run)
     clean_last_output(output_dir)
@@ -268,7 +268,7 @@ if __name__=="__main__" and debug_mode<4:
     time_left_over = 0
 
     # Loop over datasets (if several)
-    # For AutoDL challenge, there only 1 dataset for each track, so this loop
+    # For AutoDL challenge, there is only 1 dataset for each track, so this loop
     # can actually be ignored. Here basename is e.g. 'adult.data'
     for i, basename in enumerate(datanames):
 
@@ -316,13 +316,13 @@ if __name__=="__main__" and debug_mode<4:
           # Train the model
           M.train(D_train.get_dataset(),
                   remaining_time_budget=remaining_time_budget)
-          # Make predictions using the most recent checkpoint
-          # Prediction files: adult.predict_0, adult.predict_1, ...
           remaining_time_budget = start + time_budget - time.time()
+          # Make predictions using the trained model
           Y_test = M.test(D_test.get_dataset(),
                           remaining_time_budget=remaining_time_budget)
           if Y_test is None: # Stop train/predict process if Y_test is None
             break
+          # Prediction files: adult.predict_0, adult.predict_1, ...
           filename_test = basename[:-5] + '.predict_' +\
             str(prediction_order_number)
           # Write predictions to output_dir
