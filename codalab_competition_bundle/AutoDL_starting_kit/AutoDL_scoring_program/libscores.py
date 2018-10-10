@@ -53,7 +53,7 @@ else:
 
 def read_array(filename):
     ''' Read array and convert to 2d np arrays '''
-    array = np.genfromtxt(filename, dtype=float)
+    array = np.loadtxt(filename)
     if len(array.shape) == 1:
         array = array.reshape(-1, 1)
     return array
