@@ -230,6 +230,9 @@ class Model(algorithm.Algorithm):
     print_log("Begin testing...", msg_est)
     test_results = self.classifier.predict(input_fn=test_input_fn)
     predictions = [x['probabilities'] for x in test_results]
+    has_same_length = (len({len(x) for x in predictions}) == 1)
+    print_log("Asserting predictions have the same number of columns...")
+    assert(has_same_length)
     predictions = np.array(predictions)
     test_end = time.time()
     test_duration = test_end - test_begin
