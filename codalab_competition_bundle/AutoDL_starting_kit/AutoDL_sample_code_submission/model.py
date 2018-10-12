@@ -36,28 +36,32 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
-class Model(algorithm.Algorithm):
-  """A neural network with no hidden layer.
+def binarized(array, threshold):
+  return (array > threshold)
 
-  Remarks:
-    1. Adam Optimizer with default setting is used as optimizer;
-    2. No validation set is used to control number of steps to train;
-    3. After each call of self.train, update self.cumulated_num_steps and an
-        estimated time per step;
-    4. Number of steps to train for each call of self.train is chosen randomly
-        according to remaining time budget and estimated time per step;
-    5. Make all-zero prediction at beginning.
-  """
+class Model(algorithm.Algorithm):
+  """Construct CNN for classification."""
+
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
 
-    # Get dataset name. To be tested.
+    # Get dataset name.
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    # Classifier using model_fn
+    # Infer dataset domain and use corresponding model function
+    self.domain = self.infer_domain()
+    if self.domain == 'image':
+      model_fn = self.image_model_fn
+    elif self.domain == 'video' or self.domain == 'text':
+      model_fn = self.video_model_fn
+    else:
+      model_fn = self.model_fn
+
+    # Classifier using model_fn (see image_model_fn and other model_fn below)
     self.classifier = tf.estimator.Estimator(
-      model_fn=self.model_fn)
+      model_fn=model_fn,
+      model_dir='checkpoints_' + self.dataset_name)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -69,10 +73,11 @@ class Model(algorithm.Algorithm):
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
     self.done_training = False
+    self.early_stop_proba = 0.05
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.early_stop_proba = 0.05
+    self.num_epochs_we_want_to_train = 20 # see the function self.choose_to_stop_early() below for more details
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -102,7 +107,7 @@ class Model(algorithm.Algorithm):
 
     # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
     # to a dict. This example model only uses the first matrix bundle
-    # (i.e. matrix_bundle_0)
+    # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
     def train_input_fn():
@@ -110,7 +115,7 @@ class Model(algorithm.Algorithm):
       features, labels = iterator.get_next()
       return features, labels
 
-    if not remaining_time_budget:
+    if not remaining_time_budget: # This is never true in the competition anyway
       remaining_time_budget = 1200 # if no time limit is given, set to 20min
 
     # The following snippet of code intends to do
@@ -171,7 +176,8 @@ class Model(algorithm.Algorithm):
     Returns:
       predictions: A `numpy.ndarray` matrix of shape (sample_count, output_dim).
           here `sample_count` is the number of examples in this dataset as test
-          set.
+          set and `output_dim` is the number of labels to be predicted. The
+          values should be binary or in the interval [0,1].
     """
     if self.done_training:
       return None
@@ -185,8 +191,8 @@ class Model(algorithm.Algorithm):
       return features, labels
 
     # The following snippet of code intends to do:
-    # 0. With probability `self.early_stop_proba`, stop the whole train/predict
-    #    process for next call
+    # 0. Use the function self.choose_to_stop_early() to decide if stop the whole
+    #    train/predict process for next call
     # 1. If there is time budget limit, and some testing has already been done,
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
@@ -194,7 +200,6 @@ class Model(algorithm.Algorithm):
     if self.choose_to_stop_early():
       print_log("Oops! Choose to stop early for next call!")
       self.done_training = True
-
     test_begin = time.time()
     if remaining_time_budget and self.estimated_time_test and\
         self.estimated_time_test > remaining_time_budget:
@@ -228,12 +233,115 @@ class Model(algorithm.Algorithm):
   #### Above 3 methods (__init__, train, test) should always be implemented ####
   ##############################################################################
 
-  # Some helper functions
-  def model_fn(self, features, labels, mode):
-    """Model function to construct TensorFlow estimator.
+  # Model functions that contain info on neural network architectures
+  # Several model functions are to be implemented, for different domains
+  def image_model_fn(self, features, labels, mode):
+    """Simple CNN model for image datasets.
 
-    For details see:
-    https://www.tensorflow.org/get_started/custom_estimators#write_a_model_function
+    Two CNN layers are used then dropout.
+    """
+    col_count, row_count = self.metadata_.get_matrix_size(0)
+    sequence_size = self.metadata_.get_sequence_size()
+    output_dim = self.metadata_.get_output_size()
+
+    # Input Layer
+    # Transpose X to 4-D tensor: [batch_size, row_count, col_count, sequence_size]
+    # Normally the last axis should be channels instead of time axis, but they
+    # are both equal to 1 for images
+    input_layer = tf.transpose(features["x"], [0, 2, 3, 1])
+    # input_layer = tf.reshape(features["x"], [-1, sequence_size, row_count, col_count])
+
+    # Convolutional Layer #1
+    # Computes 32 features using a 5x5 filter with ReLU activation.
+    # Padding is added to preserve width and height. For MNIST, we have
+    # Input Tensor Shape: [batch_size, 28, 28, 1]
+    # Output Tensor Shape: [batch_size, 28, 28, 32]
+    conv1 = tf.layers.conv2d(
+        inputs=input_layer,
+        filters=32,
+        kernel_size=[5, 5],
+        padding="same",
+        activation=tf.nn.relu)
+
+    # Pooling Layer #1
+    # First max pooling layer with a 2x2 filter and stride of 2
+    # Input Tensor Shape: [batch_size, 28, 28, 32]
+    # Output Tensor Shape: [batch_size, 14, 14, 32]
+    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+
+    # Convolutional Layer #2
+    # Computes 64 features using a 5x5 filter.
+    # Padding is added to preserve width and height.
+    # Input Tensor Shape: [batch_size, 14, 14, 32]
+    # Output Tensor Shape: [batch_size, 14, 14, 64]
+    conv2 = tf.layers.conv2d(
+        inputs=pool1,
+        filters=64,
+        kernel_size=[5, 5],
+        padding="same",
+        activation=tf.nn.relu)
+
+    # Pooling Layer #2
+    # Second max pooling layer with a 2x2 filter and stride of 2
+    # Input Tensor Shape: [batch_size, 14, 14, 64]
+    # Output Tensor Shape: [batch_size, 7, 7, 64]
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+
+    # Flatten tensor into a batch of vectors
+    # Input Tensor Shape: [batch_size, 7, 7, 64]
+    # Output Tensor Shape: [batch_size, 7 * 7 * 64]
+    pool2_flat = tf.reshape(pool2,
+                            [-1, (row_count//4) * (col_count//4) * 64])
+
+    # Dense Layer
+    # Densely connected layer with 1024 neurons
+    # Input Tensor Shape: [batch_size, 7 * 7 * 64]
+    # Output Tensor Shape: [batch_size, 1024]
+    dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+
+    # Add dropout operation; 0.6 probability that element will be kept
+    dropout = tf.layers.dropout(
+        inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+
+    # Logits layer
+    # Input Tensor Shape: [batch_size, 1024]
+    # Output Tensor Shape: [batch_size, 10]
+    logits = tf.layers.dense(inputs=dropout, units=output_dim)
+
+    predictions = {
+        # Generate predictions (for PREDICT and EVAL mode)
+        "classes": tf.argmax(input=logits, axis=1),
+        # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+        # `logging_hook`.
+        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+    }
+    if mode == tf.estimator.ModeKeys.PREDICT:
+      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+    # Calculate Loss (for both TRAIN and EVAL modes)
+    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+
+    # Configure the Training Op (for TRAIN mode)
+    if mode == tf.estimator.ModeKeys.TRAIN:
+      optimizer = tf.train.AdamOptimizer()
+      train_op = optimizer.minimize(
+          loss=loss,
+          global_step=tf.train.get_global_step())
+      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+    # Add evaluation metrics (for EVAL mode)
+    eval_metric_ops = {
+        "accuracy": tf.metrics.accuracy(
+            labels=labels, predictions=predictions["classes"])}
+    return tf.estimator.EstimatorSpec(
+        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+  def video_model_fn(self, features, labels, mode):
+    """Model function for video dataset.
+
+    Sum over time axis and then use dense neural network. Here this model is
+    applied to video and text, for efficiency.
     """
 
     col_count, row_count = self.metadata_.get_matrix_size(0)
@@ -294,6 +402,79 @@ class Model(algorithm.Algorithm):
     return tf.estimator.EstimatorSpec(
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
+  def model_fn(self, features, labels, mode):
+    """Dense neural network with 0 hidden layer.
+
+    Flatten then dense. Can be applied to any task. Here we apply it to speech
+    and tabular data.
+    """
+    col_count, row_count = self.metadata_.get_matrix_size(0)
+    sequence_size = self.metadata_.get_sequence_size()
+    output_dim = self.metadata_.get_output_size()
+
+    # Construct a neural network with 0 hidden layer
+    input_layer = tf.reshape(features["x"],
+                             [-1, sequence_size*row_count*col_count])
+
+    # Replace missing values by 0
+    input_layer = tf.where(tf.is_nan(input_layer),
+                           tf.zeros_like(input_layer), input_layer)
+
+    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
+
+    # For multi-label classification, the correct loss is actually sigmoid with
+    # sigmoid_cross_entropy_with_logits, not softmax with softmax_cross_entropy.
+    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
+
+    predictions = {
+      # Generate predictions (for PREDICT and EVAL mode)
+      "classes": tf.argmax(input=logits, axis=1),
+      # "classes": binary_predictions,
+      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+      # `logging_hook`.
+      "probabilities": softmax_tensor
+      # "probabilities": sigmoid_tensor
+    }
+    if mode == tf.estimator.ModeKeys.PREDICT:
+      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+    # Calculate Loss (for both TRAIN and EVAL modes)
+    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+
+    # Configure the Training Op (for TRAIN mode)
+    if mode == tf.estimator.ModeKeys.TRAIN:
+      optimizer = tf.train.AdamOptimizer()
+      train_op = optimizer.minimize(
+          loss=loss,
+          global_step=tf.train.get_global_step())
+      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+    # Add evaluation metrics (for EVAL mode)
+    assert mode == tf.estimator.ModeKeys.EVAL
+    eval_metric_ops = {
+        "accuracy": tf.metrics.accuracy(
+            labels=labels, predictions=predictions["classes"])}
+    return tf.estimator.EstimatorSpec(
+        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+  # Some helper functions
+  def infer_domain(self):
+    col_count, row_count = self.metadata_.get_matrix_size(0)
+    sequence_size = self.metadata_.get_sequence_size()
+    output_dim = self.metadata_.get_output_size()
+    if sequence_size > 1:
+      if col_count == 1 and row_count == 1:
+        return "speech"
+      elif col_count > 1 and row_count > 1:
+        return "video"
+      else:
+        return 'text'
+    else:
+      if col_count > 1 and row_count > 1:
+        return 'image'
+      else:
+        return 'tabular'
+
   def age(self):
     return time.time() - self.birthday
 
@@ -302,7 +483,11 @@ class Model(algorithm.Algorithm):
     process).
     """
     # return self.cumulated_num_tests > 10 # Limit to make 10 predictions
-    return np.random.rand() < self.early_stop_proba
+    # return np.random.rand() < self.early_stop_proba
+    batch_size = 30 # See ingestion program: D_train.init(batch_size=30, repeat=True)
+    num_examples = self.metadata_.size()
+    num_epochs = self.cumulated_num_steps * batch_size / num_examples
+    return num_epochs > self.num_epochs_we_want_to_train # Train for 40 epochs then stop
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
