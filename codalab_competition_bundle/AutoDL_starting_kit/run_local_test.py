@@ -1,7 +1,7 @@
 # Author: Zhengying LIU
 # Creation date: 20 Sep 2018
 """This script allows participants to run local test of their method within the
-downloaded starting kit folder (to avoid using submission quota on CodaLab). To
+downloaded starting kit folder (and avoid using submission quota on CodaLab). To
 do this, run:
 ```
 python run_local_test.py -dataset_dir='./AutoDL_sample_data/' -code_dir='./AutoDL_sample_code_submission/'
