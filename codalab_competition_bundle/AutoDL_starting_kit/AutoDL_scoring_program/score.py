@@ -75,9 +75,15 @@ def autodl_bac(solution, prediction):
   ''' Compute the normalized balanced accuracy. '''
   label_num = solution.shape[1]
   score = np.zeros(label_num)
-  # Binarize prediction by thresholding at 0.5 (assumes predictions are like probabilities; we can also threshold at 0 if we want but we need to lest the participants know)
-  bin_prediction = np.zeros(prediction.shape)
-  bin_prediction[prediction >= 0.5] = 1
+  binarize=False
+  if binarize:
+    # Binarize prediction by thresholding at 0.5 (assumes predictions are like probabilities; we can also threshold at 0 if we want but we need to let the participants know)
+    bin_prediction = np.zeros(prediction.shape)
+    threshold = 0.5
+    bin_prediction[prediction >= threshold] = 1
+  else:
+    # Participant's prediction is already binary (or at least in [0,1])
+    bin_prediction = prediction
   # Compute the confusion matrix statistics
   tn = sum(np.multiply((1 - solution), (1 - bin_prediction)))
   fn = sum(np.multiply(solution, (1 - bin_prediction)))
@@ -302,8 +308,8 @@ if __name__ == "__main__":
 
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
-    if not len(solution_names) == 1: # Assert only one file is found
-      raise ValueError("Multiple solution file found!")
+    if len(solution_names) > 1: # Assert only one file is found
+      raise ValueError("Multiple solution file found: {}!".format(solution_names))
     solution_file = solution_names[0]
     # Extract the dataset name from the file name
     basename = get_basename(solution_file)
@@ -317,18 +323,10 @@ if __name__ == "__main__":
     # Moniter training processes while time budget is not attained
     while(time.time() < start + TIME_BUDGET):
       time.sleep(0.5)
-
-      # Use 'duration.txt' file to detect if ingestion program exits early
-      if os.path.isfile(duration_filepath):
-        print_log("Detected early stop of ingestion program. Stop scoring now.")
-        break
-
       # Give list of prediction files
       prediction_files = get_prediction_files(prediction_dir, basename)
-
       nb_preds_old = nb_preds[solution_file]
       nb_preds_new = len(prediction_files)
-
       if(nb_preds_new > nb_preds_old):
         now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
         print_log("[+] New prediction found. Now number of predictions made =", nb_preds_new)
@@ -340,12 +338,14 @@ if __name__ == "__main__":
                                   basename=basename,
                                   start=start)
         nb_preds[solution_file] = nb_preds_new
-
         scores[solution_file] = alc
         print_log("Current area under learning curve for {}: {:.4f}".format(basename, scores[solution_file]))
-
         # Update scores.html
         write_scores_html(score_dir)
+        # Use 'duration.txt' file to detect if ingestion program exits early
+        if os.path.isfile(duration_filepath):
+          print_log("Detected early stop of ingestion program. Stop scoring now.")
+          break
 
     # Write one last time the detailed results page without auto-refreshing
     write_scores_html(score_dir, auto_refresh=False)
