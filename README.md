@@ -10,6 +10,16 @@ The directories correspond to:
 ### TODO
 [Add description here]
 
+### To Prepare a Competition Bundle and Create a Copy of AutoDL competition
+Please run
+```
+git clone https://github.com/zhengying-liu/autodl.git
+cd autodl/codalab_competition_bundle/utilities/
+./make_competition_bundle.sh
+```
+then you'll see a zip file created in the directory `utilities/`. Upload it to a
+CodaLab server in the tag 'Create Competition' and bang!
+
 ### Usefuls links:
 - Current version of competition on [CodaLab](http://35.193.242.121/competitions/8)
 - Info on [Protocol Buffers](https://developers.google.com/protocol-buffers/)
