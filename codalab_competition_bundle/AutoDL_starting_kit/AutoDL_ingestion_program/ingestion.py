@@ -217,18 +217,6 @@ if __name__=="__main__" and debug_mode<4:
         sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
         print = partial(print, flush=True)
 
-    # # Print environment info for debugging
-    # if verbose:
-    #     print_log("sys.argv = ", sys.argv)
-    #     with open(os.path.join(program_dir, 'metadata'), 'r') as f:
-    #       print_log("Content of the metadata file: ")
-    #       print_log(f.read())
-    #     print_log("Using input_dir: " + input_dir)
-    #     print_log("Using output_dir: " + output_dir)
-    #     print_log("Using program_dir: " + program_dir)
-    #     print_log("Using submission_dir: " + submission_dir)
-    #     print_log("Ingestion datetime:", the_date)
-
     # Clear potentiablly results of previous execution (for local run)
     clean_last_output(output_dir)
 
@@ -301,9 +289,9 @@ if __name__=="__main__" and debug_mode<4:
 
         # ========= Creating a model
         print_log("Creating model...")
-        ##### To show to Andre #####
+        ##### Begin creating model #####
         M = Model(D_test.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
-        ##### To show to Andre #####
+        ###### End creating model ######
 
         # Keeping track of how many predictions are made
         prediction_order_number = 0
