@@ -52,7 +52,9 @@ for phase_number in range(2, 2 + n_datasets):
   submit_dirs.append(submit_dir)
   score_name = 'set{}_score'.format(phase_number - 1)
   score_names.append(score_name)
-  image_paths.append(glob(os.path.join(submit_dir,'learning-curve-*.png'))[0])
+  learning_curve_images = glob(os.path.join(submit_dir,'learning-curve-*.png'))
+  for image_path in learning_curve_images:
+    image_paths.append(image_path)
 
 scores = []
 
