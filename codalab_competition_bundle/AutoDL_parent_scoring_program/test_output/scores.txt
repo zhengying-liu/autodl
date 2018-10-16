@@ -3,4 +3,4 @@ set2_score: 0.0
 set3_score: 0.0
 set4_score: 0.0
 set5_score: 0.0
-Duration: -0.003264
+Duration: -0.011079
