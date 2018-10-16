@@ -52,7 +52,8 @@ class Model(algorithm.Algorithm):
     # Infer dataset domain and use corresponding model function
     self.domain = self.infer_domain()
     if self.domain == 'image':
-      model_fn = self.image_model_fn
+      # model_fn = self.image_model_fn # TODO
+      model_fn = self.model_fn
     elif self.domain == 'video' or self.domain == 'text':
       model_fn = self.video_model_fn
     else:
@@ -77,7 +78,7 @@ class Model(algorithm.Algorithm):
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.num_epochs_we_want_to_train = 20 # see the function self.choose_to_stop_early() below for more details
+    self.num_epochs_we_want_to_train = 40 # see the function self.choose_to_stop_early() below for more details
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -109,6 +110,9 @@ class Model(algorithm.Algorithm):
     # to a dict. This example model only uses the first matrix bundle
     # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
+
+    # Set batch size
+    dataset = dataset.batch(batch_size=100)
 
     def train_input_fn():
       iterator = dataset.make_one_shot_iterator()
@@ -185,6 +189,9 @@ class Model(algorithm.Algorithm):
     # Turn `features` in the tensor pair (features, labels) to a dict
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
+    # Set batch size
+    dataset = dataset.batch(batch_size=1000)
+
     def test_input_fn():
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
@@ -245,10 +252,11 @@ class Model(algorithm.Algorithm):
     output_dim = self.metadata_.get_output_size()
 
     # Input Layer
+    input_layer = features["x"]
     # Transpose X to 4-D tensor: [batch_size, row_count, col_count, sequence_size]
     # Normally the last axis should be channels instead of time axis, but they
     # are both equal to 1 for images
-    input_layer = tf.transpose(features["x"], [0, 2, 3, 1])
+    input_layer = tf.transpose(input_layer, [0, 2, 3, 1])
     # input_layer = tf.reshape(features["x"], [-1, sequence_size, row_count, col_count])
 
     # Convolutional Layer #1
@@ -420,6 +428,12 @@ class Model(algorithm.Algorithm):
     input_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
 
+    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
+    input_layer = tf.layers.dense(inputs=input_layer, units=128, activation=tf.nn.relu)
+    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
+    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
+    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
+
     logits = tf.layers.dense(inputs=input_layer, units=output_dim)
 
     # For multi-label classification, the correct loss is actually sigmoid with
@@ -487,7 +501,7 @@ class Model(algorithm.Algorithm):
     batch_size = 30 # See ingestion program: D_train.init(batch_size=30, repeat=True)
     num_examples = self.metadata_.size()
     num_epochs = self.cumulated_num_steps * batch_size / num_examples
-    return num_epochs > self.num_epochs_we_want_to_train # Train for 40 epochs then stop
+    return num_epochs > self.num_epochs_we_want_to_train # Train for certain number of epochs then stop
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
