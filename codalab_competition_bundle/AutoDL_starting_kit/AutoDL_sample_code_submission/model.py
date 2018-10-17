@@ -36,9 +36,6 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
-def binarized(array, threshold):
-  return (array > threshold)
-
 class Model(algorithm.Algorithm):
   """Construct CNN for classification."""
 
@@ -52,8 +49,7 @@ class Model(algorithm.Algorithm):
     # Infer dataset domain and use corresponding model function
     self.domain = self.infer_domain()
     if self.domain == 'image':
-      # model_fn = self.image_model_fn # TODO
-      model_fn = self.model_fn
+      model_fn = self.image_model_fn
     elif self.domain == 'video' or self.domain == 'text':
       model_fn = self.video_model_fn
     else:
@@ -78,7 +74,7 @@ class Model(algorithm.Algorithm):
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.num_epochs_we_want_to_train = 40 # see the function self.choose_to_stop_early() below for more details
+    self.num_epochs_we_want_to_train = 20 # see the function self.choose_to_stop_early() below for more details
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -114,6 +110,9 @@ class Model(algorithm.Algorithm):
     # Set batch size
     dataset = dataset.batch(batch_size=100)
 
+    # Convert to RepeatDataset
+    dataset = dataset.repeat()
+
     def train_input_fn():
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
@@ -141,7 +140,8 @@ class Model(algorithm.Algorithm):
       if self.cumulated_num_tests < np.log(max_steps) / np.log(2):
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        steps_to_train = np.random.randint(1, max_steps // 2)
+        # steps_to_train = np.random.randint(1, max_steps // 2)
+        steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
             "Estimated time for training per step: {:.2f}, ".format(self.estimated_time_per_step) +\
@@ -190,7 +190,7 @@ class Model(algorithm.Algorithm):
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
     # Set batch size
-    dataset = dataset.batch(batch_size=1000)
+    dataset = dataset.batch(batch_size=100)
 
     def test_input_fn():
       iterator = dataset.make_one_shot_iterator()
@@ -243,10 +243,7 @@ class Model(algorithm.Algorithm):
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
   def image_model_fn(self, features, labels, mode):
-    """Simple CNN model for image datasets.
-
-    Two CNN layers are used then dropout.
-    """
+    """Medium CNN model for image datasets."""
     col_count, row_count = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
@@ -256,79 +253,43 @@ class Model(algorithm.Algorithm):
     # Transpose X to 4-D tensor: [batch_size, row_count, col_count, sequence_size]
     # Normally the last axis should be channels instead of time axis, but they
     # are both equal to 1 for images
-    input_layer = tf.transpose(input_layer, [0, 2, 3, 1])
-    # input_layer = tf.reshape(features["x"], [-1, sequence_size, row_count, col_count])
-
-    # Convolutional Layer #1
-    # Computes 32 features using a 5x5 filter with ReLU activation.
-    # Padding is added to preserve width and height. For MNIST, we have
-    # Input Tensor Shape: [batch_size, 28, 28, 1]
-    # Output Tensor Shape: [batch_size, 28, 28, 32]
-    conv1 = tf.layers.conv2d(
-        inputs=input_layer,
-        filters=32,
-        kernel_size=[5, 5],
-        padding="same",
-        activation=tf.nn.relu)
-
-    # Pooling Layer #1
-    # First max pooling layer with a 2x2 filter and stride of 2
-    # Input Tensor Shape: [batch_size, 28, 28, 32]
-    # Output Tensor Shape: [batch_size, 14, 14, 32]
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
-
-    # Convolutional Layer #2
-    # Computes 64 features using a 5x5 filter.
-    # Padding is added to preserve width and height.
-    # Input Tensor Shape: [batch_size, 14, 14, 32]
-    # Output Tensor Shape: [batch_size, 14, 14, 64]
-    conv2 = tf.layers.conv2d(
-        inputs=pool1,
-        filters=64,
-        kernel_size=[5, 5],
-        padding="same",
-        activation=tf.nn.relu)
-
-    # Pooling Layer #2
-    # Second max pooling layer with a 2x2 filter and stride of 2
-    # Input Tensor Shape: [batch_size, 14, 14, 64]
-    # Output Tensor Shape: [batch_size, 7, 7, 64]
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-
-    # Flatten tensor into a batch of vectors
-    # Input Tensor Shape: [batch_size, 7, 7, 64]
-    # Output Tensor Shape: [batch_size, 7 * 7 * 64]
-    pool2_flat = tf.reshape(pool2,
-                            [-1, (row_count//4) * (col_count//4) * 64])
-
-    # Dense Layer
-    # Densely connected layer with 1024 neurons
-    # Input Tensor Shape: [batch_size, 7 * 7 * 64]
-    # Output Tensor Shape: [batch_size, 1024]
-    dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
-
-    # Add dropout operation; 0.6 probability that element will be kept
-    dropout = tf.layers.dropout(
-        inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-
-    # Logits layer
-    # Input Tensor Shape: [batch_size, 1024]
-    # Output Tensor Shape: [batch_size, 10]
-    logits = tf.layers.dense(inputs=dropout, units=output_dim)
+    hidden_layer = tf.transpose(input_layer, [0, 2, 3, 1])
+    # At begining number of filters = 32
+    num_filters = 32
+    while True:
+      hidden_layer = tf.layers.conv2d(
+          inputs=hidden_layer,
+          filters=num_filters,
+          kernel_size=[3, 3],
+          strides=(1, 1),
+          padding="same",
+          activation=tf.nn.relu)
+      hidden_layer = tf.layers.max_pooling2d(inputs=hidden_layer, pool_size=[2, 2], strides=2)
+      num_rows = hidden_layer.shape[1]
+      num_columns = hidden_layer.shape[2]
+      num_filters *= 2 # Double number of filters each time
+      if num_rows == 1 or num_columns == 1:
+        break
+    hidden_layer = tf.layers.flatten(hidden_layer)
+    hidden_layer = tf.layers.dense(inputs=hidden_layer, units=1024, activation=tf.nn.relu)
+    hidden_layer = tf.layers.dropout(
+        inputs=hidden_layer, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN)
+    logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
+    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
     predictions = {
         # Generate predictions (for PREDICT and EVAL mode)
         "classes": tf.argmax(input=logits, axis=1),
-        # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+        # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
         # `logging_hook`.
-        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+        "probabilities": sigmoid_tensor
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+    # For multi-label classification, a correct loss is sigmoid cross entropy
+    loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -356,43 +317,28 @@ class Model(algorithm.Algorithm):
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
+    # Input Layer
+    input_layer = features["x"]
     # Sum over time axis
-    input_layer = tf.reduce_sum(features['x'], axis=1)
-
-    # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(input_layer,
-                             [-1, row_count*col_count])
-
-    # Replace missing values by 0
-    input_layer = tf.where(tf.is_nan(input_layer),
-                           tf.zeros_like(input_layer), input_layer)
-
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
-
-    # For multi-label classification, the correct loss is actually sigmoid with
-    # sigmoid_cross_entropy_with_logits, not softmax with
-    # softmax_cross_entropy.
-    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
-
-    # sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
-    # threshold = 0.5
-    # binary_predictions = tf.cast(tf.greater(sigmoid_tensor, threshold), tf.int32)
+    hidden_layer = tf.reduce_sum(features['x'], axis=1, keepdims=True)
+    hidden_layer = tf.layers.flatten(hidden_layer)
+    logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
+    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
       "classes": tf.argmax(input=logits, axis=1),
       # "classes": binary_predictions,
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+      # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
       # `logging_hook`.
-      "probabilities": softmax_tensor
-      # "probabilities": sigmoid_tensor
+      "probabilities": sigmoid_tensor
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+    # For multi-label classification, a correct loss is sigmoid cross entropy
+    loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -434,26 +380,23 @@ class Model(algorithm.Algorithm):
     input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
     input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
-
-    # For multi-label classification, the correct loss is actually sigmoid with
-    # sigmoid_cross_entropy_with_logits, not softmax with softmax_cross_entropy.
-    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
+    logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
+    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
       "classes": tf.argmax(input=logits, axis=1),
       # "classes": binary_predictions,
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+      # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
       # `logging_hook`.
-      "probabilities": softmax_tensor
-      # "probabilities": sigmoid_tensor
+      "probabilities": sigmoid_tensor
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
+    # For multi-label classification, a correct loss is sigmoid cross entropy
+    loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -508,3 +451,18 @@ def print_log(*content):
   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
   print("MODEL INFO: " + str(now)+ " ", end='')
   print(*content)
+
+def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
+  """Re-implementation of this function:
+    https://www.tensorflow.org/api_docs/python/tf/nn/sigmoid_cross_entropy_with_logits
+
+  Let z = labels, x = logits, then return the sigmoid cross entropy
+    max(x, 0) - x * z + log(1 + exp(-abs(x)))
+  (Then sum over all classes.)
+  """
+  labels = tf.cast(labels, dtype=tf.float32)
+  relu_logits = tf.nn.relu(logits)
+  exp_logits = tf.exp(- tf.abs(logits))
+  sigmoid_logits = tf.log(1 + exp_logits)
+  element_wise_xent = relu_logits - labels * logits + sigmoid_logits
+  return tf.reduce_sum(element_wise_xent)
