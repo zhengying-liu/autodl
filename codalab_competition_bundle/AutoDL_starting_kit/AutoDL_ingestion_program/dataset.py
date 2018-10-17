@@ -92,7 +92,7 @@ class AutoDLDataset(object):
      on the features and labels.
   """
 
-  def __init__(self, dataset_name, repeat=True):
+  def __init__(self, dataset_name):
     """Construct an AutoDL Dataset.
 
     Args:
@@ -102,9 +102,6 @@ class AutoDLDataset(object):
     self.metadata_ = AutoDLMetadata(dataset_name)
     self._create_dataset()
     self.dataset_ = self.dataset_.map(self._parse_function)
-    # self.dataset_ = self.dataset_.batch(batch_size)
-    if repeat:
-      self.dataset_ = self.dataset_.repeat()
 
   def get_dataset(self):
     """Returns a tf.data.dataset object."""
@@ -207,14 +204,6 @@ class AutoDLDataset(object):
                       dataset_file_pattern(self.dataset_name_) + "'.")
       logging.info("Number of training files: %s.", str(len(files)))
       self.dataset_ = tf.data.TFRecordDataset(files)
-
-  # def init(self, batch_size=30, repeat=True):
-  #   self._create_dataset()
-  #   self.dataset_ = self.dataset_.map(self._parse_function)
-  #   # self.dataset_ = self.dataset_.batch(batch_size)
-  #   if repeat:
-  #     self.dataset_ = self.dataset_.repeat()
-
 
 def main(argv):
   del argv  # Unused.
