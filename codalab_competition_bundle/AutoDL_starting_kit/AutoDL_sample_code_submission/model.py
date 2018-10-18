@@ -134,10 +134,11 @@ class Model(algorithm.Algorithm):
         tentative_estimated_time_test = 50 # conservative estimation for test
       max_steps = int((remaining_time_budget - tentative_estimated_time_test) / self.estimated_time_per_step)
       max_steps = max(max_steps, 1)
-      if self.cumulated_num_tests < np.log(max_steps) / np.log(2):
+      if self.cumulated_num_tests < np.log(max_steps) / np.log(2): # If enough time (estimated)
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        steps_to_train = np.random.randint(1, max_steps // 2)
+        # steps_to_train = np.random.randint(1, max_steps // 2)
+        steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
             "Estimated time for training per step: {:.2f}, ".format(self.estimated_time_per_step) +\
@@ -178,6 +179,8 @@ class Model(algorithm.Algorithm):
           here `sample_count` is the number of examples in this dataset as test
           set and `output_dim` is the number of labels to be predicted. The
           values should be binary or in the interval [0,1].
+          IMPORTANT: If returns None, this means that the algorithm will stop
+          training, and the whole train/test process will stop.
     """
     if self.done_training:
       return None
