@@ -49,15 +49,6 @@ class Model(algorithm.Algorithm):
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    # Infer dataset domain and use corresponding model function
-    self.domain = self.infer_domain()
-    if self.domain == 'image':
-      model_fn = self.image_model_fn
-    elif self.domain == 'video' or self.domain == 'text':
-      model_fn = self.video_model_fn
-    else:
-      model_fn = self.model_fn
-
     # Classifier using model_fn (see image_model_fn and other model_fn below)
     self.classifier = tf.estimator.Estimator(
       model_fn=model_fn,
@@ -137,7 +128,6 @@ class Model(algorithm.Algorithm):
       if self.cumulated_num_tests < np.log(max_steps) / np.log(2): # If enough time (estimated)
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        # steps_to_train = np.random.randint(1, max_steps // 2)
         steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
@@ -461,23 +451,6 @@ class Model(algorithm.Algorithm):
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
   # Some helper functions
-  def infer_domain(self):
-    col_count, row_count = self.metadata_.get_matrix_size(0)
-    sequence_size = self.metadata_.get_sequence_size()
-    output_dim = self.metadata_.get_output_size()
-    if sequence_size > 1:
-      if col_count == 1 and row_count == 1:
-        return "speech"
-      elif col_count > 1 and row_count > 1:
-        return "video"
-      else:
-        return 'text'
-    else:
-      if col_count > 1 and row_count > 1:
-        return 'image'
-      else:
-        return 'tabular'
-
   def age(self):
     return time.time() - self.birthday
 
