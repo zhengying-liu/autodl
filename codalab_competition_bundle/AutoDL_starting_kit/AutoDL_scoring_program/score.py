@@ -172,6 +172,7 @@ def draw_learning_curve(solution_file, prediction_files,
   else:
     alc = 0
   ax.fill_between(X, Y, color='cyan')
+  ax.text(X[-1], Y[-1], "{:.4f}".format(Y[-1])) # Show the latest/final score
   ax.plot(X[-2:], Y[-2:], '--') # Draw a dotted line from last prediction
   plt.title("Task: " + basename + " - Current normalized ALC: " + format(alc, '.4f'))
   plt.xlabel('time/second (log scale)')
