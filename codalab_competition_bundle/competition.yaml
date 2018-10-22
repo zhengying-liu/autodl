@@ -14,7 +14,7 @@
 # ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS,
 # MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-title: "AutoDL Challenge 2018 :: Beta Test"
+title: "AutoDL Challenge :: 2018 Autumn Hackathon"
 description: "Create a fully Automatic Deep Learning solution."
 image: AutoDL.jpg
 has_registration: False                 # We do not check participants, registration is free
@@ -44,7 +44,7 @@ phases:
         label: "All datasets"
         description: "Please make submissions by clicking on following 'Submit' button. Then you can view the submission results of your algorithm on each dataset in corresponding tab (Dataset 1, Dataset 2, etc)."
         color: orange # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         max_submissions: 100
         max_submissions_per_day: 5
         is_parallel_parent: True
@@ -58,7 +58,7 @@ phases:
         label: "Dataset 1"
         description: "This tab contains submission results of your algorithm on Dataset 1."
         color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
@@ -77,7 +77,7 @@ phases:
         label: "Dataset 2"
         description: "This tab contains submission results of your algorithm on Dataset 2."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
@@ -96,7 +96,7 @@ phases:
         label: "Dataset 3"
         description: "This tab contains submission results of your algorithm on Dataset 3."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
@@ -115,7 +115,7 @@ phases:
         label: "Dataset 4"
         description: "This tab contains submission results of your algorithm on Dataset 4."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
@@ -134,7 +134,7 @@ phases:
         label: "Dataset 5"
         description: "This tab contains submission results of your algorithm on Dataset 5."
         color: green               # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2018-08-25
+        start_date: 2018-10-22
         parent_phasenumber: 1
         is_scoring_only: False      # if false: code submission
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
