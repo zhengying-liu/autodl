@@ -7,3 +7,4 @@ cd $STARTING_KIT_DIR
 rm -rf AutoDL_scoring_output
 rm -rf AutoDL_sample_result_submission
 ls | grep checkpoints_* | xargs rm -rf
+cd $ROOT_DIR

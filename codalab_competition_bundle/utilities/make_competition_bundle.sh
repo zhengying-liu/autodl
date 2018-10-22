@@ -26,6 +26,16 @@
 #
 # and naming them xxx.zip
 
+# Clear last output
+echo 'Cleaning output files of last local execution...'
+ROOT_DIR=$(pwd)
+STARTING_KIT_DIR=$ROOT_DIR/../AutoDL_starting_kit/
+cd $STARTING_KIT_DIR
+rm -rf AutoDL_scoring_output
+rm -rf AutoDL_sample_result_submission
+ls | grep checkpoints_* | xargs rm -rf
+cd $ROOT_DIR
+
 DATE=`date "+%Y-%m-%d-%H-%M-%S"`
 DIR='tmp/'
 # Delete $DIR if exists
