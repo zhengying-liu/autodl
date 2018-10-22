@@ -36,9 +36,6 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
-def binarized(array, threshold):
-  return (array > threshold)
-
 class Model(algorithm.Algorithm):
   """Construct CNN for classification."""
 

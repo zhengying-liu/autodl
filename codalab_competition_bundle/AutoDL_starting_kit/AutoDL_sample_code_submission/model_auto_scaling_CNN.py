@@ -36,11 +36,8 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
-def binarized(array, threshold):
-  return (array > threshold)
-
 class Model(algorithm.Algorithm):
-  """Construct CNN for classification."""
+  """Construct auto-Scaling CNN (SCNN) for classification."""
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
@@ -228,7 +225,7 @@ class Model(algorithm.Algorithm):
 
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
-  def image_model_fn(self, features, labels, mode):
+  def model_fn(self, features, labels, mode):
     """Simple CNN model for image datasets.
 
     Two CNN layers are used then dropout.
@@ -324,126 +321,6 @@ class Model(algorithm.Algorithm):
       return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # Add evaluation metrics (for EVAL mode)
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-
-  def video_model_fn(self, features, labels, mode):
-    """Model function for video dataset.
-
-    Sum over time axis and then use dense neural network. Here this model is
-    applied to video and text, for efficiency.
-    """
-
-    col_count, row_count = self.metadata_.get_matrix_size(0)
-    sequence_size = self.metadata_.get_sequence_size()
-    output_dim = self.metadata_.get_output_size()
-
-    # Sum over time axis
-    input_layer = tf.reduce_sum(features['x'], axis=1)
-
-    # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(input_layer,
-                             [-1, row_count*col_count])
-
-    # Replace missing values by 0
-    input_layer = tf.where(tf.is_nan(input_layer),
-                           tf.zeros_like(input_layer), input_layer)
-
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
-
-    # For multi-label classification, the correct loss is actually sigmoid with
-    # sigmoid_cross_entropy_with_logits, not softmax with
-    # softmax_cross_entropy.
-    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
-
-    # sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
-    # threshold = 0.5
-    # binary_predictions = tf.cast(tf.greater(sigmoid_tensor, threshold), tf.int32)
-
-    predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
-      # "classes": binary_predictions,
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`.
-      "probabilities": softmax_tensor
-      # "probabilities": sigmoid_tensor
-    }
-    if mode == tf.estimator.ModeKeys.PREDICT:
-      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
-
-    # Configure the Training Op (for TRAIN mode)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-      optimizer = tf.train.AdamOptimizer()
-      train_op = optimizer.minimize(
-          loss=loss,
-          global_step=tf.train.get_global_step())
-      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-
-    # Add evaluation metrics (for EVAL mode)
-    assert mode == tf.estimator.ModeKeys.EVAL
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-
-  def model_fn(self, features, labels, mode):
-    """Dense neural network with 0 hidden layer.
-
-    Flatten then dense. Can be applied to any task. Here we apply it to speech
-    and tabular data.
-    """
-    col_count, row_count = self.metadata_.get_matrix_size(0)
-    sequence_size = self.metadata_.get_sequence_size()
-    output_dim = self.metadata_.get_output_size()
-
-    # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(features["x"],
-                             [-1, sequence_size*row_count*col_count])
-
-    # Replace missing values by 0
-    input_layer = tf.where(tf.is_nan(input_layer),
-                           tf.zeros_like(input_layer), input_layer)
-
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
-
-    # For multi-label classification, the correct loss is actually sigmoid with
-    # sigmoid_cross_entropy_with_logits, not softmax with softmax_cross_entropy.
-    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
-
-    predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
-      # "classes": binary_predictions,
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`.
-      "probabilities": softmax_tensor
-      # "probabilities": sigmoid_tensor
-    }
-    if mode == tf.estimator.ModeKeys.PREDICT:
-      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-
-    # Configure the Training Op (for TRAIN mode)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-      optimizer = tf.train.AdamOptimizer()
-      train_op = optimizer.minimize(
-          loss=loss,
-          global_step=tf.train.get_global_step())
-      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-
-    # Add evaluation metrics (for EVAL mode)
-    assert mode == tf.estimator.ModeKeys.EVAL
     eval_metric_ops = {
         "accuracy": tf.metrics.accuracy(
             labels=labels, predictions=predictions["classes"])}

@@ -32,8 +32,8 @@ import numpy as np
 import algorithm
 
 class Model(algorithm.Algorithm):
-  """Return all-zero predictions.
-  """
+  """Return all-zero predictions."""
+
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
     self.no_more_training = False
