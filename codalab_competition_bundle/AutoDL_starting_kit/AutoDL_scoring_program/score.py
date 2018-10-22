@@ -296,7 +296,8 @@ if __name__ == "__main__":
 
 
     # Create the output directory, if it does not already exist and open output files
-    os.makedirs(score_dir, exist_ok=True)
+    if not os.path.isdir(score_dir):
+      os.mkdir(score_dir)
     score_file = open(os.path.join(score_dir, 'scores.txt'), 'w')
     detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
     # Initialize detailed_results.html
