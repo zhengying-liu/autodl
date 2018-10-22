@@ -137,7 +137,6 @@ class Model(algorithm.Algorithm):
       if self.cumulated_num_tests < np.log(max_steps) / np.log(2): # If enough time (estimated)
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        # steps_to_train = np.random.randint(1, max_steps // 2)
         steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
