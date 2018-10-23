@@ -115,8 +115,8 @@ class Model(algorithm.Algorithm):
     # 2. Otherwise, estimate training time per step and time needed for test,
     #    then compare to remaining time budget to compute a potential maximum
     #    number of steps (max_steps) that can be trained within time budget;
-    # 3. Choose a number (steps_to_train) between 0 and max_steps and train for
-    #    this many steps. Double it each time.
+    # 3. Double steps_to_train each time. When it's larger than max_steps,
+    #    stop training
     if not self.estimated_time_per_step:
       steps_to_train = 1
     else:
@@ -129,7 +129,7 @@ class Model(algorithm.Algorithm):
       if self.cumulated_num_tests < np.log(max_steps) / np.log(2):
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        steps_to_train = np.random.randint(1, max_steps // 2)
+        steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
             "Estimated time for training per step: {:.2f}, ".format(self.estimated_time_per_step) +\
