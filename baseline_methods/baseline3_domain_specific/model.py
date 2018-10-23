@@ -119,8 +119,8 @@ class Model(algorithm.Algorithm):
     # 2. Otherwise, estimate training time per step and time needed for test,
     #    then compare to remaining time budget to compute a potential maximum
     #    number of steps (max_steps) that can be trained within time budget;
-    # 3. Choose a number (steps_to_train) between 0 and max_steps and train for
-    #    this many steps. Double it each time.
+    # 3. Double steps_to_train each time. When it's larger than max_steps,
+    #    stop training
     if not self.estimated_time_per_step:
       steps_to_train = 1
     else:
@@ -590,6 +590,13 @@ class Model(algorithm.Algorithm):
     num_examples = self.metadata_.size()
     num_epochs = self.cumulated_num_steps * batch_size / num_examples
     return num_epochs > self.num_epochs_we_want_to_train # Train for certain number of epochs then stop
+
+  def image_model_fn(self, features, labels, mode):
+    """Simple CNN model for image datasets.
+
+    Two CNN layers are used then dropout.
+    """
+
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""

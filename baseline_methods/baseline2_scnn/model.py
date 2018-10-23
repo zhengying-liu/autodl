@@ -37,24 +37,19 @@ import numpy as np
 np.random.seed(42)
 
 class Model(algorithm.Algorithm):
-  """A neural network with no hidden layer.
+  """Construct auto-Scaling CNN for classification."""
 
-  Remarks:
-    1. Adam Optimizer with default setting is used as optimizer;
-    2. No validation set is used to control number of steps to train;
-    3. After each call of self.train, update self.cumulated_num_steps and an
-        estimated time per step;
-  """
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
 
-    # Get dataset name. To be tested.
+    # Get dataset name.
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    # Classifier using model_fn
+    # Classifier using model_fn (see image_model_fn and other model_fn below)
     self.classifier = tf.estimator.Estimator(
-      model_fn=self.model_fn)
+      model_fn=model_fn,
+      model_dir='checkpoints_' + self.dataset_name)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -66,10 +61,11 @@ class Model(algorithm.Algorithm):
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
     self.done_training = False
+    self.early_stop_proba = 0.05
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.early_stop_proba = 0.05
+    self.num_epochs_we_want_to_train = 20 # see the function self.choose_to_stop_early() below for more details
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -82,11 +78,10 @@ class Model(algorithm.Algorithm):
       dataset: a `tf.data.Dataset` object. Each example is of the form
             (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
           where each matrix bundle is a tf.Tensor of shape
-            (batch_size, sequence_size, row_count, col_count)
-          with default `batch_size`=30 (if you wish you can unbatch and have any
-          batch size you want). `labels` is a tf.Tensor of shape
-            (batch_size, output_dim)
-          The variable `output_dim` represents number of classes of this
+            (batch_size, sequence_size, row_count, col_count).
+          The variable `labels` is a tf.Tensor of shape
+            (batch_size, output_dim,)
+          where `output_dim` represents number of classes of this
           multilabel classification task. For the first version of AutoDL
           challenge, the number of bundles `N` will be set to 1.
 
@@ -99,7 +94,7 @@ class Model(algorithm.Algorithm):
 
     # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
     # to a dict. This example model only uses the first matrix bundle
-    # (i.e. matrix_bundle_0)
+    # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
     def train_input_fn():
@@ -107,7 +102,7 @@ class Model(algorithm.Algorithm):
       features, labels = iterator.get_next()
       return features, labels
 
-    if not remaining_time_budget:
+    if not remaining_time_budget: # This is never true in the competition anyway
       remaining_time_budget = 1200 # if no time limit is given, set to 20min
 
     # The following snippet of code intends to do
@@ -115,8 +110,8 @@ class Model(algorithm.Algorithm):
     # 2. Otherwise, estimate training time per step and time needed for test,
     #    then compare to remaining time budget to compute a potential maximum
     #    number of steps (max_steps) that can be trained within time budget;
-    # 3. Double steps_to_train each time. When it's larger than max_steps,
-    #    stop training
+    # 3. Choose a number (steps_to_train) between 0 and max_steps and train for
+    #    this many steps. Double it each time.
     if not self.estimated_time_per_step:
       steps_to_train = 1
     else:
@@ -129,7 +124,7 @@ class Model(algorithm.Algorithm):
       if self.cumulated_num_tests < np.log(max_steps) / np.log(2):
         steps_to_train = int(2 ** self.cumulated_num_tests) # Double steps_to_train after each test
       else:
-        steps_to_train = np.random.randint(1, max_steps // 2)
+        steps_to_train = 0
     if steps_to_train <= 0:
       print_log("Not enough time remaining for training. " +\
             "Estimated time for training per step: {:.2f}, ".format(self.estimated_time_per_step) +\
@@ -168,7 +163,12 @@ class Model(algorithm.Algorithm):
     Returns:
       predictions: A `numpy.ndarray` matrix of shape (sample_count, output_dim).
           here `sample_count` is the number of examples in this dataset as test
-          set.
+          set and `output_dim` is the number of labels to be predicted. The
+          values should be binary or in the interval [0,1].
+          IMPORTANT: if returns None, this means that the algorithm
+          chooses to stop training, and the whole train/test will stop. The
+          performance of the last prediction will be used to compute area under
+          learning curve.
     """
     if self.done_training:
       return None
@@ -182,8 +182,8 @@ class Model(algorithm.Algorithm):
       return features, labels
 
     # The following snippet of code intends to do:
-    # 0. With probability `self.early_stop_proba`, stop the whole train/predict
-    #    process for next call
+    # 0. Use the function self.choose_to_stop_early() to decide if stop the whole
+    #    train/predict process for next call
     # 1. If there is time budget limit, and some testing has already been done,
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
@@ -191,7 +191,6 @@ class Model(algorithm.Algorithm):
     if self.choose_to_stop_early():
       print_log("Oops! Choose to stop early for next call!")
       self.done_training = True
-
     test_begin = time.time()
     if remaining_time_budget and self.estimated_time_test and\
         self.estimated_time_test > remaining_time_budget:
@@ -225,55 +224,48 @@ class Model(algorithm.Algorithm):
   #### Above 3 methods (__init__, train, test) should always be implemented ####
   ##############################################################################
 
-  # Some helper functions
+  # Model functions that contain info on neural network architectures
+  # Several model functions are to be implemented, for different domains
   def model_fn(self, features, labels, mode):
-    """Model function to construct TensorFlow estimator.
+    """Dense neural network with 0 hidden layer.
 
-    For details see:
-    https://www.tensorflow.org/get_started/custom_estimators#write_a_model_function
+    Flatten then dense. Can be applied to any task. Here we apply it to speech
+    and tabular data.
     """
-
     col_count, row_count = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
-    # Sum over time axis
-    input_layer = tf.reduce_sum(features['x'], axis=1)
-
     # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(input_layer,
-                             [-1, row_count*col_count])
+    input_layer = tf.flatten(features["x"])
 
     # Replace missing values by 0
     input_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
 
-    logits = tf.layers.dense(inputs=input_layer, units=output_dim)
+    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
+    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
+    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
+    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    # For multi-label classification, the correct loss is actually sigmoid with
-    # sigmoid_cross_entropy_with_logits, not softmax with
-    # softmax_cross_entropy.
-    softmax_tensor = tf.nn.softmax(logits, name="softmax_tensor")
-
-    # sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
-    # threshold = 0.5
-    # binary_predictions = tf.cast(tf.greater(sigmoid_tensor, threshold), tf.int32)
+    logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
+    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
       "classes": tf.argmax(input=logits, axis=1),
       # "classes": binary_predictions,
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
+      # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
       # `logging_hook`.
-      "probabilities": softmax_tensor
-      # "probabilities": sigmoid_tensor
+      "probabilities": sigmoid_tensor
     }
+
     if mode == tf.estimator.ModeKeys.PREDICT:
       return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=labels, logits=logits)
-    # loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+    # For multi-label classification, a correct loss is sigmoid cross entropy
+    loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -299,10 +291,29 @@ class Model(algorithm.Algorithm):
     process).
     """
     # return self.cumulated_num_tests > 10 # Limit to make 10 predictions
-    return np.random.rand() < self.early_stop_proba
+    # return np.random.rand() < self.early_stop_proba
+    batch_size = 30 # See ingestion program: D_train.init(batch_size=30, repeat=True)
+    num_examples = self.metadata_.size()
+    num_epochs = self.cumulated_num_steps * batch_size / num_examples
+    return num_epochs > self.num_epochs_we_want_to_train # Train for certain number of epochs then stop
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
   print("MODEL INFO: " + str(now)+ " ", end='')
   print(*content)
+
+def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
+  """Re-implementation of this function:
+    https://www.tensorflow.org/api_docs/python/tf/nn/sigmoid_cross_entropy_with_logits
+
+  Let z = labels, x = logits, then return the sigmoid cross entropy
+    max(x, 0) - x * z + log(1 + exp(-abs(x)))
+  (Then sum over all classes.)
+  """
+  labels = tf.cast(labels, dtype=tf.float32)
+  relu_logits = tf.nn.relu(logits)
+  exp_logits = tf.exp(- tf.abs(logits))
+  sigmoid_logits = tf.log(1 + exp_logits)
+  element_wise_xent = relu_logits - labels * logits + sigmoid_logits
+  return tf.reduce_sum(element_wise_xent)
