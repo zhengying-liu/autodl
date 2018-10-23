@@ -45,7 +45,8 @@ def get_path_to_scoring_program(starting_kit_dir):
 if __name__ == '__main__':
   dataset_dir = FLAGS.dataset_dir
   code_dir = FLAGS.code_dir
-  starting_kit_dir = './'
+  # Current directory containing this script
+  starting_kit_dir = os.path.dirname(os.path.realpath(__file__))
   path_ingestion = get_path_to_ingestion_program(starting_kit_dir)
   path_scoring = get_path_to_scoring_program(starting_kit_dir)
 
