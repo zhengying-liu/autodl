@@ -226,11 +226,11 @@ class Model(algorithm.Algorithm):
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
   def model_fn(self, features, labels, mode):
-    """Simple CNN model for image datasets.
+    """Auto-Scaling CNN model for all datasets.
 
-    Two CNN layers are used then dropout.
+    3D CNN with frame sub-sampling.
     """
-    col_count, row_count = self.metadata_.get_matrix_size(0)
+    row_count, col_count  = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
