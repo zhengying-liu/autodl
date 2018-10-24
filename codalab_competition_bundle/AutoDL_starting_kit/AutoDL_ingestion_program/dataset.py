@@ -39,7 +39,7 @@ def metadata_filename(dataset_name):
 
 def dataset_file_pattern(dataset_name):
   return os.path.join(FLAGS.dataset_dir, dataset_name, "sample*")
-  
+
 
 class AutoDLMetadata(object):
   """AutoDL data specification."""
