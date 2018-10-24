@@ -46,10 +46,12 @@ class Model(algorithm.Algorithm):
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
+    model_fn = self.model_fn
+
     # Classifier using model_fn (see image_model_fn and other model_fn below)
     self.classifier = tf.estimator.Estimator(
       model_fn=model_fn,
-      model_dir='checkpoints_' + self.dataset_name)
+      model_dir='/tmp/checkpoints_' + self.dataset_name)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -61,7 +63,6 @@ class Model(algorithm.Algorithm):
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
     self.done_training = False
-    self.early_stop_proba = 0.05
     ################################################
     # Important critical number for early stopping #
     ################################################
@@ -227,26 +228,42 @@ class Model(algorithm.Algorithm):
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
   def model_fn(self, features, labels, mode):
-    """Dense neural network with 0 hidden layer.
+    """Auto-Scaling CNN model for all datasets.
 
-    Flatten then dense. Can be applied to any task. Here we apply it to speech
-    and tabular data.
+    3D CNN with frame sub-sampling and/or rescaling.
     """
-    col_count, row_count = self.metadata_.get_matrix_size(0)
+    row_count, col_count  = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
-    # Construct a neural network with 0 hidden layer
-    input_layer = tf.flatten(features["x"])
+    # Input layer of shape [batch_size, sequence_size, row_count, col_count]
+    # Add last dimension for channels (only one channel)
+    input_layer = tf.reshape(features["x"],
+                             [-1, sequence_size, row_count, col_count, 1])
+    print("*"*50, "input_layer", input_layer.shape)
 
     # Replace missing values by 0
-    input_layer = tf.where(tf.is_nan(input_layer),
+    hidden_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
+    # hidden_layer = tf.transpose(hidden_layer, [0, 2, 3, 1])
 
-    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
-    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
-    input_layer = tf.layers.dense(inputs=input_layer, units=64, activation=tf.nn.relu)
-    input_layer = tf.layers.dropout(inputs=input_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
+    # Rescale the 3D tensor such that each example has reasonable number of
+    # entries
+    REASONABLE_NUM_ENTRIES = 1000
+    BATCH_SIZE = 30
+    while(get_num_entries(hidden_layer) > REASONABLE_NUM_ENTRIES):
+      shape = hidden_layer.shape
+      print("*"*50, "get_num_entries(hidden_layer)", get_num_entries(hidden_layer)) # TODO
+      pool_size = (min(2, shape[1]), min(2, shape[2]), min(2, shape[3]))
+      hidden_layer= tf.layers.average_pooling3d(inputs=hidden_layer,
+                                                pool_size=pool_size,
+                                                strides=pool_size,
+                                                padding='valid',
+                                                data_format='channels_last')
+
+    hidden_layer = tf.layers.flatten(hidden_layer)
+    hidden_layer = tf.layers.dense(inputs=hidden_layer, units=64, activation=tf.nn.relu)
+    hidden_layer = tf.layers.dropout(inputs=hidden_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
     sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
@@ -317,3 +334,20 @@ def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
   sigmoid_logits = tf.log(1 + exp_logits)
   element_wise_xent = relu_logits - labels * logits + sigmoid_logits
   return tf.reduce_sum(element_wise_xent)
+
+def get_num_entries(tensor):
+  """Return number of entries for a TensorFlow tensor.
+
+  Args:
+    tensor: a tf.Tensor or tf.SparseTensor object of shape
+        (batch_size, sequence_size, row_count, col_count)
+  Returns:
+    num_entries: number of entries of each example, which is equal to
+        sequence_size * row_count * col_count
+  """
+  tensor_shape = tensor.shape
+  assert(len(tensor_shape) > 1)
+  num_entries  = 1
+  for i in tensor_shape[1:]:
+    num_entries *= int(i)
+  return num_entries
