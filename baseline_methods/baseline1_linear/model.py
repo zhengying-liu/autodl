@@ -54,7 +54,8 @@ class Model(algorithm.Algorithm):
 
     # Classifier using model_fn
     self.classifier = tf.estimator.Estimator(
-      model_fn=self.model_fn)
+      model_fn=self.model_fn,
+      model_dir='/tmp/checkpoints_' + self.dataset_name)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -145,10 +146,9 @@ class Model(algorithm.Algorithm):
       print_log("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
       train_start = time.time()
       # Start training
-      with tf.Session() as sess:
-        self.classifier.train(
-          input_fn=train_input_fn,
-          steps=steps_to_train)
+      self.classifier.train(
+        input_fn=train_input_fn,
+        steps=steps_to_train)
       train_end = time.time()
       # Update for time budget managing
       train_duration = train_end - train_start
