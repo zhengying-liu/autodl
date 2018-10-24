@@ -38,6 +38,10 @@ you downloaded from **Get Data** section of the challenge). On the other hand,
 you can also modify the directory containing your other sample code
 (`model.py`).
 
+WARNING: when you run local test in a Docker container, **make sure you distribute
+enough RAM** for this container. Otherwise, it's possible that certain task
+(especially when the dataset is large) will get 'Killed'.
+
 ## How to prepare a ZIP file for submission
 Zip the contents of AutoDL_sample_code_submission (without the directory structure)
 ```
