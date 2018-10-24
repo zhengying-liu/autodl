@@ -17,7 +17,7 @@ If you are new to docker, install docker from https://docs.docker.com/get-starte
 Then, at the shell, run:
 ```
 cd path/to/AutoDL_starting_kit/
-docker run -it -u root -v $(pwd):/app/codalab evariste/autodl:dockerfile bash
+docker run --memory=4g -it -u root -v $(pwd):/app/codalab evariste/autodl:dockerfile bash
 ```
 You will then be able to run the ingestion program (to produce predictions) and
 the scoring program (to evaluate your predictions) on toy sample data. In AutoDL
@@ -39,8 +39,9 @@ you can also modify the directory containing your other sample code
 (`model.py`).
 
 WARNING: when you run local test in a Docker container, **make sure you distribute
-enough RAM** for this container. Otherwise, it's possible that certain task
-(especially when the dataset is large) will get 'Killed'.
+enough RAM** (at least 4GB). Otherwise, it's possible that certain task
+(especially when the dataset is large) will get 'Killed'. You can modify memory
+allocation of Docker in 'Preferences -> Advanced'.
 
 ## How to prepare a ZIP file for submission
 Zip the contents of AutoDL_sample_code_submission (without the directory structure)
