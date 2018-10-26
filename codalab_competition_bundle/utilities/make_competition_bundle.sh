@@ -28,7 +28,8 @@
 
 # Clear last output
 echo 'Cleaning output files of last local execution...'
-ROOT_DIR=$(pwd)
+ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+echo 'Using ROOT_DIR: '$ROOT_DIR
 STARTING_KIT_DIR=$ROOT_DIR/../AutoDL_starting_kit/
 cd $STARTING_KIT_DIR
 rm -rf AutoDL_scoring_output
@@ -48,15 +49,15 @@ cp -r '../assets' $DIR
 cd .. # codalab_competition_bundle/
 
 # Begin zipping each data
-for filename in $(find . -name 'AutoDL_*' | grep -v '.zip'); do
+for filename in $(find . -name 'AutoDL_*' | grep -v '.zip\|AutoDL_starting_kit/AutoDL_'); do
   cd $filename;
-  echo $filename;
-  zip -o -r --exclude=*__pycache__* --exclude=*.DS_Store* "../utilities/"$DIR$filename .;
-  cd ..; # codalab_competition_bundle/
+  echo 'Zipping: '$filename;
+  zip -o -r --exclude=*.git* --exclude=*__pycache__* --exclude=*.DS_Store* "../utilities/"$DIR$filename .;
+  cd $ROOT_DIR/..; # codalab_competition_bundle/
 done
 
 # Zipping ingestion and scoring program
-cd AutoDL_starting_kit/
+cd $STARTING_KIT_DIR
 filename="AutoDL_ingestion_program"
 cd $filename;
 echo $filename;
