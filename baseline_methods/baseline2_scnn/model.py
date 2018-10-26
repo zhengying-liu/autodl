@@ -41,6 +41,7 @@ class Model(algorithm.Algorithm):
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
+    self.output_dim = self.metadata_.get_output_size()
 
     # Get dataset name.
     self.dataset_name = self.metadata_.get_dataset_name()\
@@ -66,7 +67,9 @@ class Model(algorithm.Algorithm):
     ################################################
     # Important critical number for early stopping #
     ################################################
-    self.num_epochs_we_want_to_train = 20 # see the function self.choose_to_stop_early() below for more details
+    self.num_epochs_we_want_to_train = max(40, self.output_dim)
+    # Depends on number of classes (output_dim)
+    # see the function self.choose_to_stop_early() below for more details
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -107,14 +110,14 @@ class Model(algorithm.Algorithm):
       remaining_time_budget = 1200 # if no time limit is given, set to 20min
 
     # The following snippet of code intends to do
-    # 1. If no training is done before, train for 1 step (one batch);
+    # 1. If no training is done before, train for 10 steps (ten batches);
     # 2. Otherwise, estimate training time per step and time needed for test,
     #    then compare to remaining time budget to compute a potential maximum
     #    number of steps (max_steps) that can be trained within time budget;
     # 3. Choose a number (steps_to_train) between 0 and max_steps and train for
     #    this many steps. Double it each time.
     if not self.estimated_time_per_step:
-      steps_to_train = 1
+      steps_to_train = 10
     else:
       if self.estimated_time_test:
         tentative_estimated_time_test = self.estimated_time_test
@@ -141,10 +144,9 @@ class Model(algorithm.Algorithm):
       print_log("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
       train_start = time.time()
       # Start training
-      with tf.Session() as sess:
-        self.classifier.train(
-          input_fn=train_input_fn,
-          steps=steps_to_train)
+      self.classifier.train(
+        input_fn=train_input_fn,
+        steps=steps_to_train)
       train_end = time.time()
       # Update for time budget managing
       train_duration = train_end - train_start
@@ -188,7 +190,7 @@ class Model(algorithm.Algorithm):
     # 1. If there is time budget limit, and some testing has already been done,
     #    but not enough remaining time for testing, then return None to stop
     # 2. Otherwise: make predictions normally, and update some
-    #    variables for time managing
+    #    variables for time management
     if self.choose_to_stop_early():
       print_log("Oops! Choose to stop early for next call!")
       self.done_training = True
@@ -200,11 +202,11 @@ class Model(algorithm.Algorithm):
             "But remaining time budget is: {:.2f}. ".format(remaining_time_budget) +\
             "Stop train/predict process by returning None.")
       return None
-
     msg_est = ""
     if self.estimated_time_test:
       msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
     print_log("Begin testing...", msg_est)
+    # Start testing (i.e. making prediction on test set)
     test_results = self.classifier.predict(input_fn=test_input_fn)
     predictions = [x['probabilities'] for x in test_results]
     has_same_length = (len({len(x) for x in predictions}) == 1)
@@ -212,6 +214,7 @@ class Model(algorithm.Algorithm):
     assert(has_same_length)
     predictions = np.array(predictions)
     test_end = time.time()
+    # Update some variables for time management
     test_duration = test_end - test_begin
     self.total_test_time += test_duration
     self.cumulated_num_tests += 1
@@ -228,9 +231,9 @@ class Model(algorithm.Algorithm):
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
   def model_fn(self, features, labels, mode):
-    """Auto-Scaling CNN model for all datasets.
+    """Auto-Scaling CNN model that can be applied to all datasets.
 
-    3D CNN with frame sub-sampling and/or rescaling.
+    3D CNN with pre-rescaling.
     """
     row_count, col_count  = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
@@ -240,28 +243,48 @@ class Model(algorithm.Algorithm):
     # Add last dimension for channels (only one channel)
     input_layer = tf.reshape(features["x"],
                              [-1, sequence_size, row_count, col_count, 1])
-    print("*"*50, "input_layer", input_layer.shape)
 
     # Replace missing values by 0
     hidden_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
-    # hidden_layer = tf.transpose(hidden_layer, [0, 2, 3, 1])
+    print_log("Shape before pre-scaling:", hidden_layer.shape)
 
-    # Rescale the 3D tensor such that each example has reasonable number of
-    # entries
-    REASONABLE_NUM_ENTRIES = 1000
-    BATCH_SIZE = 30
+    # Pre-rescaling: use 3D average pooling to rescale the 3D tensor such that
+    # each example has reasonable number of entries
+    REASONABLE_NUM_ENTRIES = 10000
+    print_log("Will rescale all 3D tensors to have less than {} entries."\
+              .format(REASONABLE_NUM_ENTRIES))
     while(get_num_entries(hidden_layer) > REASONABLE_NUM_ENTRIES):
       shape = hidden_layer.shape
-      print("*"*50, "get_num_entries(hidden_layer)", get_num_entries(hidden_layer)) # TODO
       pool_size = (min(2, shape[1]), min(2, shape[2]), min(2, shape[3]))
       hidden_layer= tf.layers.average_pooling3d(inputs=hidden_layer,
                                                 pool_size=pool_size,
                                                 strides=pool_size,
                                                 padding='valid',
                                                 data_format='channels_last')
+    print_log("Shape after pre-scaling:", hidden_layer.shape)
+
+    # After pre-rescaling, repeatedly apply 3D CNN, followed by 3D max pooling
+    # until the hidden layer has reasonable number of entries
+    num_filters = 16 # The number of filters is fixed
+    while True:
+      shape = hidden_layer.shape
+      kernel_size = [min(3, shape[1]), min(3, shape[2]), min(3, shape[3])]
+      hidden_layer = tf.layers.conv3d(inputs=hidden_layer,
+                                      filters=num_filters,
+                                      kernel_size=kernel_size)
+      pool_size = [min(2, shape[1]), min(2, shape[2]), min(2, shape[3])]
+      hidden_layer= tf.layers.max_pooling3d(inputs=hidden_layer,
+                                            pool_size=pool_size,
+                                            strides=pool_size,
+                                            padding='valid',
+                                            data_format='channels_last')
+      print_log("Shape after max-pooling:", hidden_layer.shape)
+      if get_num_entries(hidden_layer) < REASONABLE_NUM_ENTRIES:
+        break
 
     hidden_layer = tf.layers.flatten(hidden_layer)
+    print_log("Shape after flattening:", hidden_layer.shape)
     hidden_layer = tf.layers.dense(inputs=hidden_layer, units=64, activation=tf.nn.relu)
     hidden_layer = tf.layers.dropout(inputs=hidden_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -340,10 +363,10 @@ def get_num_entries(tensor):
 
   Args:
     tensor: a tf.Tensor or tf.SparseTensor object of shape
-        (batch_size, sequence_size, row_count, col_count)
+        (batch_size, sequence_size, row_count, col_count[, num_channels])
   Returns:
     num_entries: number of entries of each example, which is equal to
-        sequence_size * row_count * col_count
+        sequence_size * row_count * col_count [* num_channels]
   """
   tensor_shape = tensor.shape
   assert(len(tensor_shape) > 1)
