@@ -155,6 +155,7 @@ def clean_last_output(output_dir):
     AutoDL_sample_result_submission/
     AutoDL_scoring_output/
     checkpoints_adult/
+    /tmp/checkpoints_adult/
     ...
 
   Using this function, the user doesn't need to worry about the generated
@@ -164,15 +165,16 @@ def clean_last_output(output_dir):
     if verbose:
       print_log("Cleaning existing output_dir: {}".format(output_dir))
     shutil.rmtree(output_dir)
-  # Clean existing checkpoints
-  checkpoints_glob =\
-    os.path.abspath(os.path.join(output_dir, os.pardir, 'checkpoints*'))
-  checkpoints_dirs = tf.gfile.Glob(checkpoints_glob)
-  for checkpoints_dir in checkpoints_dirs:
-    if verbose:
-      print_log("Cleaning existing checkpoints_dir: {}"\
-                .format(checkpoints_dir))
-    shutil.rmtree(checkpoints_dir)
+  for parent_dir in ['/tmp/', os.path.join(output_dir, os.pardir)]:
+    # Clean existing checkpoints
+    checkpoints_glob =\
+      os.path.abspath(os.path.join(parent_dir, 'checkpoints*'))
+    checkpoints_dirs = tf.gfile.Glob(checkpoints_glob)
+    for checkpoints_dir in checkpoints_dirs:
+      if verbose:
+        print_log("Cleaning existing checkpoints_dir: {}"\
+                  .format(checkpoints_dir))
+      shutil.rmtree(checkpoints_dir)
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
