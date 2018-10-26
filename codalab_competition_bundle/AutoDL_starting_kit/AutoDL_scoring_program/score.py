@@ -146,11 +146,10 @@ def draw_learning_curve(solution_file, prediction_files,
     timestamps.append(timestamp)
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
-  start = sorted_pairs[0][0]
   X = [t - start + 1 for t,_ in sorted_pairs] # Since X on log scale, set first x=1
   Y = [s for _,s in sorted_pairs]
   # Add origin as the first point of the curve
-  X.insert(0, 1)
+  X.insert(0, 1) # X starts from 1 to use log
   Y.insert(0, 0)
   # Truncate X using X_max
   X_max = TIME_BUDGET
