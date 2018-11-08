@@ -165,7 +165,9 @@ def clean_last_output(output_dir):
     if verbose:
       print_log("Cleaning existing output_dir: {}".format(output_dir))
     shutil.rmtree(output_dir)
-  for parent_dir in ['/tmp/', os.path.join(output_dir, os.pardir)]:
+  model_dir = os.path.join(os.path.dirname(os.path.realpath(model.__file__)),
+                           os.pardir)
+  for parent_dir in ['/tmp/', os.path.join(output_dir, os.pardir), model_dir]:
     # Clean existing checkpoints
     checkpoints_glob =\
       os.path.abspath(os.path.join(parent_dir, 'checkpoints*'))
@@ -219,9 +221,6 @@ if __name__=="__main__" and debug_mode<4:
         sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
         print = partial(print, flush=True)
 
-    # Clear potentiablly results of previous execution (for local run)
-    clean_last_output(output_dir)
-
 	# Our libraries
     path.append(program_dir)
     path.append(submission_dir)
@@ -229,8 +228,12 @@ if __name__=="__main__" and debug_mode<4:
     path.append(submission_dir + '/AutoDL_sample_code_submission')
     import data_io
     from data_io import vprint
+    import model # participants' model.py
     from model import Model
     from dataset import AutoDLDataset # THE class of AutoDL datasets
+
+    # Clear potentiablly results of previous execution (for local run)
+    clean_last_output(output_dir)
 
     if debug_mode >= 4: # Show library version and directory structure
         data_io.show_dir(".")

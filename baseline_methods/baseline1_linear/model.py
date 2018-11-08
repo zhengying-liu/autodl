@@ -43,16 +43,24 @@ class Model(algorithm.Algorithm):
     super(Model, self).__init__(metadata)
     self.output_dim = self.metadata_.get_output_size()
 
+    # Set batch size (for both training and testing)
+    self.batch_size = 30
+
     # Get dataset name.
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
     model_fn = self.model_fn
 
+    # Directory to store checkpoints of model during training
+    model_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             os.pardir,
+                             'checkpoints_' + self.dataset_name)
+
     # Classifier using model_fn (see image_model_fn and other model_fn below)
     self.classifier = tf.estimator.Estimator(
       model_fn=model_fn,
-      model_dir='/tmp/checkpoints_' + self.dataset_name)
+      model_dir=model_dir)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -102,7 +110,7 @@ class Model(algorithm.Algorithm):
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
     # Set batch size
-    dataset = dataset.batch(batch_size=100)
+    dataset = dataset.batch(batch_size=self.batch_size)
 
     # Convert to RepeatDataset to train for several epochs
     dataset = dataset.repeat()
@@ -186,7 +194,7 @@ class Model(algorithm.Algorithm):
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
     # Set batch size
-    dataset = dataset.batch(batch_size=100)
+    dataset = dataset.batch(batch_size=self.batch_size)
 
     def test_input_fn():
       iterator = dataset.make_one_shot_iterator()
@@ -249,17 +257,20 @@ class Model(algorithm.Algorithm):
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
-    # Sum over time axis
-    input_layer = tf.reduce_sum(features['x'], axis=1)
+    input_layer = features['x']
 
-    # Construct a neural network with 0 hidden layer
-    input_layer = tf.reshape(input_layer,
-                             [-1, row_count*col_count])
+    # Sum over time axis
+    hidden_layer = tf.reduce_sum(input_layer, axis=1)
 
     # Replace missing values by 0
-    input_layer = tf.where(tf.is_nan(input_layer),
-                           tf.zeros_like(input_layer), input_layer)
+    hidden_layer = tf.where(tf.is_nan(hidden_layer),
+                           tf.zeros_like(hidden_layer), hidden_layer)
 
+    # Flatten
+    hidden_layer = tf.reshape(hidden_layer,
+                              [-1, row_count * col_count])
+
+    # Construct a neural network with 0 hidden layer (fully connected)
     logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
     sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
@@ -304,10 +315,10 @@ class Model(algorithm.Algorithm):
     """
     # return self.cumulated_num_tests > 10 # Limit to make 10 predictions
     # return np.random.rand() < self.early_stop_proba
-    batch_size = 30 # See ingestion program: D_train.init(batch_size=30, repeat=True)
+    batch_size = self.batch_size
     num_examples = self.metadata_.size()
     num_epochs = self.cumulated_num_steps * batch_size / num_examples
-    return num_epochs > self.num_epochs_we_want_to_train # Train for certain number of epochs then stop
+    return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
 
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
@@ -329,20 +340,3 @@ def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
   sigmoid_logits = tf.log(1 + exp_logits)
   element_wise_xent = relu_logits - labels * logits + sigmoid_logits
   return tf.reduce_sum(element_wise_xent)
-
-def get_num_entries(tensor):
-  """Return number of entries for a TensorFlow tensor.
-
-  Args:
-    tensor: a tf.Tensor or tf.SparseTensor object of shape
-        (batch_size, sequence_size, row_count, col_count[, num_channels])
-  Returns:
-    num_entries: number of entries of each example, which is equal to
-        sequence_size * row_count * col_count [* num_channels]
-  """
-  tensor_shape = tensor.shape
-  assert(len(tensor_shape) > 1)
-  num_entries  = 1
-  for i in tensor_shape[1:]:
-    num_entries *= int(i)
-  return num_entries
