@@ -82,9 +82,9 @@ class Model(algorithm.Algorithm):
       dataset: a `tf.data.Dataset` object. Each example is of the form
             (matrix_bundle_0, matrix_bundle_1, ..., matrix_bundle_(N-1), labels)
           where each matrix bundle is a tf.Tensor of shape
-            (batch_size, sequence_size, row_count, col_count).
+            (sequence_size, row_count, col_count).
           The variable `labels` is a tf.Tensor of shape
-            (batch_size, output_dim,)
+            (output_dim,)
           where `output_dim` represents number of classes of this
           multilabel classification task. For the first version of AutoDL
           challenge, the number of bundles `N` will be set to 1.
@@ -100,6 +100,12 @@ class Model(algorithm.Algorithm):
     # to a dict. This example model only uses the first matrix bundle
     # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
+
+    # Set batch size
+    dataset = dataset.batch(batch_size=100)
+
+    # Convert to RepeatDataset to train for several epochs
+    dataset = dataset.repeat()
 
     def train_input_fn():
       iterator = dataset.make_one_shot_iterator()
@@ -179,6 +185,9 @@ class Model(algorithm.Algorithm):
     # Turn `features` in the tensor pair (features, labels) to a dict
     dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
+    # Set batch size
+    dataset = dataset.batch(batch_size=100)
+
     def test_input_fn():
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
@@ -230,6 +239,7 @@ class Model(algorithm.Algorithm):
 
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
+
   def model_fn(self, features, labels, mode):
     """Auto-Scaling CNN model that can be applied to all datasets.
 

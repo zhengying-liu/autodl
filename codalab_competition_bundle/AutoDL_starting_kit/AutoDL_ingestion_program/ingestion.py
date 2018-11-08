@@ -275,12 +275,8 @@ if __name__=="__main__" and debug_mode<4:
         print_log("Reading training set and test set...")
 
         ##### Begin creating training set and test set #####
-        ## default batch size for training set is 30
-        ## for test test is 1000
         D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
         D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
-        D_train.init(batch_size=30, repeat=True)
-        D_test.init(batch_size=1000, repeat=False)
         ##### End creating training set and test set #####
 
         # ======== Keep track of time
