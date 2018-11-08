@@ -84,6 +84,9 @@ class AutoDLMetadata(object):
   def size(self):
     return self.metadata_.sample_count
 
+  def get_label_to_index_map(self):
+    return self.metadata_.label_to_index_map
+
 
 class AutoDLDataset(object):
   """AutoDL Datasets out of TFRecords of SequenceExamples.
