@@ -23,7 +23,7 @@ disallow_leaderboard_modifying: True    # If true, submissions cannot be changed
 enable_detailed_results: True           # True if html file written
 competition_docker_image: evariste/autodl:dockerfile # replace that by your own docker
 end_date: 2018-12-31
-admin_names: eric, guyon, Zhengying, neutralnet, tthomas63
+admin_names: eric2, guyon, Zhengying, neutralnet, tthomas63
 html:
     overview: overview.html
     evaluation: evaluation.html
