@@ -37,7 +37,7 @@ import numpy as np
 np.random.seed(42)
 
 class Model(algorithm.Algorithm):
-  """Construct auto-Scaling CNN for classification."""
+  """Construct CNN for classification."""
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
@@ -50,14 +50,18 @@ class Model(algorithm.Algorithm):
     self.dataset_name = self.metadata_.get_dataset_name()\
                           .split('/')[-2].split('.')[0]
 
-    model_fn = self.model_fn
+    # Infer dataset domain and use corresponding model function
+    self.domain = self.infer_domain()
+    # Construct the neural network according to inferred domain
+    model_fn = self.get_model_fn()
 
     # Directory to store checkpoints of model during training
     model_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              os.pardir,
                              'checkpoints_' + self.dataset_name)
 
-    # Classifier using model_fn (see image_model_fn and other model_fn below)
+    # Classifier using model_fn
+    # It'll be used for both training and testing
     self.classifier = tf.estimator.Estimator(
       model_fn=model_fn,
       model_dir=model_dir)
@@ -245,101 +249,141 @@ class Model(algorithm.Algorithm):
   #### Above 3 methods (__init__, train, test) should always be implemented ####
   ##############################################################################
 
-  # Model functions that contain info on neural network architectures
-  # Several model functions are to be implemented, for different domains
+  def neural_network_architecture(self, input_layer, mode):
+    """Construct a feed-forward neural network architecture according to
+    self.domain.
 
-  def model_fn(self, features, labels, mode):
-    """Auto-Scaling CNN model that can be applied to all datasets.
-
-    3D CNN with pre-rescaling.
+    Args:
+      input_layer: a tensor (placeholder) of shape
+            [batch_size, sequence_size, row_count, col_count].
+    Returns:
+      logits: a tensor of shape
+            [batch_size, output_dim]
+          where output_dim is equal to the number of classes. The entries should
+          be
     """
-    row_count, col_count  = self.metadata_.get_matrix_size(0)
+    # Get shape info from metadata
+    col_count, row_count = self.metadata_.get_matrix_size(0)
     sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
-    # Input layer of shape [batch_size, sequence_size, row_count, col_count]
-    # Add last dimension for channels (only one channel)
-    input_layer = tf.reshape(features["x"],
-                             [-1, sequence_size, row_count, col_count, 1])
+    ### Begin constructing neural networks for each domain ###
+    ### Tabular ###
+    if self.domain == 'tabular':
+      hidden_layer = tf.layers.flatten(input_layer)
+      hidden_layer = tf.layers.dense(inputs=hidden_layer, units=64,
+                                     activation=tf.nn.relu)
+      hidden_layer =\
+        tf.layers.dropout(inputs=hidden_layer, rate=0.15,
+                          training=mode == tf.estimator.ModeKeys.TRAIN)
+      logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
 
-    # Replace missing values by 0
-    hidden_layer = tf.where(tf.is_nan(input_layer),
-                           tf.zeros_like(input_layer), input_layer)
-    print_log("Shape before pre-scaling:", hidden_layer.shape)
 
-    # Pre-rescaling: use 3D average pooling to rescale the 3D tensor such that
-    # each example has reasonable number of entries
-    REASONABLE_NUM_ENTRIES = 10000
-    print_log("Will rescale all 3D tensors to have less than {} entries."\
-              .format(REASONABLE_NUM_ENTRIES))
-    while(get_num_entries(hidden_layer) > REASONABLE_NUM_ENTRIES):
-      shape = hidden_layer.shape
-      pool_size = (min(2, shape[1]), min(2, shape[2]), min(2, shape[3]))
-      hidden_layer= tf.layers.average_pooling3d(inputs=hidden_layer,
-                                                pool_size=pool_size,
-                                                strides=pool_size,
-                                                padding='valid',
-                                                data_format='channels_last')
-    print_log("Shape after pre-scaling:", hidden_layer.shape)
+    ### Video ###
+    elif self.domain == 'video':
+      hidden_layer = tf.layers.flatten(input_layer)
+      logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
 
-    # After pre-rescaling, repeatedly apply 3D CNN, followed by 3D max pooling
-    # until the hidden layer has reasonable number of entries
-    num_filters = 16 # The number of filters is fixed
-    while True:
-      shape = hidden_layer.shape
-      kernel_size = [min(3, shape[1]), min(3, shape[2]), min(3, shape[3])]
-      hidden_layer = tf.layers.conv3d(inputs=hidden_layer,
-                                      filters=num_filters,
-                                      kernel_size=kernel_size)
-      pool_size = [min(2, shape[1]), min(2, shape[2]), min(2, shape[3])]
-      hidden_layer= tf.layers.max_pooling3d(inputs=hidden_layer,
-                                            pool_size=pool_size,
-                                            strides=pool_size,
-                                            padding='valid',
-                                            data_format='channels_last')
-      print_log("Shape after max-pooling:", hidden_layer.shape)
-      if get_num_entries(hidden_layer) < REASONABLE_NUM_ENTRIES:
-        break
 
-    hidden_layer = tf.layers.flatten(hidden_layer)
-    print_log("Shape after flattening:", hidden_layer.shape)
-    hidden_layer = tf.layers.dense(inputs=hidden_layer, units=64, activation=tf.nn.relu)
-    hidden_layer = tf.layers.dropout(inputs=hidden_layer, rate=0.15, training=mode == tf.estimator.ModeKeys.TRAIN)
+    ### Speech ###
+    elif self.domain == 'speech':
+      raise NotImplementedError("No method implemented for speech.")
 
-    logits = tf.layers.dense(inputs=hidden_layer, units=output_dim)
-    sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
 
-    predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
-      # "classes": binary_predictions,
-      # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`.
-      "probabilities": sigmoid_tensor
-    }
+    ### Text ###
+    elif self.domain == 'text':
+      raise NotImplementedError("No method implemented for text.")
 
-    if mode == tf.estimator.ModeKeys.PREDICT:
-      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    # For multi-label classification, a correct loss is sigmoid cross entropy
-    loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+    ### Image ###
+    elif self.domain == 'image':
+      raise NotImplementedError("No method implemented for image.")
 
-    # Configure the Training Op (for TRAIN mode)
-    if mode == tf.estimator.ModeKeys.TRAIN:
-      optimizer = tf.train.AdamOptimizer()
-      train_op = optimizer.minimize(
-          loss=loss,
-          global_step=tf.train.get_global_step())
-      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-    # Add evaluation metrics (for EVAL mode)
-    assert mode == tf.estimator.ModeKeys.EVAL
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    ### Others ### (not impossible in general)
+    else:
+      raise ValueError("Wrong domain value: {}. Should be".format(self.domain) +
+                       " in ['tabular', 'video', 'speech', 'text', 'image'].")
+    return logits
+
+  def get_model_fn(self):
+    """Return a model function with signature model_fn(features, labels, mode)
+    using the function self.neural_network_architecture.
+    """
+    def model_fn(features, labels, mode):
+      print_log("Constructing model function for {} dataset..."\
+                .format(self.domain))
+
+      col_count, row_count = self.metadata_.get_matrix_size(0)
+      sequence_size = self.metadata_.get_sequence_size()
+      output_dim = self.metadata_.get_output_size()
+
+      # Input Layer
+      input_layer = features["x"]
+      input_layer = tf.reshape(input_layer,
+                               [-1, sequence_size, row_count, col_count])
+
+      ### The whole network architecture is constructed in this line ###
+      logits = self.neural_network_architecture(input_layer, mode)
+      ##################################################################
+
+      sigmoid_tensor = tf.nn.sigmoid(logits, name="sigmoid_tensor")
+
+      predictions = {
+        # Generate predictions (for PREDICT and EVAL mode)
+        "classes": tf.argmax(input=logits, axis=1),
+        # "classes": binary_predictions,
+        # Add `sigmoid_tensor` to the graph. It is used for PREDICT and by the
+        # `logging_hook`.
+        "probabilities": sigmoid_tensor
+      }
+      if mode == tf.estimator.ModeKeys.PREDICT:
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+      # Calculate Loss (for both TRAIN and EVAL modes)
+      # For multi-label classification, a correct loss is sigmoid cross entropy
+      loss = sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+
+      # Configure the Training Op (for TRAIN mode)
+      if mode == tf.estimator.ModeKeys.TRAIN:
+        optimizer = tf.train.AdamOptimizer()
+        train_op = optimizer.minimize(
+            loss=loss,
+            global_step=tf.train.get_global_step())
+        return tf.estimator.EstimatorSpec(mode=mode,loss=loss,train_op=train_op)
+
+      # Add evaluation metrics (for EVAL mode)
+      assert mode == tf.estimator.ModeKeys.EVAL
+      eval_metric_ops = {
+          "accuracy": tf.metrics.accuracy(
+              labels=labels, predictions=predictions["classes"])}
+      return tf.estimator.EstimatorSpec(
+          mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    return model_fn
+
+# def video_architecture(input_layer):
+#   """Construct neural network for video datasets.
+#
+#   See more details in the doc of the function neural_network_architecture."""
+#   a
+
+  # Some helper functions
+  def infer_domain(self):
+    col_count, row_count = self.metadata_.get_matrix_size(0)
+    sequence_size = self.metadata_.get_sequence_size()
+    output_dim = self.metadata_.get_output_size()
+    if sequence_size > 1:
+      if col_count == 1 and row_count == 1:
+        return "speech"
+      elif col_count > 1 and row_count > 1:
+        return "video"
+      else:
+        return 'text'
+    else:
+      if col_count > 1 and row_count > 1:
+        return 'image'
+      else:
+        return 'tabular'
 
   def age(self):
     return time.time() - self.birthday
@@ -350,11 +394,12 @@ class Model(algorithm.Algorithm):
     """
     # return self.cumulated_num_tests > 10 # Limit to make 10 predictions
     # return np.random.rand() < self.early_stop_proba
-    batch_size = self.batch_size
+    batch_size = 30 # See ingestion program: D_train.init(batch_size=30, repeat=True)
     num_examples = self.metadata_.size()
     num_epochs = self.cumulated_num_steps * batch_size / num_examples
-    return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
+    return num_epochs > self.num_epochs_we_want_to_train # Train for certain number of epochs then stop
 
+### Other utility functions ###
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
@@ -375,20 +420,3 @@ def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
   sigmoid_logits = tf.log(1 + exp_logits)
   element_wise_xent = relu_logits - labels * logits + sigmoid_logits
   return tf.reduce_sum(element_wise_xent)
-
-def get_num_entries(tensor):
-  """Return number of entries for a TensorFlow tensor.
-
-  Args:
-    tensor: a tf.Tensor or tf.SparseTensor object of shape
-        (batch_size, sequence_size, row_count, col_count[, num_channels])
-  Returns:
-    num_entries: number of entries of each example, which is equal to
-        sequence_size * row_count * col_count [* num_channels]
-  """
-  tensor_shape = tensor.shape
-  assert(len(tensor_shape) > 1)
-  num_entries  = 1
-  for i in tensor_shape[1:]:
-    num_entries *= int(i)
-  return num_entries
