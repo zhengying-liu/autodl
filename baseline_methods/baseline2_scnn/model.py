@@ -57,7 +57,7 @@ class Model(algorithm.Algorithm):
                              os.pardir,
                              'checkpoints_' + self.dataset_name)
 
-    # Classifier using model_fn (see image_model_fn and other model_fn below)
+    # Classifier using model_fn
     self.classifier = tf.estimator.Estimator(
       model_fn=model_fn,
       model_dir=model_dir)
