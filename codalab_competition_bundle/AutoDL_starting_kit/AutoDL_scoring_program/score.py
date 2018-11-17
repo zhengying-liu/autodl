@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
     # if verbose: # For debugging
     #     print_log("sys.argv = ", sys.argv)
-    #     list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir)))
+    #     list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir))) # /tmp/codalab/
     #     with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
     #       print_log("Content of the metadata file: ")
     #       print_log(f.read())
@@ -338,7 +338,7 @@ if __name__ == "__main__":
         now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
         print_log("[+] New prediction found. Now number of predictions made =", nb_preds_new)
         alc = 0
-        alc =draw_learning_curve(solution_file=solution_file,
+        alc = draw_learning_curve(solution_file=solution_file,
                                   prediction_files=prediction_files,
                                   scoring_function=scoring_function,
                                   output_dir=score_dir,
