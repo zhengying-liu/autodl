@@ -50,6 +50,7 @@ phases:
         is_parallel_parent: True
         is_scoring_only: True
         scoring_program: AutoDL_parent_scoring_program.zip
+        hidden_columns: "score, Duration"
         # public_data: AutoDL_public_data.zip
         # starting_kit: AutoDL_starting_kit.zip
 
@@ -70,6 +71,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data_1.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
     3:
@@ -89,6 +91,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data_2.zip # 8b92f40f-f193-4026-9ef8-a06d8bc82934
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
     4:
@@ -108,6 +111,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data_3.zip # 8436224e-e958-457e-bd8d-7c18ac43a6c0
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
     5:
@@ -127,6 +131,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data_4.zip # 8528974d-b0f2-45bd-bd9c-2c859acb8ebc
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
     6:
@@ -146,6 +151,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data:  AutoDL_reference_data_5.zip # 65acfcae-9b8f-4cb5-ad8c-1032ad038856
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
 # ----------------------------------------------------------------------------------------
