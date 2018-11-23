@@ -168,6 +168,7 @@ def draw_learning_curve(solution_file, prediction_files,
   plt.clf()
   fig, ax = plt.subplots(figsize=(7, 7.07))
   ax.plot(X, Y, marker="o", label="Test score", markersize=3)
+  # ax.step(X, Y, marker="o", label="Test score", markersize=3, where='post')
   # Add a point on the final line using last prediction
   X.append(TIME_BUDGET)
   Y.append(Y[-1])
@@ -177,6 +178,7 @@ def draw_learning_curve(solution_file, prediction_files,
   else:
     alc = 0
   ax.fill_between(X, Y, color='cyan')
+  # ax.fill_between(X, Y, color='cyan', step='post')
   ax.text(X[-1], Y[-1], "{:.4f}".format(Y[-1])) # Show the latest/final score
   ax.plot(X[-2:], Y[-2:], '--') # Draw a dotted line from last prediction
   plt.title("Task: " + basename + " - Current normalized ALC: " + format(alc, '.4f'))
@@ -255,7 +257,7 @@ if __name__ == "__main__":
 
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
-    start = time.time()
+    # start = time.time()
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
@@ -308,6 +310,11 @@ if __name__ == "__main__":
     detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
+
+    # Use the timestamp of 'detailed_results.html' as start time
+    # This is more robust than using start = time.time()
+    # especially when Docker image time is not synced with host time
+    start = os.path.getmtime(detailed_results_filepath)
 
     # Get the metric
     scoring_function = autodl_bac
