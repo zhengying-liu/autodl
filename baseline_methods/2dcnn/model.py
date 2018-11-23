@@ -41,6 +41,8 @@ class Model(algorithm.Algorithm):
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
+    self.col_count, self.row_count = self.metadata_.get_matrix_size(0)
+    self.sequence_size = self.metadata_.get_sequence_size()
     self.output_dim = self.metadata_.get_output_size()
 
     # Set batch size (for both training and testing)
