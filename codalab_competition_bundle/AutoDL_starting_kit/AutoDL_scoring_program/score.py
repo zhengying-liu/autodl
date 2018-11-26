@@ -114,6 +114,28 @@ def autodl_bac(solution, prediction):
   score = 2*bac - 1
   return score
 
+def is_one_hot_vector(x, axis=None, keepdims=False):
+  norm_1 = np.linalg.norm(x, ord=1, axis=axis, keepdims=keepdims)
+  norm_inf = np.linalg.norm(x, ord=np.inf, axis=axis, keepdims=keepdims)
+  return np.logical_and(norm_1 == 1, norm_inf == 1)
+
+def is_multiclass(solution):
+  """Return if a task is a multi-class classification task, according to its
+  solution.
+
+  Args:
+    solution: a numpy.ndarray object of shape [num_examples, num_classes].
+  """
+  return all(is_one_hot_vector(solution, axis=1))
+
+def accuracy(solution, prediction):
+  # assert(is_multiclass(solution))
+  epsilon = 1e-15
+  # normalize prediction
+  prediction_normalized =\
+    prediction / (np.sum(np.abs(prediction), axis=1, keepdims=True) + epsilon)
+  return np.sum(solution * prediction_normalized) / solution.shape[0]
+
 def get_prediction_files(prediction_dir, basename):
   """Return prediction files for the task <basename>.
 
@@ -137,11 +159,14 @@ def get_basename(solution_file):
 
 # TODO: change this function to avoid repeated computing
 def draw_learning_curve(solution_file, prediction_files,
-                        scoring_function, output_dir, basename, start):
+                        scoring_function, output_dir,
+                        basename, start, is_multiclass_task):
   """Draw learning curve for one task."""
   solution = read_array(solution_file) # numpy array
   scores = []
   timestamps = []
+  if is_multiclass_task:
+    accuracy_scores = []
   for prediction_file in prediction_files:
     timestamp = os.path.getmtime(prediction_file)
     prediction = read_array(prediction_file) # numpy array
@@ -150,8 +175,20 @@ def draw_learning_curve(solution_file, prediction_files,
     score = scoring_function(solution, prediction)
     scores.append(score)
     timestamps.append(timestamp)
+    if is_multiclass_task:
+      acc = accuracy(solution, prediction)
+      accuracy_scores.append(acc)
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
+  if len(timestamps) > 0:
+    latest_bac = sorted_pairs[-1][1]
+    print_log("BAC of the latest prediction is {:.4f}."\
+              .format(latest_bac))
+    if is_multiclass_task:
+      sorted_pairs_acc = sorted(zip(timestamps, accuracy_scores))
+      latest_acc = sorted_pairs_acc[-1][1]
+      print_log("Accuracy of the latest prediction is {:.4f}."\
+                .format(latest_acc))
   X = [t - start + 1 for t,_ in sorted_pairs] # Since X on log scale, set first x=1
   Y = [s for _,s in sorted_pairs]
   # Add origin as the first point of the curve
@@ -166,7 +203,7 @@ def draw_learning_curve(solution_file, prediction_files,
   Y = Y[:len(log_X)]
   # Draw learning curve
   plt.clf()
-  fig, ax = plt.subplots(figsize=(7, 7.07))
+  fig, ax = plt.subplots(figsize=(7, 7.07)) #Have a small area of negative score
   ax.plot(X, Y, marker="o", label="Test score", markersize=3)
   # ax.step(X, Y, marker="o", label="Test score", markersize=3, where='post')
   # Add a point on the final line using last prediction
@@ -315,6 +352,8 @@ if __name__ == "__main__":
     # This is more robust than using start = time.time()
     # especially when Docker image time is not synced with host time
     start = os.path.getmtime(detailed_results_filepath)
+    start_str = time.ctime(start)
+    print_log("Start scoring program at " + start_str)
 
     # Get the metric
     scoring_function = autodl_bac
@@ -325,6 +364,8 @@ if __name__ == "__main__":
     if len(solution_names) > 1: # Assert only one file is found
       raise ValueError("Multiple solution files found: {}!".format(solution_names))
     solution_file = solution_names[0]
+    solution = read_array(solution_file)
+    is_multiclass_task = is_multiclass(solution)
     # Extract the dataset name from the file name
     basename = get_basename(solution_file)
     nb_preds = {x:0 for x in solution_names}
@@ -335,6 +376,7 @@ if __name__ == "__main__":
 
     # Begin scoring process, along with ingestion program
     # Moniter training processes while time budget is not attained
+    known_prediction_files = {}
     while(time.time() < start + TIME_BUDGET):
       time.sleep(0.5)
       # Give list of prediction files
@@ -350,7 +392,8 @@ if __name__ == "__main__":
                                   scoring_function=scoring_function,
                                   output_dir=score_dir,
                                   basename=basename,
-                                  start=start)
+                                  start=start,
+                                  is_multiclass_task=is_multiclass_task)
         nb_preds[solution_file] = nb_preds_new
         scores[solution_file] = alc
         print_log("Current area under learning curve for {}: {:.4f}".format(basename, scores[solution_file]))
