@@ -36,6 +36,18 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
+# Add path containing the repo tensorflow/models
+# see https://github.com/tensorflow/models
+import sys
+MODELS_DIR = '../../../models'
+if not os.path.isdir(MODELS_DIR):
+  raise ValueError("You need to git clone the GitHub repo "
+                   "at https://github.com/tensorflow/models, "
+                   "at the parallel level of autodl repo.")
+sys.path.append(MODELS_DIR)
+# import models
+# from models.official.resnet import resnet_model
+
 class Model(algorithm.Algorithm):
   """Construct CNN for classification."""
 
@@ -46,7 +58,7 @@ class Model(algorithm.Algorithm):
     self.output_dim = self.metadata_.get_output_size()
 
     # Set batch size (for both training and testing)
-    self.batch_size = 30
+    self.batch_size = 32
 
     # Get dataset name.
     self.dataset_name = self.metadata_.get_dataset_name()\
@@ -110,7 +122,7 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return
 
-    train_input_fn = self.get_train_input_fn()
+    train_input_fn = self.get_input_fn(is_test=False)
 
     if not remaining_time_budget: # This is never true in the competition anyway
       remaining_time_budget = 1200 # if no time limit is given, set to 20min
@@ -182,16 +194,7 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return None
 
-    # Turn `features` in the tensor pair (features, labels) to a dict
-    dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
-
-    # Set batch size
-    dataset = dataset.batch(batch_size=self.batch_size)
-
-    def test_input_fn():
-      iterator = dataset.make_one_shot_iterator()
-      features, labels = iterator.get_next()
-      return features, labels
+    test_input_fn = self.get_input_fn(is_test=True)
 
     # The following snippet of code intends to do:
     # 0. Use the function self.choose_to_stop_early() to decide if stop the whole
@@ -216,7 +219,7 @@ class Model(algorithm.Algorithm):
       msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
     print_log("Begin testing...", msg_est)
     # Start testing (i.e. making prediction on test set)
-    test_results = self.classifier.predict(input_fn=test_input_fn)
+    test_results = self.classifier.predict(input_fn=lambda:test_input_fn(dataset))
     predictions = [x['probabilities'] for x in test_results]
     has_same_length = (len({len(x) for x in predictions}) == 1)
     print_log("Asserting predictions have the same number of columns...")
@@ -237,28 +240,42 @@ class Model(algorithm.Algorithm):
   #### Above 3 methods (__init__, train, test) should always be implemented ####
   ##############################################################################
 
-  def get_train_input_fn(self):
+  def get_input_fn(self, is_test):
 
-    def train_input_fn(dataset):
+    def input_fn(dataset):
       """For more details on how to write input function, please see:
       https://www.tensorflow.org/guide/custom_estimators#write_an_input_function
       """
-      # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
+      # Turn `features` in the tensor tuples
+      #   (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
       # to a dict. This example model only uses the first matrix bundle
-      # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
-      dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
-      # Shuffle training set
-      buffer_size = 10 * self.batch_size * self.output_dim
-      dataset = dataset.shuffle(buffer_size=buffer_size)
+      # (i.e. matrix_bundle_0) (see the documentation of train() function above
+      # for the description of each example)
+      dataset = dataset.map(lambda *x: (x[0], x[-1]))
+      # Sample seveval frames from the video to represent it
+      def sample_frames(video, num_frames):
+        sequence_size = video.shape[0]
+        frames = []
+        for i in range(num_frames):
+          random_index = np.random.randint(0, sequence_size)
+          frames.append(video[random_index])
+        res = tf.stack(frames)
+        print(res.shape) # TODO
+        return res
+      num_frames = 5
+      dataset = dataset.map(lambda x,y: (sample_frames(x,num_frames), y))
+      # For training set, shuffle and repeat
+      if not is_test:
+        buffer_size = 10 * self.batch_size * self.output_dim
+        dataset = dataset.shuffle(buffer_size=buffer_size)
+        dataset = dataset.repeat()
       # Set batch size
       dataset = dataset.batch(batch_size=self.batch_size)
-      # Convert to RepeatDataset to train for several epochs
-      dataset = dataset.repeat()
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
       return features, labels
 
-    return train_input_fn
+    return input_fn
 
 
   def neural_network_architecture(self, input_layer, mode):
@@ -275,9 +292,10 @@ class Model(algorithm.Algorithm):
           be
     """
     # Get shape info from metadata
-    col_count, row_count = self.metadata_.get_matrix_size(0)
-    sequence_size = self.metadata_.get_sequence_size()
-    output_dim = self.metadata_.get_output_size()
+    col_count = self.col_count
+    row_count = self.row_count
+    sequence_size = self.sequence_size
+    output_dim = self.output_dim
 
     ### Begin constructing neural networks for each domain ###
     ### Tabular ###
@@ -326,12 +344,15 @@ class Model(algorithm.Algorithm):
       print_log("Constructing model function for {} dataset..."\
                 .format(self.domain))
 
-      col_count, row_count = self.metadata_.get_matrix_size(0)
-      sequence_size = self.metadata_.get_sequence_size()
-      output_dim = self.metadata_.get_output_size()
+      # col_count = self.col_count
+      # row_count = self.row_count
+      # sequence_size = self.sequence_size
+      # output_dim = self.output_dim
+      print('features.shape:', features.shape)
+      batch_size, sequence_size, row_count, col_count = features.shape
 
       # Input Layer
-      input_layer = features["x"]
+      input_layer = features
       input_layer = tf.reshape(input_layer,
                                [-1, sequence_size, row_count, col_count])
 
@@ -372,12 +393,6 @@ class Model(algorithm.Algorithm):
       return tf.estimator.EstimatorSpec(
           mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
     return model_fn
-
-# def video_architecture(input_layer):
-#   """Construct neural network for video datasets.
-#
-#   See more details in the doc of the function neural_network_architecture."""
-#   a
 
   # Some helper functions
   def infer_domain(self):
@@ -432,3 +447,107 @@ def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
   sigmoid_logits = tf.log(1 + exp_logits)
   element_wise_xent = relu_logits - labels * logits + sigmoid_logits
   return tf.reduce_sum(element_wise_xent)
+
+#CREATE CNN STRUCTURE
+"""----------------------------------------------------------------------------------------------------------------------------------------------------------------"""
+def alexnet_model_fn(features, labels, mode):
+
+    """INPUT LAYER"""
+    input_layer = tf.reshape(features["x"], [-1, FLAGS.image_width, FLAGS.image_height, FLAGS.image_channels], name="input_layer") #Alexnet uses 227x227x3 input layer. '-1' means pick batch size randomly
+    #print(input_layer)
+
+    """%FIRST CONVOLUTION BLOCK
+        The first convolutional layer filters the 227×227×3 input image with
+        96 kernels of size 11×11 with a stride of 4 pixels. Bias of 1."""
+    conv1 = tf.layers.conv2d(inputs=input_layer, filters=96, kernel_size=[11, 11], strides=4, padding="valid", activation=tf.nn.relu)
+    lrn1 = tf.nn.lrn(input=conv1, depth_radius=5, bias=1.0, alpha=0.0001/5.0, beta=0.75); #Normalization layer
+    pool1_conv1 = tf.layers.max_pooling2d(inputs=lrn1, pool_size=[3, 3], strides=2) #Max Pool Layer
+    #print(pool1_conv1)
+
+
+    """SECOND CONVOLUTION BLOCK
+    Divide the 96 channel blob input from block one into 48 and process independently"""
+    conv2 = tf.layers.conv2d(inputs=pool1_conv1, filters=256, kernel_size=[5, 5], strides=1, padding="same", activation=tf.nn.relu)
+    lrn2 = tf.nn.lrn(input=conv2, depth_radius=5, bias=1.0, alpha=0.0001/5.0, beta=0.75); #Normalization layer
+    pool2_conv2 = tf.layers.max_pooling2d(inputs=lrn2, pool_size=[3, 3], strides=2) #Max Pool Layer
+    #print(pool2_conv2)
+
+    """THIRD CONVOLUTION BLOCK
+    Note that the third, fourth, and fifth convolution layers are connected to one
+    another without any intervening pooling or normalization layers.
+    The third convolutional layer has 384 kernels of size 3 × 3
+    connected to the (normalized, pooled) outputs of the second convolutional layer"""
+    conv3 = tf.layers.conv2d(inputs=pool2_conv2, filters=384, kernel_size=[3, 3], strides=1, padding="same", activation=tf.nn.relu)
+    #print(conv3)
+
+    #FOURTH CONVOLUTION BLOCK
+    """%The fourth convolutional layer has 384 kernels of size 3 × 3"""
+    conv4 = tf.layers.conv2d(inputs=conv3, filters=384, kernel_size=[3, 3], strides=1, padding="same", activation=tf.nn.relu)
+    #print(conv4)
+
+    #FIFTH CONVOLUTION BLOCK
+    """%the fifth convolutional layer has 256 kernels of size 3 × 3"""
+    conv5 = tf.layers.conv2d(inputs=conv4, filters=256, kernel_size=[3, 3], strides=1, padding="same", activation=tf.nn.relu)
+    pool3_conv5 = tf.layers.max_pooling2d(inputs=conv5, pool_size=[3, 3], strides=2, padding="valid") #Max Pool Layer
+    #print(pool3_conv5)
+
+
+    #FULLY CONNECTED LAYER 1
+    """The fully-connected layers have 4096 neurons each"""
+    pool3_conv5_flat = tf.reshape(pool3_conv5, [-1, 6* 6 * 256]) #output of conv block is 6x6x256 therefore, to connect it to a fully connected layer, we can flaten it out
+    fc1 = tf.layers.dense(inputs=pool3_conv5_flat, units=4096, activation=tf.nn.relu)
+    #fc1 = tf.layers.conv2d(inputs=pool3_conv5, filters=4096, kernel_size=[6, 6], strides=1, padding="valid", activation=tf.nn.relu) #representing the FCL using a convolution block (no need to do 'pool3_conv5_flat' above)
+    #print(fc1)
+
+    #FULLY CONNECTED LAYER 2
+    """since the output from above is [1x1x4096]"""
+    fc2 = tf.layers.dense(inputs=fc1, units=4096, activation=tf.nn.relu)
+    #fc2 = tf.layers.conv2d(inputs=fc1, filters=4096, kernel_size=[1, 1], strides=1, padding="valid", activation=tf.nn.relu)
+    #print(fc2)
+
+    #FULLY CONNECTED LAYER 3
+    """since the output from above is [1x1x4096]"""
+    logits = tf.layers.dense(inputs=fc2, units=FLAGS.num_of_classes, name="logits_layer")
+    #fc3 = tf.layers.conv2d(inputs=fc2, filters=43, kernel_size=[1, 1], strides=1, padding="valid")
+    #logits = tf.layers.dense(inputs=fc3, units=FLAGS.num_of_classes) #converting the convolutional block (tf.layers.conv2d) to a dense layer (tf.layers.dense). Only needed if we had used tf.layers.conv2d to represent the FCLs
+    #print(logits)
+
+    #PASS OUTPUT OF LAST FC LAYER TO A SOFTMAX LAYER
+    """convert these raw values into two different formats that our model function can return:
+    The predicted class for each example: a digit from 1–43.
+    The probabilities for each possible target class for each example
+    tf.argmax(input=fc3, axis=1: Generate predictions from the 43 last filters returned from the fc3. Axis 1 will apply argmax to the rows
+    tf.nn.softmax(logits, name="softmax_tensor"): Generate the probability distribution
+    """
+    predictions = {
+      "classes": tf.argmax(input=logits, axis=1, name="classes_tensor"),
+      "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+      }
+
+    #Return result if we were in prediction mode and not training
+    if mode == tf.estimator.ModeKeys.PREDICT:
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+    #CALCULATE OUR LOSS
+    """For both training and evaluation, we need to define a loss function that measures how closely the
+    model's predictions match the target classes. For multiclass classification, cross entropy is typically used as the loss metric."""
+    onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=FLAGS.num_of_classes)
+    loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=logits)
+    tf.summary.scalar('Loss Per Stride', loss) #Just to see loss values per epoch (testing tensor board)
+
+    #CONFIGURE TRAINING
+    """Since the loss of the CNN is the softmax cross-entropy of the fc3 layer
+    and our labels. Let's configure our model to optimize this loss value during
+    training. We'll use a learning rate of 0.001 and stochastic gradient descent
+    as the optimization algorithm:"""
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.00001)
+        train_op = optimizer.minimize(loss, global_step=tf.train.get_global_step()) #global_Step needed for proper graph on tensor board
+        #optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.00005) #Very small learning rate used. Training will be slower at converging by better
+        #train_op = optimizer.minimize(loss=loss,global_step=tf.train.get_global_step())
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+    #ADD EVALUATION METRICS
+    eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
+    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+"""-----------------------------------------------------------------------------------------------------------------------------------------------------------------"""
