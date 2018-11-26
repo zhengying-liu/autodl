@@ -36,11 +36,44 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
+# Model specific parameters
+tf.flags.DEFINE_string(
+    "model_dir", default="",
+    help="This should be the path of storage bucket which will be used as "
+    "model_directory to export the checkpoints during training.")
+tf.flags.DEFINE_integer(
+    "batch_size", default=128,
+    help="This is the global batch size and not the per-shard batch.")
+tf.flags.DEFINE_integer(
+    "train_steps", default=1000,
+    help="Total number of training steps.")
+tf.flags.DEFINE_integer(
+    "eval_steps", default=4,
+    help="Total number of evaluation steps. If `0`, evaluation "
+    "after training is skipped.")
+
+# TPU specific parameters.
+tf.flags.DEFINE_integer(
+    "iterations", default=500,
+    help="Number of iterations per TPU training loop.")
+
+FLAGS = tf.flags.FLAGS
+
 class Model(algorithm.Algorithm):
   """Construct auto-Scaling CNN for classification."""
 
   def __init__(self, metadata):
     super(Model, self).__init__(metadata)
+
+    try:
+      haha = os.system('ls')
+      print('haha:', haha)
+    except e:
+      print(e)
+
+    # Use TPU or CPU/GPU
+    self.use_tpu = False
+
     self.output_dim = self.metadata_.get_output_size()
 
     # Set batch size (for both training and testing)
@@ -57,21 +90,17 @@ class Model(algorithm.Algorithm):
                              os.pardir,
                              'checkpoints_' + self.dataset_name)
 
-    # Classifier using model_fn (see image_model_fn and other model_fn below)
-    use_tpu = True
-    if use_tpu:
-      self.classifier = tf.contrib.tpu.TPUEstimator(
-          model_fn=model_fn,
-          model_dir=model_dir,
-          train_batch_size=self.batch_size,
-          eval_batch_size=self.batch_size,
-          predict_batch_size=self.batch_size,
-          config=tf.contrib.tpu.RunConfig(),
-          use_tpu=False)
-    else:
-      self.classifier = tf.estimator.Estimator(
-          model_fn=model_fn,
-          model_dir=model_dir)
+    # Classifier using model_fn
+    # Useing TPU or not depends on self.use_tpu
+    # if use_tpu:
+    self.classifier = tf.contrib.tpu.TPUEstimator(
+        model_fn=model_fn,
+        model_dir=model_dir,
+        train_batch_size=FLAGS.batch_size,
+        eval_batch_size=FLAGS.batch_size,
+        predict_batch_size=FLAGS.batch_size,
+        config=tf.contrib.tpu.RunConfig(),
+        use_tpu=self.use_tpu)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -115,18 +144,19 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return
 
-    # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
-    # to a dict. This example model only uses the first matrix bundle
-    # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
-    dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
-    # Set batch size
-    dataset = dataset.batch(batch_size=self.batch_size)
+    def train_input_fn(dataset, batch_size):
+      # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
+      # to a dict. This example model only uses the first matrix bundle
+      # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
+      dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
-    # Convert to RepeatDataset to train for several epochs
-    dataset = dataset.repeat()
+      # Shuffle and repeat
+      dataset = dataset.shuffle(1000).repeat()
 
-    def train_input_fn():
+      # Set batch size
+      dataset = dataset.batch(batch_size=self.batch_size, drop_remainder=True)
+
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
       return features, labels
@@ -170,7 +200,7 @@ class Model(algorithm.Algorithm):
       train_start = time.time()
       # Start training
       self.classifier.train(
-        input_fn=train_input_fn,
+        input_fn=lambda params:train_input_fn(dataset, params['batch_size']),
         steps=steps_to_train)
       train_end = time.time()
       # Update for time budget managing
@@ -201,13 +231,16 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return None
 
-    # Turn `features` in the tensor pair (features, labels) to a dict
-    dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
-    # Set batch size
-    dataset = dataset.batch(batch_size=self.batch_size)
+    def test_input_fn(dataset, batch_size):
+      # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
+      # to a dict. This example model only uses the first matrix bundle
+      # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
+      dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
 
-    def test_input_fn():
+      # Set batch size
+      dataset = dataset.batch(batch_size=self.batch_size, drop_remainder=True)
+
       iterator = dataset.make_one_shot_iterator()
       features, labels = iterator.get_next()
       return features, labels
@@ -235,7 +268,8 @@ class Model(algorithm.Algorithm):
       msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
     print_log("Begin testing...", msg_est)
     # Start testing (i.e. making prediction on test set)
-    test_results = self.classifier.predict(input_fn=test_input_fn)
+    test_results = self.classifier.predict(
+        input_fn=lambda params:test_input_fn(dataset, params['batch_size']))
     predictions = [x['probabilities'] for x in test_results]
     has_same_length = (len({len(x) for x in predictions}) == 1)
     print_log("Asserting predictions have the same number of columns...")
@@ -259,7 +293,7 @@ class Model(algorithm.Algorithm):
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
 
-  def model_fn(self, features, labels, mode):
+  def model_fn(self, features, labels, mode, params):
     """Auto-Scaling CNN model that can be applied to all datasets.
 
     3D CNN with pre-rescaling.
@@ -330,7 +364,7 @@ class Model(algorithm.Algorithm):
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
-      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+      return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate Loss (for both TRAIN and EVAL modes)
     # For multi-label classification, a correct loss is sigmoid cross entropy
@@ -339,18 +373,26 @@ class Model(algorithm.Algorithm):
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
       optimizer = tf.train.AdamOptimizer()
+      if self.use_tpu:
+        optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
       train_op = optimizer.minimize(
           loss=loss,
           global_step=tf.train.get_global_step())
-      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+      return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     # Add evaluation metrics (for EVAL mode)
     assert mode == tf.estimator.ModeKeys.EVAL
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    return tf.contrib.tpu.TPUEstimatorSpec(
+        mode=mode, loss=loss, eval_metrics=(metric_fn, labels, logits))
+
+  def metric_fn(labels, logits):
+    """Function to return metrics for evaluation."""
+
+    predicted_classes = tf.argmax(logits, 1)
+    accuracy = tf.metrics.accuracy(labels=labels,
+                                   predictions=predicted_classes,
+                                   name="acc_op")
+    return {"accuracy": accuracy}
 
   def age(self):
     return time.time() - self.birthday
