@@ -1,8 +1,9 @@
+<p>See the home tab for a general introduction to the challenge.&nbsp;</p>
 <h3>Starting kit</h3>
-<p>The AutoDL starting kit is everything you need to</p>
+<p>The AutoDL starting kit is everything you need to:</p>
 <ol>
 <li>make a test submission with the contained baseline method;</li>
-<li>create your own&nbsp;<strong>sample code submission</strong>&nbsp;(by modifying the file model.py, see more details in README.md)</li>
+<li>create your own&nbsp;<strong>sample code submission</strong>&nbsp;(by modifying the file model.py, see more details in README.md inside the starting kit)</li>
 <li>run local test.</li>
 </ol>
 <p>You can download it following this link:</p>
@@ -79,7 +80,7 @@
 <h3>&nbsp;</h3>
 <div>
 <p>&nbsp;</p>
-<p><strong>Usage</strong>: Dowload and put only ONE pair of data and solution (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling `run_local_test.py`.</p>
+<p>&nbsp;<strong>Usage</strong>: Dowload and put only ONE pair of data and solution (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling `run_local_test.py`.</p>
 <h3>Some statistics/info on these datasets&nbsp;</h3>
 <table border="1" cellspacing="1" cellpadding="1" align="left">
 <tbody>
@@ -180,10 +181,11 @@
 <p>&nbsp;</p>
 </div>
 <p>The columns correspond to:</p>
-<p>num_train/num_test: number of training/test examples</p>
-<p>col_count/row_count/sequence_size: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time))</p>
-<p>output_dim: number of classes</p>
-<p>has_locality_col/has_locality_row:&nbsp;indicate if column/row indices carry some structure/information based on closeness of indices, like in an image or in a video.</p>
+<p><strong>num_train/num_test</strong>: number of training/test examples</p>
+<p><strong>col_count/row_count/sequence_size</strong>: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time))</p>
+<p><strong>output_dim</strong>: number of classes</p>
+<p><strong>has_locality_col/has_locality_row</strong>:&nbsp;indicate if column/row indices carry some structure/information based on closeness of indices, like in an image or in a video.</p>
 </div>
 <h3>Data format</h3>
-<p>Data are not pre-processed in a uniform feature vector representation; they include all data types representable as spatio-temporal sequences. We use a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by <a href="https://www.tensorflow.org/">TensorFlow</a>. This format allows us to format any 2D+time data, including text, speech, image, video, etc. This will not however impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, we provide <a href="https://github.com/zhengying-liu/autodl-contrib/tree/master/tfrecord_format">instructions to help you</a>.</p>
+<p>In this challenge, you do not have access to datasets but we provide the dataset dimension and size. All datasets are&nbsp; furthermore formatted in a uniform way and are provided in a raw form to encourage the use of Deep Learning methods that perform automatic feature learning. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems.</p>
+<p>We use a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>. This format allows us to format any 2D+time data, including text, speech, image, video, etc. If you want to practice designing algorithms with your own datasets, we provide <a href="https://github.com/zhengying-liu/autodl-contrib/tree/master/tfrecord_format">instructions</a>&nbsp;about how to format your datasets for the AutoDL challenge.</p>

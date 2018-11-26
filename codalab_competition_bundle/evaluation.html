@@ -1,14 +1,17 @@
-<h3>Tasks and submissions</h3>
-<p>The identity of the datasets and the type of data is concealed but their structure is revealed.&nbsp; All datasets (see "Get Data" tab) are formatted in a uniform way, though the type of data might differ (<strong>image, audio, video, text, or tabular data</strong>): we provide the dimension of the data tensor. The data are provided in a raw form (no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are <strong>multi-label classification </strong> problems. The tasks are constrained by a <strong> time budget</strong>.&nbsp;A <strong>starting kit</strong> is provided to help you prepare a submission under the "Files" tab. <img class="img-responsive" src="{{ ASSET_BASE_URL }}/AutoDL.png" alt="" />&nbsp; The interface is simple and generic: you must supply a class model.py with:</p>
+<h3><span style="font-size: 1.17em;">Submission process</span></h3>
+<p>A <strong>starting kit</strong> is provided to help you prepare a submission under the "Starting Kit" tab.&nbsp;To submit an algorithm, you must supply a model.py file containing a Model class with:</p>
 <ul>
 <li>a constructor</li>
 <li>a train method</li>
 <li>a test method</li>
 </ul>
-<p>To make submissions, <strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.</p>
-<p>This challenge has a single phase during which participants get immediate feed-back on<strong>&nbsp;five datasets&nbsp;</strong>when they submit their code, without having access to them.&nbsp;Code submitted is trained and tested automatically, without any human intervention. All five datasets are run in parallel on separate compte workers, each one with its own time budget.&nbsp;</p>
-<h3>Evaluation protocol</h3>
-<p>Here is some pseudo-code of the evaluation protocol:</p>
+<p>You can also provide a short metadata file to describe your model. Its content should be like "description: &lt;describe your algorithm&gt;". See metadata file examples in the starting kit.</p>
+<p>Once you have a metadata and a model.py file, you zip them into a submission file that you upload by clicking on the "<strong>Upload a Submission</strong>" button. The size of the zip file should be less than 1GB. Your submission will appear in the table under the "<strong>My Submissions</strong>" tab.</p>
+<p>It might take a while to run - it all depends on the complexity of your method (we allocate one compute instance per run per dataset and limit the compute time to be max. 2 hours per dataset). You can check the progress of your submission by looking at its learning curves for each dataset (click on one of the dataset buttons). Note that learning curves will only appear if your algorithm has saved its first result.</p>
+<p>Once a run is completed, your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab. You will see a check mark on your submission table that indicates which submission is considered for the final results.</p>
+<p>If one submission fails, you can expand the row showing your submission to get more details including error logs. It can happen that one submission fails for some (not all) datasets. In that case, the whole submission is considered as failed.</p>
+<p><span style="font-size: 1.17em;">Evaluation protocol</span></p>
+<p>The evaluation protocol is done as follows:</p>
 <pre><code># For each dataset, our evaluation program calls the model constructor:
 M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
 # Initialize
@@ -24,13 +27,13 @@ remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Re
 save(results)
 }
 </code></pre>
-<p>It belongs to the participants to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
-<h3>Metrics</h3>
-<p>The participants can train in batches with duration that they choose to incrementally improve their performance, until the time limit is attained. In this way we can plot learning curves: <strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
-<p>Here is how "performance" is computed. We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of presence or absence of a label in a pattern. We measure performance with the average over all labels of</p>
-<p><strong>balanced_accuracy = (1/2) (TPR + TNR).</strong></p>
-<p>For each dataset we compute the <strong>area under the learning curve</strong> (by the trapeze method), i.e. the area of mean_balanced_accuracy as a function of log(time), where "time" is the cumulative time of training and testing. The <strong>overall ranking</strong> is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
+<p>You have to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo; (max. 2 hours). It is recommended to save regularly so the platform computes a score before the time budget is exceeded. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments. The score used to rank all participants is based on the learning curve (see below): the better and earlier results will be ranked first.&nbsp;</p>
+<h3>Score</h3>
+<p>The participants can train in batches with duration that they can adjust over time. We plot learning curves as soon as the first result is available. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
+<p>We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of the presence or absence of a label in a pattern. We measure the performance of such predictions with the average over all labels of</p>
+<p><strong>balanced score = TPR + TNR -1</strong></p>
+<p>A value of zero is what you would obtain with a random classifier. The perfect classification will return 1, while negative values are worst than a random choice.</p>
+<p>For each dataset we compute the <strong>area under the learning curve aka ALC</strong>&nbsp;(by the trapeze method), i.e. the area of balanced score as a function of log(time), where "time" is the cumulative time of training and testing. The <strong>overall ranking</strong> is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
 <p>Examples of learning curves: <img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
 <h3>&nbsp;</h3>
-<p><a href="http://google.com"> <img class="img-responsive" src="{{ ASSET_BASE_URL }}/google.jpg" alt="GOOGLE" width="100" align="left" border="0" /> </a></p>
-<p>This challenge is brought to you by <a href="http://google.com">Google</a>. <a href="mailto:google@chalearn.org">Contact the organizers</a>.</p>
+<p>&nbsp;</p>
