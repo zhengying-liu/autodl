@@ -7,6 +7,7 @@
 #
 # competition.yaml
 # *.jpg
+# *.png
 # *.html
 # assets/
 #
@@ -43,6 +44,7 @@ DIR='tmp/'
 rm -rf $DIR
 mkdir $DIR
 cp '../'*.jpg $DIR
+cp '../'*.png $DIR
 cp '../'*.html $DIR
 cp '../'*.yaml $DIR
 cp -r '../assets' $DIR
