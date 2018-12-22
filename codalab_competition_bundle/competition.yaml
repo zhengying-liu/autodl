@@ -16,7 +16,7 @@
 
 title: "AutoDL Challenge :: 2018 Autumn Hackathon"
 description: "Create a fully Automatic Deep Learning solution."
-image: AutoDL.jpg
+image: logo.png #AutoDL.jpg
 has_registration: False                 # We do not check participants, registration is free
 force_submission_to_leaderboard: True   # If false, participants must submit manually
 disallow_leaderboard_modifying: True    # If true, submissions cannot be changed
