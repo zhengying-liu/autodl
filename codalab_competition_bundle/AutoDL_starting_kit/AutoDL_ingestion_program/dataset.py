@@ -157,7 +157,8 @@ class AutoDLDataset(object):
       fixed_matrix_size = row_count > 0 and col_count > 0
       if key_dense in features:
         f = features[key_dense]
-        f = tf.reshape(f, [-1, row_count, col_count])
+        if fixed_matrix_size:
+          f = tf.reshape(f, [-1, row_count, col_count])
         sample.append(f)
 
       key_compressed = self._feature_key(i, "compressed")
