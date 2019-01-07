@@ -77,8 +77,8 @@ class Model(algorithm.Algorithm):
     # Classifier using model_fn
     # It'll be used for both training and testing
     self.classifier = tf.estimator.Estimator(
-      model_fn=model_fn,
-      model_dir=model_dir)
+        model_fn=model_fn,
+        model_dir=model_dir)
 
     # Attributes for managing time budget
     # Cumulated number of training steps
