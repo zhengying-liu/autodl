@@ -136,12 +136,14 @@ def accuracy(solution, prediction):
     prediction / (np.sum(np.abs(prediction), axis=1, keepdims=True) + epsilon)
   return np.sum(solution * prediction_normalized) / solution.shape[0]
 
-def get_prediction_files(prediction_dir, basename):
+def get_prediction_files(prediction_dir, basename, start):
   """Return prediction files for the task <basename>.
 
   Examples of prediction file name: mini.predict_0, mini.predict_1
   """
   prediction_files = ls(os.path.join(prediction_dir, basename + '*.predict_*'))
+  # Exclude all files (if any) generated before start
+  prediction_files = [f for f in prediction_files if os.path.getmtime(f)> start]
   return prediction_files
 
 def get_fig_name(basename):
@@ -294,8 +296,6 @@ if __name__ == "__main__":
 
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
-    # start = time.time()
-
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
         solution_dir = default_solution_dir
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     while(time.time() < start + TIME_BUDGET):
       time.sleep(0.5)
       # Give list of prediction files
-      prediction_files = get_prediction_files(prediction_dir, basename)
+      prediction_files = get_prediction_files(prediction_dir, basename, start)
       nb_preds_old = nb_preds[solution_file]
       nb_preds_new = len(prediction_files)
       if(nb_preds_new > nb_preds_old):
