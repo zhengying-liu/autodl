@@ -210,7 +210,7 @@ class AutoDLDataset(object):
       if not files:
         raise IOError("Unable to find training files. data_pattern='" +
                       dataset_file_pattern(self.dataset_name_) + "'.")
-      logging.info("Number of training files: %s.", str(len(files)))
+      # logging.info("Number of training files: %s.", str(len(files)))
       self.dataset_ = tf.data.TFRecordDataset(files)
 
 def main(argv):
