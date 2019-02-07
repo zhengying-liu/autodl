@@ -23,16 +23,6 @@ import time
 import webbrowser
 from multiprocessing import Process
 
-tf.flags.DEFINE_string('dataset_dir', './AutoDL_sample_data/',
-                       "Directory containing the content (e.g. adult.data/ + "
-                       "adult.solution) of an AutoDL dataset. Specify this "
-                       "argument if you want to test on a different dataset.")
-
-tf.flags.DEFINE_string('code_dir', './AutoDL_sample_code_submission',
-                       "Directory containing a `model.py` file. Specify this "
-                       "argument if you want to test on a different algorithm.")
-
-FLAGS = tf.flags.FLAGS
 
 def get_path_to_ingestion_program(starting_kit_dir):
   return os.path.join(starting_kit_dir,
@@ -42,34 +32,50 @@ def get_path_to_scoring_program(starting_kit_dir):
   return os.path.join(starting_kit_dir,
                       'AutoDL_scoring_program', 'score.py')
 
+
+def run_baseline(dataset_dir, code_dir):
+    print('Run baseline. Date: 02/07/2019.')
+    # Current directory containing this script
+    starting_kit_dir = os.path.dirname(os.path.realpath(__file__))
+    path_ingestion = get_path_to_ingestion_program(starting_kit_dir)
+    path_scoring = get_path_to_scoring_program(starting_kit_dir)
+
+    # Run ingestion and scoring at the same time
+    command_ingestion = 'python {} {} {}'.format(path_ingestion, dataset_dir, code_dir)
+    command_scoring = 'python {} {}'.format(path_scoring, dataset_dir)
+    def run_ingestion():
+      os.system(command_ingestion)
+    def run_scoring():
+      os.system(command_scoring)
+    ingestion_process = Process(name='ingestion', target=run_ingestion)
+    scoring_process = Process(name='scoring', target=run_scoring)
+    ingestion_process.start()
+    scoring_process.start()
+    detailed_results_page = os.path.join(starting_kit_dir,
+                                         'AutoDL_scoring_output',
+                                         'detailed_results.html')
+    detailed_results_page = os.path.abspath(detailed_results_page)
+
+    # Open detailed results page in a browser
+    time.sleep(2)
+    for i in range(30):
+      if os.path.isfile(detailed_results_page):
+        webbrowser.open('file://'+detailed_results_page, new=2)
+        break
+      time.sleep(1)
+
+
 if __name__ == '__main__':
-  dataset_dir = FLAGS.dataset_dir
-  code_dir = FLAGS.code_dir
-  # Current directory containing this script
-  starting_kit_dir = os.path.dirname(os.path.realpath(__file__))
-  path_ingestion = get_path_to_ingestion_program(starting_kit_dir)
-  path_scoring = get_path_to_scoring_program(starting_kit_dir)
+   tf.flags.DEFINE_string('dataset_dir', './AutoDL_sample_data',
+                          "Directory containing the content (e.g. adult.data/ + "
+                          "adult.solution) of an AutoDL dataset. Specify this "
+                          "argument if you want to test on a different dataset.")
 
-  # Run ingestion and scoring at the same time
-  command_ingestion = 'python {} {} {}'.format(path_ingestion, dataset_dir, code_dir)
-  command_scoring = 'python {} {}'.format(path_scoring, dataset_dir)
-  def run_ingestion():
-    os.system(command_ingestion)
-  def run_scoring():
-    os.system(command_scoring)
-  ingestion_process = Process(name='ingestion', target=run_ingestion)
-  scoring_process = Process(name='scoring', target=run_scoring)
-  ingestion_process.start()
-  scoring_process.start()
-  detailed_results_page = os.path.join(starting_kit_dir,
-                                       'AutoDL_scoring_output',
-                                       'detailed_results.html')
-  detailed_results_page = os.path.abspath(detailed_results_page)
+   tf.flags.DEFINE_string('code_dir', './AutoDL_sample_code_submission',
+                          "Directory containing a `model.py` file. Specify this "
+                          "argument if you want to test on a different algorithm.")
 
-  # Open detailed results page in a browser
-  time.sleep(2)
-  for i in range(30):
-    if os.path.isfile(detailed_results_page):
-      webbrowser.open('file://'+detailed_results_page, new=2)
-      break
-    time.sleep(1)
+   FLAGS = tf.flags.FLAGS
+   dataset_dir = FLAGS.dataset_dir
+   code_dir = FLAGS.code_dir
+   run_baseline(dataset_dir, code_dir)
