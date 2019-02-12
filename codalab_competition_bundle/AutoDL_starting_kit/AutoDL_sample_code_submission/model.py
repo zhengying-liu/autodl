@@ -477,6 +477,7 @@ def preprocess_tensor_3d(tensor_3d,
   tensor_ts = resize_space_axes(tensor_3d,
                                 new_row_count=new_row_count,
                                 new_col_count=new_col_count)
-  tensor_ts.set_shape([1, 224, 224]) # TODO
+  # tensor_ts.set_shape([1,224,224]]) # TODO
+  tensor_ts.set_shape([num_frames, new_row_count, new_col_count])
   # print("tensor_ts shape:", tensor_ts.shape)
   return tensor_ts
