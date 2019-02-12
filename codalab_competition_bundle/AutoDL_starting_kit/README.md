@@ -29,7 +29,7 @@ If you are new to docker, install docker from https://docs.docker.com/get-starte
 Then, at the shell, run:
 ```
 cd path/to/AutoDL_starting_kit/
-docker run --memory=4g -it -u root -v $(pwd):/app/codalab evariste/autodl:dockerfile bash
+docker run --memory=4g -it -u root -v $(pwd):/app/codalab evariste/autodl bash
 ```
 You will then be able to run the ingestion program (to produce predictions) and
 the scoring program (to evaluate your predictions) on toy sample data. In AutoDL
