@@ -36,6 +36,12 @@ import datetime
 import numpy as np
 np.random.seed(42)
 
+_GLOBAL_CROP_SIZE = (224,224)
+_GLOBAL_NUM_FRAMES = 1
+_GLOBAL_NUM_REPEAT = 4
+_GLOBAL_CROP_RATIO = 0.5
+_SHUFFLE_BUFFER = 1000
+
 class Model(algorithm.Algorithm):
   """Construct auto-Scaling CNN for classification."""
 
@@ -104,10 +110,10 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return
 
-    # Turn `features` in the tensor tuples (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
-    # to a dict. This example model only uses the first matrix bundle
-    # (i.e. matrix_bundle_0) (see the documentation of this train() function above for the description of each example)
-    dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
+    # Retrieve first matrix bundle of `features` in the tensor tuples
+    #   (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
+    # i.e. matrix_bundle_0
+    dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
 
     # Set batch size
     dataset = dataset.batch(batch_size=self.batch_size)
@@ -191,7 +197,7 @@ class Model(algorithm.Algorithm):
       return None
 
     # Turn `features` in the tensor pair (features, labels) to a dict
-    dataset = dataset.map(lambda *x: ({'x': x[0]}, x[-1]))
+    dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
 
     # Set batch size
     dataset = dataset.batch(batch_size=self.batch_size)
@@ -253,18 +259,20 @@ class Model(algorithm.Algorithm):
 
     3D CNN with pre-rescaling.
     """
-    row_count, col_count  = self.metadata_.get_matrix_size(0)
-    sequence_size = self.metadata_.get_sequence_size()
+    # row_count, col_count  = self.metadata_.get_matrix_size(0)
+    # sequence_size = self.metadata_.get_sequence_size()
     output_dim = self.metadata_.get_output_size()
 
     # Input layer of shape [batch_size, sequence_size, row_count, col_count]
     # Add last dimension for channels (only one channel)
-    input_layer = tf.reshape(features["x"],
-                             [-1, sequence_size, row_count, col_count, 1])
+    # input_layer = tf.reshape(features,
+    #                          [-1, sequence_size, row_count, col_count, 1])
 
     # Replace missing values by 0
+    input_layer = features
     hidden_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
+    hidden_layer = tf.expand_dims(hidden_layer, -1)
 
     # Pre-rescaling: use 3D average pooling to rescale the 3D tensor such that
     # each example has reasonable number of entries
@@ -273,6 +281,7 @@ class Model(algorithm.Algorithm):
     #           .format(REASONABLE_NUM_ENTRIES))
     while(get_num_entries(hidden_layer) > REASONABLE_NUM_ENTRIES):
       shape = hidden_layer.shape
+      # print("shape:", "*"*50, shape)
       pool_size = (min(2, shape[1]), min(2, shape[2]), min(2, shape[3]))
       hidden_layer= tf.layers.average_pooling3d(inputs=hidden_layer,
                                                 pool_size=pool_size,
@@ -388,3 +397,86 @@ def get_num_entries(tensor):
   for i in tensor_shape[1:]:
     num_entries *= int(i)
   return num_entries
+
+def crop_time_axis(tensor_3d, num_frames, begin_index=None):
+  """Given a 3-D tensor, take a slice of length `num_frames` on its time axis.
+
+  Args:
+    tensor_3d: A Tensor of shape [sequence_size, row_count, col_count]
+    num_frames: An integer representing the resulted chunk (sequence) length
+    begin_index: The index of the beginning of the chunk. If `None`, chosen
+      randomly.
+  Returns:
+    A Tensor of sequence length `num_frames`, which is a chunk of `tensor_3d`.
+  """
+  # pad sequence if not long enough
+  pad_size = tf.maximum(num_frames - tf.shape(tensor_3d)[1], 0)
+  padded_tensor = tf.pad(tensor_3d, ((0, pad_size), (0, 0), (0, 0)))
+
+  # If not given, randomly choose the beginning index of frames
+  if not begin_index:
+    maxval = tf.shape(padded_tensor)[1] - num_frames + 1
+    begin_index = tf.random.uniform([1],
+                                    minval=0,
+                                    maxval=maxval,
+                                    dtype=tf.int32)
+    begin_index = tf.stack([begin_index[0], 0, 0], name='begin_index')
+
+  sliced_tensor = tf.slice(padded_tensor,
+                           begin=begin_index,
+                           size=[num_frames, -1, -1])
+
+  return sliced_tensor
+
+def resize_space_axes(tensor_3d, new_row_count, new_col_count):
+  """Given a 3-D tensor, resize space axes have have target size.
+
+  Args:
+    tensor_3d: A Tensor of shape [sequence_size, row_count, col_count].
+    new_row_count: An integer indicating the target row count.
+    new_col_count: An integer indicating the target column count.
+  Returns:
+    A Tensor of shape [sequence_size, target_row_count, target_col_count].
+  """
+  transposed = tf.transpose(tensor_3d, perm=[1, 2, 0])
+  resized = tf.image.resize_images(transposed,
+                                   (new_row_count, new_col_count))
+  return tf.transpose(resized, perm=[2, 0, 1])
+
+def preprocess_tensor_3d(tensor_3d,
+                         input_shape=None,
+                         output_shape=None):
+  """Preprocess a 3-D tensor.
+
+  Args:
+    tensor_3d: A Tensor of shape [sequence_size, row_count, col_count].
+    input_shape: The shape [sequence_size, row_count, col_count] of the input
+      examples
+    output_shape: The shape [sequence_size, row_count, col_count] of the oputput
+      examples. All components should be positive.
+  """
+  if input_shape:
+    shape = [x if x > 0 else None for x in input_shape]
+    tensor_3d.set_shape(input_shape)
+  else:
+    tensor_3d.set_shape([None, None, None])
+  if output_shape and output_shape[0] > 0:
+    num_frames = output_shape[0]
+  else:
+    num_frames = _GLOBAL_NUM_FRAMES
+  if output_shape and output_shape[1] > 0:
+    new_row_count = output_shape[1]
+  else:
+    new_row_count=_GLOBAL_CROP_SIZE[0]
+  if output_shape and output_shape[2] > 0:
+    new_col_count = output_shape[2]
+  else:
+    new_col_count=_GLOBAL_CROP_SIZE[1]
+
+  # tensor_t = crop_time_axis(tensor_3d, num_frames=num_frames)
+  tensor_ts = resize_space_axes(tensor_3d,
+                                new_row_count=new_row_count,
+                                new_col_count=new_col_count)
+  tensor_ts.set_shape([1, 224, 224]) # TODO
+  # print("tensor_ts shape:", tensor_ts.shape)
+  return tensor_ts
