@@ -154,11 +154,12 @@ class AutoDLDataset(object):
     for i in range(self.metadata_.get_bundle_size()):
       key_dense = self._feature_key(i, "dense_input")
       row_count, col_count = self.metadata_.get_matrix_size(i)
+      sequence_size = self.metadata_.get_sequence_size()
       fixed_matrix_size = row_count > 0 and col_count > 0
       if key_dense in features:
         f = features[key_dense]
         if fixed_matrix_size:
-          f = tf.reshape(f, [-1, row_count, col_count])
+          f = tf.reshape(f, [3, row_count, col_count]) # TODO
         sample.append(f)
 
       key_compressed = self._feature_key(i, "compressed")
@@ -167,9 +168,16 @@ class AutoDLDataset(object):
         images = tf.map_fn(
             dataset_utils.decompress_image, compressed_images, dtype=tf.float32)
         if fixed_matrix_size:
-          images = tf.reshape(images, [-1, row_count, col_count])
+          images = tf.reshape(images, [3, row_count, col_count]) # TODO
         else:
           images = images[0]
+
+          #sequence_size = 3 # TMP
+          #new_shape = [sequence_size, row_count, col_count]
+          #new_shape = [x if x > 0 else None for x in new_shape]
+          #images.set_shape(new_shape)
+          images.set_shape([None, None, None])
+
         sample.append(images)
 
       key_sparse_val = self._feature_key(i, "sparse_value")

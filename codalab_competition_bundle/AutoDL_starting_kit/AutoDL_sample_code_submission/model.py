@@ -47,6 +47,10 @@ class Model(algorithm.Algorithm):
     super(Model, self).__init__(metadata)
     self.output_dim = self.metadata_.get_output_size()
 
+    # Boolean True if features have fixed size
+    row_count, col_count = self.metadata_.get_matrix_size(0)
+    self.fixed_matrix_size = row_count > 0 and col_count > 0
+
     # Set batch size (for both training and testing)
     self.batch_size = 30
 
@@ -115,7 +119,11 @@ class Model(algorithm.Algorithm):
     #     lambda *x: (preprocess_tensor_3d(x[0]), x[-1]),
     #     batch_size=self.batch_size
     # )
-    dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
+
+    if not self.fixed_matrix_size:
+        dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
+    else:
+        dataset = dataset.map(lambda *x: (x[0], x[-1]))
 
     # Set batch size
     dataset = dataset.batch(batch_size=self.batch_size)
@@ -204,7 +212,10 @@ class Model(algorithm.Algorithm):
     #     lambda *x: (preprocess_tensor_3d(x[0]), x[-1]),
     #     batch_size=self.batch_size
     # )
-    dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
+    if not self.fixed_matrix_size:
+        dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
+    else:
+        dataset = dataset.map(lambda *x: (x[0], x[-1]))
 
     # Set batch size
     dataset = dataset.batch(batch_size=self.batch_size)
@@ -280,6 +291,7 @@ class Model(algorithm.Algorithm):
     hidden_layer = tf.where(tf.is_nan(input_layer),
                            tf.zeros_like(input_layer), input_layer)
     hidden_layer = tf.expand_dims(hidden_layer, -1)
+    print(hidden_layer.shape)
 
     # Pre-rescaling: use 3D average pooling to rescale the 3D tensor such that
     # each example has reasonable number of entries
