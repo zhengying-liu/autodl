@@ -38,8 +38,6 @@ np.random.seed(42)
 
 _GLOBAL_CROP_SIZE = (224,224)
 _GLOBAL_NUM_FRAMES = 1
-_GLOBAL_NUM_REPEAT = 4
-_GLOBAL_CROP_RATIO = 0.5
 _SHUFFLE_BUFFER = 1000
 
 class Model(algorithm.Algorithm):
@@ -113,6 +111,10 @@ class Model(algorithm.Algorithm):
     # Retrieve first matrix bundle of `features` in the tensor tuples
     #   (matrix_bundle_0,...,matrix_bundle_(N-1), labels)
     # i.e. matrix_bundle_0
+    # tf.data.experimental.map_and_batch(
+    #     lambda *x: (preprocess_tensor_3d(x[0]), x[-1]),
+    #     batch_size=self.batch_size
+    # )
     dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
 
     # Set batch size
@@ -196,7 +198,12 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return None
 
-    # Turn `features` in the tensor pair (features, labels) to a dict
+    # Retrieve `features` and preprocess it in the tensor pair
+    # (features, labels)
+    # tf.data.experimental.map_and_batch(
+    #     lambda *x: (preprocess_tensor_3d(x[0]), x[-1]),
+    #     batch_size=self.batch_size
+    # )
     dataset = dataset.map(lambda *x: (preprocess_tensor_3d(x[0]), x[-1]))
 
     # Set batch size
@@ -429,7 +436,7 @@ def crop_time_axis(tensor_3d, num_frames, begin_index=None):
   return sliced_tensor
 
 def resize_space_axes(tensor_3d, new_row_count, new_col_count):
-  """Given a 3-D tensor, resize space axes have have target size.
+  """Given a 3-D tensor, resize space axes to have target size.
 
   Args:
     tensor_3d: A Tensor of shape [sequence_size, row_count, col_count].
@@ -446,7 +453,7 @@ def resize_space_axes(tensor_3d, new_row_count, new_col_count):
 def preprocess_tensor_3d(tensor_3d,
                          input_shape=None,
                          output_shape=None):
-  """Preprocess a 3-D tensor.
+  """Preprocess a 3-D tensor. The output tensor has fixed, known shape.
 
   Args:
     tensor_3d: A Tensor of shape [sequence_size, row_count, col_count].
@@ -473,11 +480,10 @@ def preprocess_tensor_3d(tensor_3d,
   else:
     new_col_count=_GLOBAL_CROP_SIZE[1]
 
-  # tensor_t = crop_time_axis(tensor_3d, num_frames=num_frames)
+  tensor_t = crop_time_axis(tensor_3d, num_frames=num_frames)
   tensor_ts = resize_space_axes(tensor_3d,
                                 new_row_count=new_row_count,
                                 new_col_count=new_col_count)
-  # tensor_ts.set_shape([1,224,224]]) # TODO
   tensor_ts.set_shape([num_frames, new_row_count, new_col_count])
-  # print("tensor_ts shape:", tensor_ts.shape)
+  print("tensor_ts shape:", tensor_ts.shape) #TODO
   return tensor_ts
