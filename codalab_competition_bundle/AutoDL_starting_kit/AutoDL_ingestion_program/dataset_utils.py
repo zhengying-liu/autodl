@@ -44,7 +44,7 @@ def decompress_image(compressed_image):
   Args:
     compressed_image: string representing an image compressed as JPEG.
   Returns:
-    2-D float Tensor with values ranging from [0, 1).
+    3-D float Tensor with values ranging from [0, 1).
   """
   # Note that the resulting image contains an unknown height and width
   # that is set dynamically by decode_jpeg. The returned image
@@ -54,6 +54,4 @@ def decompress_image(compressed_image):
   # Use float32 rather than uint8.
   image = tf.image.convert_image_dtype(image, dtype=tf.float32)
 
-  # Remove the channel dimension.
   return tf.transpose(image, perm=[2, 0, 1])
-  # return tf.squeeze(image, axis=2)

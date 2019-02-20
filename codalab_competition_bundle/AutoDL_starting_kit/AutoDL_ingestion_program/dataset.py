@@ -168,6 +168,8 @@ class AutoDLDataset(object):
             dataset_utils.decompress_image, compressed_images, dtype=tf.float32)
         if fixed_matrix_size:
           images = tf.reshape(images, [-1, row_count, col_count])
+        else:
+          images = images[0]
         sample.append(images)
 
       key_sparse_val = self._feature_key(i, "sparse_value")
