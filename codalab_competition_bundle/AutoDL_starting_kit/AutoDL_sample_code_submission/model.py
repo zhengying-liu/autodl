@@ -480,7 +480,7 @@ def preprocess_tensor_3d(tensor_3d,
   else:
     new_col_count=_GLOBAL_CROP_SIZE[1]
 
-  tensor_t = crop_time_axis(tensor_3d, num_frames=num_frames)
+  # tensor_t = crop_time_axis(tensor_3d, num_frames=num_frames)
   tensor_ts = resize_space_axes(tensor_3d,
                                 new_row_count=new_row_count,
                                 new_col_count=new_col_count)

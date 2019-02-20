@@ -49,10 +49,11 @@ def decompress_image(compressed_image):
   # Note that the resulting image contains an unknown height and width
   # that is set dynamically by decode_jpeg. The returned image
   # is a 3-D Tensor of uint8 [0, 255]. The third dimension is the channel.
-  image = tf.image.decode_image(compressed_image, channels=1)
+  image = tf.image.decode_image(compressed_image, channels=3)
 
   # Use float32 rather than uint8.
   image = tf.image.convert_image_dtype(image, dtype=tf.float32)
 
   # Remove the channel dimension.
-  return tf.squeeze(image, axis=2)
+  return tf.transpose(image, perm=[2, 0, 1])
+  # return tf.squeeze(image, axis=2)
