@@ -87,6 +87,9 @@ class AutoDLMetadata(object):
   def get_label_to_index_map(self):
     return self.metadata_.label_to_index_map
 
+  def get_feature_to_index_map(self):
+    return self.metadata_.feature_to_index_map
+
 
 class AutoDLDataset(object):
   """AutoDL Datasets out of TFRecords of SequenceExamples.
@@ -124,7 +127,11 @@ class AutoDLDataset(object):
       sequence_example_proto: a SequenceExample with "x_dense_input" or sparse
           input representation.
     Returns:
-      An array of tensors.
+      An array of tensors. For first edition of AutoDl challenge, returns a
+          pair `(features, labels)` where `features` is a Tensor of shape
+            [sequence_size, row_count, col_count, num_channels]
+          and `labels` a Tensor of shape
+            [output_dim, ]
     """
     sequence_features = {}
     for i in range(self.metadata_.get_bundle_size()):
@@ -156,28 +163,26 @@ class AutoDLDataset(object):
       row_count, col_count = self.metadata_.get_matrix_size(i)
       sequence_size = self.metadata_.get_sequence_size()
       fixed_matrix_size = row_count > 0 and col_count > 0
+      row_count = row_count if row_count > 0 else None
+      col_count = col_count if col_count > 0 else None
+      sequence_size = sequence_size if sequence_size > 0 else None
       if key_dense in features:
         f = features[key_dense]
-        if fixed_matrix_size:
-          f = tf.reshape(f, [3, row_count, col_count]) # TODO
+        if not fixed_matrix_size:
+          raise ValueError("To parse dense data, the tensor shape should " +
+                           "be known but got {} instead..."\
+                           .format((sequence_size, row_count, col_count)))
+        f = tf.reshape(f, [sequence_size, row_count, col_count, 1])
         sample.append(f)
 
       key_compressed = self._feature_key(i, "compressed")
       if key_compressed in features:
         compressed_images = features[key_compressed].values
+        # `images` here is a 4D-tensor of shape [T, H, W, C], some of which
+        # might be unknown
         images = tf.map_fn(
             dataset_utils.decompress_image, compressed_images, dtype=tf.float32)
-        if fixed_matrix_size:
-          images = tf.reshape(images, [3, row_count, col_count]) # TODO
-        else:
-          images = images[0]
-
-          #sequence_size = 3 # TMP
-          #new_shape = [sequence_size, row_count, col_count]
-          #new_shape = [x if x > 0 else None for x in new_shape]
-          #images.set_shape(new_shape)
-          images.set_shape([None, None, None])
-
+        images.set_shape([sequence_size, row_count, col_count, 3])
         sample.append(images)
 
       key_sparse_val = self._feature_key(i, "sparse_value")
@@ -196,16 +201,19 @@ class AutoDLDataset(object):
         sparse_tensor = tf.sparse_reorder(
             tf.SparseTensor(
                 indices, sparse_val.values,
-                [self.metadata_.get_sequence_size(), row_count, col_count]))
+                [sequence_size, row_count, col_count]))
         # TODO: see how we can keep sparse tensors instead of
         # returning dense ones.
-        sample.append(tf.sparse_tensor_to_dense(sparse_tensor))
+        tensor = tf.sparse_tensor_to_dense(sparse_tensor)
+        tensor = tf.reshape(tensor,
+                  [sequence_size, row_count, col_count, 1])
+        sample.append(tensor)
 
     # Enforce the Sample tensors to have the correct sequence length.
-    # sequence_size = self.metadata_.get_sequence_size()
-    # sample = [
-    #     dataset_utils.enforce_sequence_size(t, sequence_size) for t in sample
-    # ]
+    if sequence_size > 1:
+      sample = [
+          dataset_utils.enforce_sequence_size(t, sequence_size) for t in sample
+      ]
 
     labels = tf.sparse_to_dense(
         contexts["label_index"].values, (self.metadata_.get_output_size(),),
