@@ -54,4 +54,6 @@ def decompress_image(compressed_image):
   # Use float32 rather than uint8.
   image = tf.image.convert_image_dtype(image, dtype=tf.float32)
 
-  return tf.transpose(image, perm=[2, 0, 1])
+  image.set_shape([None, None, 3])
+
+  return image
