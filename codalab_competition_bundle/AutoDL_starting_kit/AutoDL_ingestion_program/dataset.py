@@ -18,6 +18,8 @@ Reads data in the Tensorflow AutoDL standard format.
 """
 import os
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
 from tensorflow import app
 from tensorflow import flags
 from tensorflow import gfile
@@ -222,6 +224,25 @@ class AutoDLDataset(object):
                       dataset_file_pattern(self.dataset_name_) + "'.")
       # logging.info("Number of training files: %s.", str(len(files)))
       self.dataset_ = tf.data.TFRecordDataset(files)
+
+  def get_nth_element(self, num):
+    """Get n-th element in `autodl_dataset` using iterator."""
+    dataset = self.get_dataset()
+    iterator = dataset.make_one_shot_iterator()
+    next_element = iterator.get_next()
+    with tf.Session() as sess:
+      for _ in range(num+1):
+        tensor_3d, labels = sess.run(next_element)
+    return tensor_3d, labels
+
+  def show_image(self, num):
+    """Visualize a image represented by `tensor_3d` in grayscale."""
+    tensor_3d, label_confidence_pairs = self.get_nth_element(num)
+    image = np.transpose(tensor_3d, (1, 2, 0))
+    plt.imshow(image)
+    plt.title('Labels: ' + str(label_confidence_pairs))
+    plt.show()
+    return plt
 
 def main(argv):
   del argv  # Unused.
