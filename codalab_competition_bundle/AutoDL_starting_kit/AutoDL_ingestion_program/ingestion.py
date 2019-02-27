@@ -109,7 +109,7 @@ from os import getcwd as pwd
 from os.path import join
 import shutil # for deleting a whole directory
 from functools import partial
-import tensorflow as tf
+import glob
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -171,7 +171,7 @@ def clean_last_output(output_dir):
     # Clean existing checkpoints
     checkpoints_glob =\
       os.path.abspath(os.path.join(parent_dir, 'checkpoints*'))
-    checkpoints_dirs = tf.gfile.Glob(checkpoints_glob)
+    checkpoints_dirs = glob.glob(checkpoints_glob)
     for checkpoints_dir in checkpoints_dirs:
       if verbose:
         print_log("Cleaning existing checkpoints_dir: {}"\
