@@ -49,7 +49,7 @@ class Model(algorithm.Algorithm):
     print_log("The dataset {} has {} training examples and {} classes."\
         .format(self.dataset_name, self.num_examples_train, self.output_dim))
 
-    # Boolean True if features have fixed size
+    # Boolean True if example have fixed size
     row_count, col_count = self.metadata_.get_matrix_size(0)
     self.fixed_matrix_size = row_count > 0 and col_count > 0
     sequence_size = self.metadata_.get_sequence_size()
@@ -57,8 +57,6 @@ class Model(algorithm.Algorithm):
 
     # Set batch size (for both training and testing)
     self.batch_size = 30
-
-
 
     model_fn = self.model_fn
 
@@ -75,7 +73,7 @@ class Model(algorithm.Algorithm):
     # Attributes for preprocessing
     self.default_image_size = (112,112)
     self.default_num_frames = 10
-    self.default_shuffle_buffer = 1000
+    self.default_shuffle_buffer = 100
 
     # Attributes for managing time budget
     # Cumulated number of training steps
@@ -102,19 +100,19 @@ class Model(algorithm.Algorithm):
 
     Args:
       dataset: a `tf.data.Dataset` object. Its example tensor is of the form
-            (features, labels)
-          where `features` is a 4-D Tensor of shape
+            (example, labels)
+          where `example` is a dense 4-D Tensor of shape
             (sequence_size, row_count, col_count, num_channels)
           and `labels` is a 1-D Tensor of shape
             (output_dim,).
           Here `output_dim` represents number of classes of this
           multilabel classification task.
 
-          IMPORTANT: some of the dimensions of `features` might be `None`,
+          IMPORTANT: some of the dimensions of `example` might be `None`,
           which means the shape on this dimension might be variable. In this
           case, some preprocessing technique should be applied in order to
           feed the training of a neural network. For example, if an image
-          dataset has `features` of shape
+          dataset has `example` of shape
             (1, None, None, 3)
           then the images in this datasets may have different sizes. On could
           apply resizing, cropping or padding in order to have a fixed size
@@ -234,13 +232,13 @@ class Model(algorithm.Algorithm):
 
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
-  def model_fn(self, features, labels, mode):
+  def model_fn(self, example, labels, mode):
     """Auto-Scaling 3D CNN model.
 
     For more information on how to write a model function, see:
       https://www.tensorflow.org/guide/custom_estimators#write_a_model_function
     """
-    input_layer = features
+    input_layer = example
 
     # Replace missing values by 0
     hidden_layer = tf.where(tf.is_nan(input_layer),
@@ -326,8 +324,8 @@ class Model(algorithm.Algorithm):
     dataset = dataset.batch(batch_size=self.batch_size)
 
     iterator = dataset.make_one_shot_iterator()
-    features, labels = iterator.get_next()
-    return features, labels
+    example, labels = iterator.get_next()
+    return example, labels
 
   def preprocess_tensor_4d(self, tensor_4d):
     """Preprocess a 4-D tensor (only when some dimensions are `None`, i.e.
@@ -341,8 +339,9 @@ class Model(algorithm.Algorithm):
       A 4-D Tensor with fixed, known shape.
     """
     tensor_4d_shape = tensor_4d.shape
+    print_log("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
 
-    if tensor_4d_shape[0] > 0:
+    if tensor_4d_shape[0] > 0 and tensor_4d_shape[0] < 10:
       num_frames = tensor_4d_shape[0]
     else:
       num_frames = self.default_num_frames
@@ -367,6 +366,7 @@ class Model(algorithm.Algorithm):
       tensor_4d = resize_space_axes(tensor_4d,
                                     new_row_count=new_row_count,
                                     new_col_count=new_col_count)
+    print_log("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
     return tensor_4d
 
   def get_steps_to_train(self, remaining_time_budget):
@@ -465,20 +465,20 @@ def crop_time_axis(tensor_4d, num_frames, begin_index=None):
   """
   # pad sequence if not long enough
   pad_size = tf.maximum(num_frames - tf.shape(tensor_4d)[1], 0)
-  padded_tensor = tf.pad(tensor_4d, ((0, 0), (0, pad_size), (0, 0), (0, 0)))
+  padded_tensor = tf.pad(tensor_4d, ((0, pad_size), (0, 0), (0, 0), (0, 0)))
 
   # If not given, randomly choose the beginning index of frames
   if not begin_index:
-    maxval = tf.shape(padded_tensor)[1] - num_frames + 1
+    maxval = tf.shape(padded_tensor)[0] - num_frames + 1
     begin_index = tf.random.uniform([1],
                                     minval=0,
                                     maxval=maxval,
                                     dtype=tf.int32)
-    begin_index = tf.stack([0, begin_index[0], 0, 0], name='begin_index')
+    begin_index = tf.stack([begin_index[0], 0, 0, 0], name='begin_index')
 
   sliced_tensor = tf.slice(padded_tensor,
                            begin=begin_index,
-                           size=[-1, num_frames, -1, -1])
+                           size=[num_frames, -1, -1, -1])
 
   return sliced_tensor
 
