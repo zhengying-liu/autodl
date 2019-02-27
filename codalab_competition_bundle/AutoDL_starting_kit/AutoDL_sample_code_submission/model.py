@@ -99,7 +99,7 @@ class Model(algorithm.Algorithm):
     hopefully improve your model performance after each call.
 
     Args:
-      dataset: a `tf.data.Dataset` object. Its example tensor is of the form
+      dataset: a `tf.data.Dataset` object. Each of its examples is of the form
             (example, labels)
           where `example` is a dense 4-D Tensor of shape
             (sequence_size, row_count, col_count, num_channels)
@@ -122,10 +122,6 @@ class Model(algorithm.Algorithm):
           should keep track of its execution time to avoid exceeding its time
           budget. If remaining_time_budget is None, no time budget is imposed.
     """
-    # If decided to stop training in a previous call, then return
-    if self.done_training:
-      return
-
     # Get number of steps to train according to some strategy
     steps_to_train = self.get_steps_to_train(remaining_time_budget)
 
