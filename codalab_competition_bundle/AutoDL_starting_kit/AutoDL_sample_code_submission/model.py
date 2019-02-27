@@ -232,13 +232,13 @@ class Model(algorithm.Algorithm):
 
   # Model functions that contain info on neural network architectures
   # Several model functions are to be implemented, for different domains
-  def model_fn(self, example, labels, mode):
+  def model_fn(self, features, labels, mode):
     """Auto-Scaling 3D CNN model.
 
     For more information on how to write a model function, see:
       https://www.tensorflow.org/guide/custom_estimators#write_a_model_function
     """
-    input_layer = example
+    input_layer = features
 
     # Replace missing values by 0
     hidden_layer = tf.where(tf.is_nan(input_layer),
