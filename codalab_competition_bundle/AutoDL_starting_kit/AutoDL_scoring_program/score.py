@@ -296,6 +296,11 @@ if __name__ == "__main__":
 
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
+    #while(time.time() < start + TIME_BUDGET):
+    #  time.sleep(0.5)
+    #  if is_started(output_dir):
+    #    break
+
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
         solution_dir = default_solution_dir
@@ -399,10 +404,10 @@ if __name__ == "__main__":
         print_log("Current area under learning curve for {}: {:.4f}".format(basename, scores[solution_file]))
         # Update scores.html
         write_scores_html(score_dir)
-        # Use 'duration.txt' file to detect if ingestion program exits early
-        if os.path.isfile(duration_filepath):
-          print_log("Detected early stop of ingestion program. Stop scoring now.")
-          break
+      # Use 'duration.txt' file to detect if ingestion program exits early
+      if os.path.isfile(duration_filepath):
+        print_log("Detected early stop of ingestion program. Stop scoring now.")
+        break
 
     # Write one last time the detailed results page without auto-refreshing
     write_scores_html(score_dir, auto_refresh=False)
