@@ -243,6 +243,12 @@ if __name__=="__main__" and debug_mode<4:
         data_io.mvdir(output_dir, output_dir+'_'+the_date)
     data_io.mkdir(output_dir)
 
+    # Create start file to tell scoring program that submission has begin
+    start_filename =  'start.txt'
+    start_filepath = os.path.join(output_dir, start_filename)
+    with open(start_filepath, 'w') as f:
+      f.write('Started!')
+
     #### INVENTORY DATA (and sort dataset names alphabetically)
     datanames = data_io.inventory_data(input_dir)
     #### Delete zip files and metadata file
@@ -325,6 +331,11 @@ if __name__=="__main__" and debug_mode<4:
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
+
+    # Delete start file to clean folder
+    if os.path.exists(start_filepath):
+      os.remove(start_filepath)
+
     # Write overall_time_spent to a duration.txt file
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:

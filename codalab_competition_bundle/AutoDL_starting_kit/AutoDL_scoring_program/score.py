@@ -290,16 +290,16 @@ def clean_last_output(score_dir):
       print_log("Cleaning existing score_dir: {}".format(score_dir))
     shutil.rmtree(score_dir)
 
+def is_started(prediction_dir):
+    # Check if file start.txt exists
+    start_filepath = os.path.join(prediction_dir, 'start.txt')
+    return os.path.isfile(start_filepath)
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
 
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-
-    #while(time.time() < start + TIME_BUDGET):
-    #  time.sleep(0.5)
-    #  if is_started(output_dir):
-    #    break
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv) == 1:  # Use the default data directories if no arguments are provided
@@ -352,6 +352,10 @@ if __name__ == "__main__":
     detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
+
+    # Check if ingestion program is ready before starting
+    while(not is_started(prediction_dir)):
+      time.sleep(0.5)
 
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()
