@@ -69,6 +69,7 @@ phases:
     description: "This tab contains submission results of your algorithm on Dataset 2."
     parent_phasenumber: 1
     is_scoring_only: False
+    execution_time_limit: 7200
     auto_migration: True
     ingestion_program_only_during_scoring: True
     hidden_columns: set1_score, set2_score, set3_score, set4_score, set5_score, ave_score
@@ -86,6 +87,7 @@ phases:
     description: "This tab contains submission results of your algorithm on Dataset 3."
     parent_phasenumber: 1
     is_scoring_only: False
+    execution_time_limit: 7200
     auto_migration: True 
     ingestion_program_only_during_scoring: True
     hidden_columns: set1_score, set2_score, set3_score, set4_score, set5_score, ave_score
@@ -103,6 +105,7 @@ phases:
     description: "This tab contains submission results of your algorithm on Dataset 4."
     parent_phasenumber: 1
     is_scoring_only: False
+    execution_time_limit: 7200
     auto_migration: True
     ingestion_program_only_during_scoring: True
     hidden_columns: set1_score, set2_score, set3_score, set4_score, set5_score, ave_score
@@ -120,6 +123,7 @@ phases:
     description: "This tab contains submission results of your algorithm on Dataset 5."
     parent_phasenumber: 1
     is_scoring_only: False
+    execution_time_limit: 7200
     auto_migration: True
     ingestion_program_only_during_scoring: True
     hidden_columns: set1_score, set2_score, set3_score, set4_score, set5_score, ave_score
