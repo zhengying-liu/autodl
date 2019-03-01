@@ -23,6 +23,9 @@ import time
 import webbrowser
 from multiprocessing import Process
 
+def _HERE(*args):
+    h = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(h, *args)
 
 def get_path_to_ingestion_program(starting_kit_dir):
   return os.path.join(starting_kit_dir,
@@ -66,16 +69,22 @@ def run_baseline(dataset_dir, code_dir):
 
 
 if __name__ == '__main__':
-   tf.flags.DEFINE_string('dataset_dir', './AutoDL_sample_data',
+    default_starting_kit_dir = os.path.abspath(os.path.join(_HERE()))
+    default_dataset_dir = os.path.join(default_starting_kit_dir,
+                                       'AutoDL_sample_data')
+    default_code_dir = os.path.join(default_starting_kit_dir,
+                                       'AutoDL_sample_code_submission')
+
+    tf.flags.DEFINE_string('dataset_dir', default_dataset_dir,
                           "Directory containing the content (e.g. adult.data/ + "
                           "adult.solution) of an AutoDL dataset. Specify this "
                           "argument if you want to test on a different dataset.")
 
-   tf.flags.DEFINE_string('code_dir', './AutoDL_sample_code_submission',
+    tf.flags.DEFINE_string('code_dir', default_code_dir,
                           "Directory containing a `model.py` file. Specify this "
                           "argument if you want to test on a different algorithm.")
 
-   FLAGS = tf.flags.FLAGS
-   dataset_dir = FLAGS.dataset_dir
-   code_dir = FLAGS.code_dir
-   run_baseline(dataset_dir, code_dir)
+    FLAGS = tf.flags.FLAGS
+    dataset_dir = FLAGS.dataset_dir
+    code_dir = FLAGS.code_dir
+    run_baseline(dataset_dir, code_dir)
