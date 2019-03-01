@@ -203,7 +203,7 @@ if __name__=="__main__" and debug_mode<4:
         program_dir= default_program_dir
         submission_dir= default_submission_dir
         score_dir = join(root_dir, "AutoDL_scoring_output")
-    elif len(argv)==3: # the case for indicating special input_dir and submission_dir
+    elif len(argv)==3: # the case for indicating special input_dir and submission_dir. The case for run_local_test.py
         input_dir = argv[1]
         output_dir = default_output_dir
         program_dir= default_program_dir
@@ -215,6 +215,13 @@ if __name__=="__main__" and debug_mode<4:
         program_dir = os.path.abspath(argv[3])
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
         score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
+
+    if verbose: # For debugging
+        print_log("sys.argv = ", sys.argv)
+        print_log("Using input_dir: " + input_dir)
+        print_log("Using output_dir: " + output_dir)
+        print_log("Using program_dir: " + program_dir)
+        print_log("Using submission_dir: " + submission_dir)
 
     # Redirect standard output to have live debugging info (esp. on CodaLab)
     if REDIRECT_STDOUT:
