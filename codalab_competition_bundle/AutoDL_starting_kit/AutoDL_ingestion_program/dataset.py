@@ -75,6 +75,14 @@ class AutoDLMetadata(object):
     return (self.metadata_.matrix_spec[bundle_index].row_count,
             self.metadata_.matrix_spec[bundle_index].col_count)
 
+  def get_num_channels(self, bundle_index):
+    return  self.metadata_.matrix_spec[bundle_index].num_channels
+
+  def get_tensor_size(self, bundle_index):
+    matrix_size = self.get_matrix_size(bundle_index)
+    num_channels = self.get_num_channels(bundle_index)
+    return matrix_size[0], matrix_size[1], num_channels
+
   def get_sequence_size(self):
     return self.metadata_.sequence_size
 
@@ -148,7 +156,7 @@ class AutoDLDataset(object):
       else:
         sequence_features[self._feature_key(
             i, "dense_input")] = tf.FixedLenSequenceFeature(
-                self.metadata_.get_matrix_size(i), dtype=tf.float32)
+                self.metadata_.get_tensor_size(i), dtype=tf.float32)
     contexts, features = tf.parse_single_sequence_example(
         sequence_example_proto,
         context_features={
@@ -161,6 +169,7 @@ class AutoDLDataset(object):
     for i in range(self.metadata_.get_bundle_size()):
       key_dense = self._feature_key(i, "dense_input")
       row_count, col_count = self.metadata_.get_matrix_size(i)
+      num_channels = self.metadata_.get_num_channels(i)
       sequence_size = self.metadata_.get_sequence_size()
       fixed_matrix_size = row_count > 0 and col_count > 0
       row_count = row_count if row_count > 0 else None
@@ -171,7 +180,7 @@ class AutoDLDataset(object):
           raise ValueError("To parse dense data, the tensor shape should " +
                            "be known but got {} instead..."\
                            .format((sequence_size, row_count, col_count)))
-        f = tf.reshape(f, [sequence_size, row_count, col_count, 1])
+        f = tf.reshape(f, [sequence_size, row_count, col_count, num_channels])
         sample.append(f)
 
       sequence_size = sequence_size if sequence_size > 0 else None
@@ -182,7 +191,7 @@ class AutoDLDataset(object):
         # might be unknown
         images = tf.map_fn(
             dataset_utils.decompress_image, compressed_images, dtype=tf.float32)
-        images.set_shape([sequence_size, row_count, col_count, 3])
+        images.set_shape([sequence_size, row_count, col_count, 3]) # TODO: 3 to change to num_channels
         sample.append(images)
 
       key_sparse_val = self._feature_key(i, "sparse_value")
