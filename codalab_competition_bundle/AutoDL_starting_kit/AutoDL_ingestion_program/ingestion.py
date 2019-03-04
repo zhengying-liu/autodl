@@ -216,12 +216,12 @@ if __name__=="__main__" and debug_mode<4:
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
         score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
 
-    if verbose: # For debugging
-        print_log("sys.argv = ", sys.argv)
-        print_log("Using input_dir: " + input_dir)
-        print_log("Using output_dir: " + output_dir)
-        print_log("Using program_dir: " + program_dir)
-        print_log("Using submission_dir: " + submission_dir)
+    # if verbose: # For debugging
+    #     print_log("sys.argv = ", sys.argv)
+    #     print_log("Using input_dir: " + input_dir)
+    #     print_log("Using output_dir: " + output_dir)
+    #     print_log("Using program_dir: " + program_dir)
+    #     print_log("Using submission_dir: " + submission_dir)
 
     # Redirect standard output to have live debugging info (esp. on CodaLab)
     if REDIRECT_STDOUT:
