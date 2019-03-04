@@ -22,7 +22,7 @@ def write_scores_html(output_dir, image_paths):
   with open(detailed_results_path, 'w') as html_file:
       # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
-      html_file.write("Oh yeah! Now AutoDL is ready for beta testing!<br>")
+      # html_file.write("Oh yeah! Now AutoDL is ready for beta testing!<br>")
       for image_path in image_paths:
         with open(image_path, "rb") as image_file:
           encoded_string = base64.b64encode(image_file.read())

@@ -18,22 +18,24 @@ import tensorflow as tf
 
 
 def enforce_sequence_size(sample, sequence_size):
-  """Takes a Sample as 3-D tensor and enfore the sequence size.
+  """Takes a Sample as 4-D tensor and enfore the sequence size.
 
   The first dimension of the tensor represents the sequence length. Bundles
   will be added or removed at the end.
 
   Args:
-    sample: 3-D tensor representing a Sample.
+    sample: 4-D tensor representing a Sample.
     sequence_size: int representing the maximum sequence length.
   Returns:
-    The input 3-D tensor with added padds or removed bundles if it didn't
+    The input 4-D tensor with added padds or removed bundles if it didn't
     respect the sequence_size.
   """
   pad_size = tf.maximum(sequence_size - tf.shape(sample)[0], 0)
 
-  padded_sample = tf.pad(sample, ((0, pad_size), (0, 0), (0, 0)))
-  return tf.slice(padded_sample, [0, 0, 0], [sequence_size, -1, -1])
+  padded_sample = tf.pad(sample, ((0, pad_size), (0, 0), (0, 0), (0, 0)))
+
+  sample = tf.slice(padded_sample, [0, 0, 0, 0], [sequence_size, -1, -1, -1])
+  return sample
 
 
 def decompress_image(compressed_image):
@@ -54,4 +56,6 @@ def decompress_image(compressed_image):
   # Use float32 rather than uint8.
   image = tf.image.convert_image_dtype(image, dtype=tf.float32)
 
-  return tf.transpose(image, perm=[2, 0, 1])
+  image.set_shape([None, None, 3])
+
+  return image

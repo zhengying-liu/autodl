@@ -26,7 +26,7 @@ If you are new to docker, install docker from https://docs.docker.com/get-starte
 Then, at the shell, run:
 ```
 cd path_to/AutoDL_starting_kit_stable/
-docker run --memory=4g -it -u root -v $(pwd):/app/codalab -p 8888:8888 evariste/autodl:dockerfile
+docker run --memory=4g -it -u root -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:dockerfile
 ```
 Make sure you use enough RAM (**at least 4GB**). 
 You will then be able to run the `ingestion program` (to produce predictions) and
@@ -60,7 +60,7 @@ http://0.0.0.0:8888/?token=82e416e792c8f6a9f2194d2f4dbbd3660ad4ca29a4c58fe7
 and select README.ipynb in the menu.
 
 ## How to prepare a ZIP file for submission
-Zip the contents of AutoDL_sample_code_submission (without the directory structure)
+Zip the contents of `AutoDL_sample_code_submission` (without the directory structure)
 ```
 zip mysubmission.zip AutoDL_sample_code_submission/*
 ```

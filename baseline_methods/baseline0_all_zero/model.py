@@ -48,7 +48,16 @@ class Model(algorithm.Algorithm):
       return None
     else:
       self.no_more_training = True
-      sample_count = self.metadata_.size() # sample count for test set (see ingestion program)
+      sample_count = 0
+      iterator = dataset.make_one_shot_iterator()
+      next_element = iterator.get_next()
+      with tf.Session() as sess:
+        while True:
+          try:
+            sess.run(next_element)
+            sample_count += 1
+          except tf.errors.OutOfRangeError:
+            break
       output_dim = self.metadata_.get_output_size()
       predictions = np.zeros((sample_count, output_dim))
       return predictions

@@ -1,191 +1,35 @@
-<p>See the home tab for a general introduction to the challenge.&nbsp;</p>
-<h3>Starting kit</h3>
-<p>The AutoDL starting kit is everything you need to:</p>
-<ol>
-<li>make a test submission with the contained baseline method;</li>
-<li>create your own&nbsp;<strong>sample code submission</strong>&nbsp;(by modifying the file model.py, see more details in README.md inside the starting kit)</li>
-<li>run local test.</li>
-</ol>
-<p>You can download it following this link:</p>
-<h3 style="text-align: center;"><span style="text-decoration: underline;"><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
-<h3>Submissions for Test</h3>
-<p>Here we provide 3 baseline methods for participants to make submissions for testing purpose:</p>
-<p><a href="http://134.158.74.63/my/datasets/download/435e77d0-95c1-4818-b233-9ae41120b74a">Baseline 0</a>: return all zero (then stop by returning 'None')</p>
-<p><a href="http://134.158.74.63/my/datasets/download/4617eb76-9344-472b-8ac2-12fedd64d646">Baseline 1</a>: linear classifier (neural network with 0 hidden layer)</p>
-<p><a href="http://134.158.74.63/my/datasets/download/f7b320ce-5169-4ff2-af5b-0588e66bec83">Baseline 2</a>: Self-scaling CNN (construct 3D CNN with pre-rescaling)</p>
-<p>You can download these zip files and upload to the competition as submissions. It's also recommended to read closely the code in these baseline methods to gain an idea on what a valid submission should be.</p>
-<h3>Larger practice datasets</h3>
-<table border="1" cellspacing="1" cellpadding="1" align="left">
-<tbody>
-<tr>
-<td style="text-align: left;">&nbsp;#&nbsp;</td>
-<td style="text-align: left;">&nbsp;Name</td>
-<td style="text-align: left;">&nbsp;Domain</td>
-<td style="text-align: left;">&nbsp;Size</td>
-<td style="text-align: left;">&nbsp;Source</td>
-<td style="text-align: left;">
-<p>&nbsp;Data (w/o test labels)</p>
-</td>
-<td style="text-align: left;">&nbsp;Test labels</td>
-</tr>
-<tr>
-<td>&nbsp;1</td>
-<td>&nbsp;ADULT</td>
-<td>&nbsp;tabular</td>
-<td>&nbsp;1.9 MB</td>
-<td>&nbsp;<a href="https://archive.ics.uci.edu/ml/datasets/adult" target="_blank">Adult</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/c92700af-3b0f-432a-b784-898383fda1b2">adult.data</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/4f48064f-3da6-48a5-9ed6-9a2b260c47c4">adult.solution</a></td>
-</tr>
-<tr>
-<td>&nbsp;2</td>
-<td>&nbsp;KATZE</td>
-<td>&nbsp;video</td>
-<td>&nbsp;1.94 GB</td>
-<td style="text-align: left;">&nbsp;<a href="http://www.nada.kth.se/cvap/actions/" target="_blank">KTH Human Actions</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/49288e21-67eb-4984-b8fe-dc23e53e37b3">katze.data</a>&nbsp;</td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/0cf44915-ac2f-4e5f-9b12-432c1ddac1d3">katze.solution</a>&nbsp;</td>
-</tr>
-<tr>
-<td>&nbsp;3</td>
-<td>&nbsp;STARCRAFT</td>
-<td>&nbsp;speech</td>
-<td>&nbsp;732 MB</td>
-<td style="text-align: left;">&nbsp;<a href="https://www.kaggle.com/c/tensorflow-speech-recognition-challenge/data" target="_blank">TensorFlow Speech Commands</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/910e4256-b8bc-48fd-aa19-3475165eb5d2">starcraft.data</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/b5632ab4-624e-4ccc-8873-1fd5825b1e24">starcraft.solution</a></td>
-</tr>
-<tr>
-<td>&nbsp;4</td>
-<td>&nbsp;TWEET</td>
-<td>&nbsp;text</td>
-<td>&nbsp;604 MB</td>
-<td style="text-align: left;">&nbsp;<a href="http://qwone.com/~jason/20Newsgroups/" target="_blank">20 Newsgroups</a></td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/fea6c7bb-b398-4757-924c-b20f16bf4fde">tweet.data</a>&nbsp;</td>
-<td>&nbsp;<a href="http://134.158.74.63/my/datasets/download/724b6bef-f223-4828-881c-2b44b286dd24">tweet.solution</a></td>
-</tr>
-<tr>
-<td style="text-align: left;">&nbsp;5</td>
-<td style="text-align: left;">&nbsp;MUNSTER</td>
-<td style="text-align: left;">&nbsp;image</td>
-<td style="text-align: left;">&nbsp;17.2 MB</td>
-<td style="text-align: left;">&nbsp;<a href="http://yann.lecun.com/exdb/mnist/" target="_blank">MNIST</a></td>
-<td style="text-align: left;">&nbsp;<a href="http://134.158.74.63/my/datasets/download/9ecba9a7-a066-4888-9c00-e0235617446d">munster.data</a>&nbsp;</td>
-<td style="text-align: left;">&nbsp;<a href="http://134.158.74.63/my/datasets/download/feb8a3b3-22ed-4dfc-8935-664ca7e15f2f">munster.solution</a></td>
-</tr>
-</tbody>
-</table>
-<h3>&nbsp;</h3>
-<h3>&nbsp;</h3>
-<h3>&nbsp;</h3>
-<div>
+<h2>Tasks and submissions</h2>
+<p>The identity of the datasets used for blind testing on the platform is concealed.&nbsp;The data are provided in a <strong>raw form</strong> (no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by a&nbsp;<strong>time budget</strong>.&nbsp;</p>
+<p>A&nbsp;<strong>starting kit</strong>&nbsp;is provided to help you prepare a submission under the "<strong>Instructions</strong>" tab.&nbsp;The interface is simple and generic: you must supply a class model.py with:</p>
+<ul>
+<li>a constructor</li>
+<li>a train method</li>
+<li>a test method</li>
+</ul>
+<p>To make submissions,&nbsp;<strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
+<p>This challenge has a single phase during which participants get immediate feed-back on<strong>&nbsp;five datasets&nbsp;</strong>when they submit their code, without having access to them.&nbsp;Code submitted is trained and tested automatically, without any human intervention. All five datasets are run in parallel on separate compute workers, each one with its own time budget. After this challenge terminates, the participants will be invited to a shoters re-match to submit their favorite methods on 5 fresh test datasets.</p>
+<h2>Evaluation protocol</h2>
+<p>Here is some pseudo-code of the evaluation protocol:</p>
+<pre><code># For each dataset, our evaluation program calls the model constructor:
+M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
+# Initialize
+remaining_time budget = overall_time_budget
+start_time = time()
+# Ingestion program calls multiple times train and test:
+repeat until remaining_time_budget &lt; 0
+{
+<strong>M.train</strong> (training_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()
+results = <strong>M.test</strong>(test_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
+save(results)
+}
+</code></pre>
+<p>It belongs to the participants to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
+<h2>Metrics</h2>
+<p>The participants can train in batches with duration that they choose to incrementally improve their performance, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
+<p>Here is how "performance" is computed. We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of presence or absence of a label in a pattern. We measure performance with the average over all labels of</p>
+<p><strong>balanced_accuracy = (1/2) (TPR + TNR).</strong></p>
+<p>For each dataset we compute the&nbsp;<strong>area under the learning curve</strong>&nbsp;(by the trapeze method), i.e. the area of mean_balanced_accuracy as a function of log(time), where "time" is the cumulative time of training and testing. The&nbsp;<strong>overall ranking</strong>&nbsp;is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
+<p>Examples of learning curves:&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
 <p>&nbsp;</p>
-<p>&nbsp;<strong>Usage</strong>: Dowload and put only ONE pair of data and solution (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling `run_local_test.py`.</p>
-<h3>Some statistics/info on these datasets&nbsp;</h3>
-<table border="1" cellspacing="1" cellpadding="1" align="left">
-<tbody>
-<tr>
-<td style="text-align: left;">&nbsp;#&nbsp;</td>
-<td style="text-align: left;">&nbsp;Name</td>
-<td style="text-align: left;">
-<p>&nbsp;num_train</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;num_test</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;col_count</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;row_count</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;sequence_size</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;output_dim</p>
-</td>
-<td style="text-align: left;">
-<p>&nbsp;has_locality_col</p>
-</td>
-<td>
-<p style="text-align: left;">&nbsp;has_locality_row</p>
-</td>
-</tr>
-<tr>
-<td>&nbsp;1</td>
-<td>&nbsp;ADULT</td>
-<td>&nbsp;39074</td>
-<td>&nbsp;9768</td>
-<td>&nbsp;24</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1</td>
-<td>&nbsp;3</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;2</td>
-<td>&nbsp;KATZE</td>
-<td>&nbsp;1528</td>
-<td>&nbsp;863</td>
-<td>&nbsp;160</td>
-<td>&nbsp;120</td>
-<td>&nbsp;181</td>
-<td>&nbsp;6</td>
-<td>&nbsp;true</td>
-<td>&nbsp;true</td>
-</tr>
-<tr>
-<td>&nbsp;3</td>
-<td>&nbsp;TYPHOON</td>
-<td>&nbsp;177080</td>
-<td>&nbsp;64145</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1934</td>
-<td>&nbsp;71</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;4</td>
-<td>&nbsp;TWEET</td>
-<td>&nbsp;11314</td>
-<td>&nbsp;7532</td>
-<td>&nbsp;50</td>
-<td>&nbsp;1</td>
-<td>&nbsp;473</td>
-<td>&nbsp;20</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;5</td>
-<td>&nbsp;MUNSTER</td>
-<td>&nbsp;60000</td>
-<td>&nbsp;10000</td>
-<td>&nbsp;28</td>
-<td>&nbsp;28</td>
-<td>&nbsp;1</td>
-<td>&nbsp;10</td>
-<td>&nbsp;true</td>
-<td>&nbsp;true</td>
-</tr>
-</tbody>
-</table>
-<h3>&nbsp;</h3>
-<h3>&nbsp;</h3>
-<h3>&nbsp;</h3>
-<div>
-<p>&nbsp;</p>
-</div>
-<p>The columns correspond to:</p>
-<p><strong>num_train/num_test</strong>: number of training/test examples</p>
-<p><strong>col_count/row_count/sequence_size</strong>: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time))</p>
-<p><strong>output_dim</strong>: number of classes</p>
-<p><strong>has_locality_col/has_locality_row</strong>:&nbsp;indicate if column/row indices carry some structure/information based on closeness of indices, like in an image or in a video.</p>
-</div>
-<h3>Data format</h3>
-<p>In this challenge, you do not have access to datasets but we provide the dataset dimension and size. All datasets are&nbsp; furthermore formatted in a uniform way and are provided in a raw form to encourage the use of Deep Learning methods that perform automatic feature learning. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems.</p>
-<p>We use a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>. This format allows us to format any 2D+time data, including text, speech, image, video, etc. If you want to practice designing algorithms with your own datasets, we provide <a href="https://github.com/zhengying-liu/autodl-contrib/tree/master/tfrecord_format">instructions</a>&nbsp;about how to format your datasets for the AutoDL challenge.</p>

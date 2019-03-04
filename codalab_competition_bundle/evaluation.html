@@ -1,39 +1,175 @@
-<h3><span style="font-size: 1.17em;">Submission process</span></h3>
-<p>A <strong>starting kit</strong> is provided to help you prepare a submission under the "Starting Kit" tab.&nbsp;To submit an algorithm, you must supply a model.py file containing a Model class with:</p>
+<h2>Quick start</h2>
+<p>This is a challenge with code submission. We provide 3 baseline methods for test purposes:</p>
+<p><a href="../../my/datasets/download/435e77d0-95c1-4818-b233-9ae41120b74a">Baseline 0</a>: Make constant predictions (all 0).</p>
+<p><a href="../../my/datasets/download/4617eb76-9344-472b-8ac2-12fedd64d646">Baseline 1</a>: Linear classifier.</p>
+<p><a href="../../my/datasets/download/f7b320ce-5169-4ff2-af5b-0588e66bec83">Baseline 2</a>: Self-scaling Conveolutional Neural Network (CNN).</p>
+<p>To make a test submission, download one of the baseline methods, click on the blue button "<strong>Upload a Submission</strong>" in the upper right corner of the page and re-upload it.&nbsp;To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.</p>
+<h2>Complete starting kit</h2>
+<p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and test it on your local computer, in conditions identical to those of the Codalab platform.&nbsp;</p>
+<center>
+<h3><span><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
+</center>
+<h2>Larger practice datasets</h2>
+<p>The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and put only ONE pair of data and solution (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py. But remember:</p>
+<p style="text-align: center;"><strong>Put only ONE pair of data and solution in one directory.</strong></p>
+<p style="text-align: left;">Then you can of course create several directories (each for one single dataset) then specify the dataset you want to work on by that directory.</p>
+<table border="1" cellspacing="1" cellpadding="1" align="left">
+<tbody>
+<tr>
+<td>&nbsp;#&nbsp;</td>
+<td>&nbsp;Name</td>
+<td>&nbsp;Domain</td>
+<td>&nbsp;Size</td>
+<td>&nbsp;Source</td>
+<td>
+<p>&nbsp;Data (w/o test labels)</p>
+</td>
+<td>&nbsp;Test labels</td>
+</tr>
+<tr>
+<td>&nbsp;1</td>
+<td>&nbsp;ADULT</td>
+<td>&nbsp;tabular</td>
+<td>&nbsp;1.9 MB</td>
+<td>&nbsp;<a href="https://archive.ics.uci.edu/ml/datasets/adult" target="_blank">Adult</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/c92700af-3b0f-432a-b784-898383fda1b2">adult.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/4f48064f-3da6-48a5-9ed6-9a2b260c47c4">adult.solution</a></td>
+</tr>
+<tr>
+<td>&nbsp;2</td>
+<td>&nbsp;KATZE</td>
+<td>&nbsp;video</td>
+<td>&nbsp;1.94 GB</td>
+<td>&nbsp;<a href="http://www.nada.kth.se/cvap/actions/" target="_blank">KTH Human Actions</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/49288e21-67eb-4984-b8fe-dc23e53e37b3">katze.data</a>&nbsp;</td>
+<td>&nbsp;<a href="../../my/datasets/download/0cf44915-ac2f-4e5f-9b12-432c1ddac1d3">katze.solution</a>&nbsp;</td>
+</tr>
+<tr>
+<td>&nbsp;3</td>
+<td>&nbsp;STARCRAFT</td>
+<td>&nbsp;speech</td>
+<td>&nbsp;732 MB</td>
+<td>&nbsp;<a href="https://www.kaggle.com/c/tensorflow-speech-recognition-challenge/data" target="_blank">TensorFlow Speech Commands</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/910e4256-b8bc-48fd-aa19-3475165eb5d2">starcraft.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/b5632ab4-624e-4ccc-8873-1fd5825b1e24">starcraft.solution</a></td>
+</tr>
+<tr>
+<td>&nbsp;4</td>
+<td>&nbsp;TWEET</td>
+<td>&nbsp;text</td>
+<td>&nbsp;604 MB</td>
+<td>&nbsp;<a href="http://qwone.com/~jason/20Newsgroups/" target="_blank">20 Newsgroups</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/fea6c7bb-b398-4757-924c-b20f16bf4fde">tweet.data</a>&nbsp;</td>
+<td>&nbsp;<a href="../../my/datasets/download/724b6bef-f223-4828-881c-2b44b286dd24">tweet.solution</a></td>
+</tr>
+<tr>
+<td>&nbsp;5</td>
+<td>&nbsp;MUNSTER</td>
+<td>&nbsp;image</td>
+<td>&nbsp;17.2 MB</td>
+<td>&nbsp;<a href="http://yann.lecun.com/exdb/mnist/" target="_blank">MNIST</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/9ecba9a7-a066-4888-9c00-e0235617446d">munster.data</a>&nbsp;</td>
+<td>&nbsp;<a href="../../my/datasets/download/feb8a3b3-22ed-4dfc-8935-664ca7e15f2f">munster.solution</a></td>
+</tr>
+</tbody>
+</table>
+<table border="1" cellspacing="1" cellpadding="1" align="left">
+<tbody>
+<tr>
+<td>&nbsp;#&nbsp;</td>
+<td>&nbsp;Name</td>
+<td>
+<p>&nbsp;num_train</p>
+</td>
+<td>
+<p>&nbsp;num_test</p>
+</td>
+<td>
+<p>&nbsp;col_count</p>
+</td>
+<td>
+<p>&nbsp;row_count</p>
+</td>
+<td>
+<p>&nbsp;sequence_size</p>
+</td>
+<td>
+<p>&nbsp;output_dim</p>
+</td>
+<td>
+<p>&nbsp;has_locality_col</p>
+</td>
+<td>
+<p>&nbsp;has_locality_row</p>
+</td>
+</tr>
+<tr>
+<td>&nbsp;1</td>
+<td>&nbsp;ADULT</td>
+<td>&nbsp;39074</td>
+<td>&nbsp;9768</td>
+<td>&nbsp;24</td>
+<td>&nbsp;1</td>
+<td>&nbsp;1</td>
+<td>&nbsp;3</td>
+<td>&nbsp;false</td>
+<td>&nbsp;false</td>
+</tr>
+<tr>
+<td>&nbsp;2</td>
+<td>&nbsp;KATZE</td>
+<td>&nbsp;1528</td>
+<td>&nbsp;863</td>
+<td>&nbsp;160</td>
+<td>&nbsp;120</td>
+<td>&nbsp;181</td>
+<td>&nbsp;6</td>
+<td>&nbsp;true</td>
+<td>&nbsp;true</td>
+</tr>
+<tr>
+<td>&nbsp;3</td>
+<td>&nbsp;TYPHOON</td>
+<td>&nbsp;177080</td>
+<td>&nbsp;64145</td>
+<td>&nbsp;1</td>
+<td>&nbsp;1</td>
+<td>&nbsp;1934</td>
+<td>&nbsp;71</td>
+<td>&nbsp;false</td>
+<td>&nbsp;false</td>
+</tr>
+<tr>
+<td>&nbsp;4</td>
+<td>&nbsp;TWEET</td>
+<td>&nbsp;11314</td>
+<td>&nbsp;7532</td>
+<td>&nbsp;50</td>
+<td>&nbsp;1</td>
+<td>&nbsp;473</td>
+<td>&nbsp;20</td>
+<td>&nbsp;false</td>
+<td>&nbsp;false</td>
+</tr>
+<tr>
+<td>&nbsp;5</td>
+<td>&nbsp;MUNSTER</td>
+<td>&nbsp;60000</td>
+<td>&nbsp;10000</td>
+<td>&nbsp;28</td>
+<td>&nbsp;28</td>
+<td>&nbsp;1</td>
+<td>&nbsp;10</td>
+<td>&nbsp;true</td>
+<td>&nbsp;true</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>a constructor</li>
-<li>a train method</li>
-<li>a test method</li>
+<li>num_train/num_test: number of training/test examples</li>
+<li>col_count/row_count/sequence_size: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time))</li>
+<li>output_dim: number of classes</li>
+<li>has_locality_col/has_locality_row:&nbsp;indicate if column/row indices carry some structure/information based on closeness of indices, like in an image or in a video.</li>
 </ul>
-<p>You can also provide a short metadata file to describe your model. Its content should be like "description: &lt;describe your algorithm&gt;". See metadata file examples in the starting kit.</p>
-<p>Once you have a metadata and a model.py file, you zip them into a submission file that you upload by clicking on the "<strong>Upload a Submission</strong>" button. The size of the zip file should be less than 1GB. Your submission will appear in the table under the "<strong>My Submissions</strong>" tab.</p>
-<p>It might take a while to run - it all depends on the complexity of your method (we allocate one compute instance per run per dataset and limit the compute time to be max. 2 hours per dataset). You can check the progress of your submission by looking at its learning curves for each dataset (click on one of the dataset buttons). Note that learning curves will only appear if your algorithm has saved its first result.</p>
-<p>Once a run is completed, your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab. You will see a check mark on your submission table that indicates which submission is considered for the final results.</p>
-<p>If one submission fails, you can expand the row showing your submission to get more details including error logs. It can happen that one submission fails for some (not all) datasets. In that case, the whole submission is considered as failed.</p>
-<p><span style="font-size: 1.17em;">Evaluation protocol</span></p>
-<p>The evaluation protocol is done as follows:</p>
-<pre><code># For each dataset, our evaluation program calls the model constructor:
-M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
-# Initialize
-remaining_time_budget = overall_time_budget
-start_time = time()
-# Ingestion program calls multiple times train and test:
-repeat until remaining_time_budget &lt; 0
-{
-<strong>M.train</strong> (training_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()
-results = <strong>M.test</strong>(test_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
-save(results)
-}
-</code></pre>
-<p>You have to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo; (max. 2 hours). It is recommended to save regularly so the platform computes a score before the time budget is exceeded. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments. The score used to rank all participants is based on the learning curve (see below): the better and earlier results will be ranked first.&nbsp;</p>
-<h3>Score</h3>
-<p>The participants can train in batches with duration that they can adjust over time. We plot learning curves as soon as the first result is available. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
-<p>We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of the presence or absence of a label in a pattern. We measure the performance of such predictions with the average over all labels of</p>
-<p><strong>balanced score = TPR + TNR -1</strong></p>
-<p>A value of zero is what you would obtain with a random classifier. The perfect classification will return 1, while negative values are worst than a random choice.</p>
-<p>For each dataset we compute the <strong>area under the learning curve aka ALC</strong>&nbsp;(by the trapeze method), i.e. the area of balanced score as a function of log(time), where "time" is the cumulative time of training and testing. The <strong>overall ranking</strong> is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
-<p>Examples of learning curves: <img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
-<h3>&nbsp;</h3>
-<p>&nbsp;</p>
+<h2>Format and use your own datasets</h2>
+<p>Raw data are preserved, but formatted in a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by&nbsp;<a href="https://www.tensorflow.org/">TensorFlow</a>. However, this will not impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
