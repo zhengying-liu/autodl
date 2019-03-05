@@ -37,6 +37,8 @@ For collaborators, the steps to follow are:
 4. **Push your Changes**. In your workspace, use the `git push` command to upload your changes to your remote fork on GitHub.
 5. **Create a Pull Request**. On the GitHub page of your remote fork, click the “Pull request” button. Wait for the owner to merge or comment your changes and be proud when it is merged :). If the owner suggests some changes before merging, you can simply push these changes into your fork by repeating steps #3 and #4 and the pull request is updated automatically.
 
+[comment]: <> (Some material is borrowed from https://reflectoring.io/github-fork-and-pull/)
+
 ## Tips
 1. For changes of Jupyter notebooks, please do test by *Cell -> Run All* then save the notebook after doing *Kernel -> Restart & Clear Output*. This is to avoid the useless cell numbering, metadata and images changes.
 
