@@ -30,6 +30,8 @@ For collaborators, the steps to follow are:
 1. **Create a fork**, i.e. a copy of the source repository under your own GitHub account. To do this, go to the [project main page](https://github.com/zhengying-liu/autodl), sign in and click on the *Fork* button on right top of the page;
 2. **Make changes to your own repo**. Do the changes that you would like to suggest in your own repo.
 3. **Make a pull request**. TODO(zhengying-liu)
+Then the project maintainer will review your code and integrate it into the 
+source repo if it goes well.
 
 ## Tips
 1. For changes of Jupyter notebooks, please do test by *Cell -> Run All* then save the notebook after doing *Kernel -> Restart & Clear Output*. This is to avoid the useless cell numbering, metadata and images changes.
