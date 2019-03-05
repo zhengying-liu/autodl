@@ -45,6 +45,7 @@ rm -rf $DIR
 mkdir $DIR
 cp '../'*.jpg $DIR
 cp '../'*.png $DIR
+cp '../'*.gif $DIR
 cp '../'*.html $DIR
 cp '../'*.yaml $DIR
 cp -r '../assets' $DIR
