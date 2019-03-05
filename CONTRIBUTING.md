@@ -28,10 +28,14 @@ For this project, we follow the *fork and pull model* collaborative development.
 
 For collaborators, the steps to follow are:
 1. **Create a fork**, i.e. a copy of the source repository under your own GitHub account. To do this, go to the [project main page](https://github.com/zhengying-liu/autodl), sign in and click on the *Fork* button on right top of the page;
-2. **Make changes to your own repo**. Do the changes that you would like to suggest in your own repo.
-3. **Make a pull request**. TODO(zhengying-liu)
-Then the project maintainer will review your code and integrate it into the 
-source repo if it goes well.
+2. **Clone your Fork**. The standard clone command creates a local git repository from your remote fork on GitHub.
+    ```
+    git clone https://github.com/USERNAME/autodl.git
+    ```
+    **WARNING:** Remember to change `USERNAME` to your own username.
+3. **Modify the Code**. In your local clone, modify the code and commit them to your local clone using the `git commit` command.
+4. **Push your Changes**. In your workspace, use the `git push` command to upload your changes to your remote fork on GitHub.
+5. **Create a Pull Request**. On the GitHub page of your remote fork, click the “Pull request” button. Wait for the owner to merge or comment your changes and be proud when it is merged :). If the owner suggests some changes before merging, you can simply push these changes into your fork by repeating steps #3 and #4 and the pull request is updated automatically.
 
 ## Tips
 1. For changes of Jupyter notebooks, please do test by *Cell -> Run All* then save the notebook after doing *Kernel -> Restart & Clear Output*. This is to avoid the useless cell numbering, metadata and images changes.
