@@ -1,6 +1,6 @@
-########################################################################
-############################ AUTODL CHALLENGE  #########################
-########################################################################
+################################################################################
+############################ AUTODL CHALLENGE  #################################
+################################################################################
 # Authors: Isabelle Guyon, Zhengying Liu
 # Date: Apr 12, 2018
 
@@ -31,17 +31,18 @@ html:
     data: data.html
     credits: credits.html
 
-# ----------------------------------------------------------------------------------------
-# ----------------------                PHASES                   -------------------------
-# ----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ----------------------|               PHASES                   |--------------
+# ------------------------------------------------------------------------------
 
 phases:
 
-# ----------------------            AUTODL              -------------------------
+# ----------------------            AUTODL              ------------------------
 
+# ----------------------          VALIDATION PHASE      ------------------------
     1:
         phasenumber: 1
-        label: "All datasets"
+        label: "Validation datasets"
         description: "Please make submissions by clicking on following 'Submit' button. Then you can view the submission results of your algorithm on each dataset in corresponding tab (Dataset 1, Dataset 2, etc)."
         color: orange # Tab colors (white, orange, yellow, green, blue, purple)
         start_date: 2018-10-22
@@ -152,48 +153,280 @@ phases:
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
-# ----------------------------------------------------------------------------------------
-# ----------------------              LEADERBOARD                -------------------------
-# ----------------------------------------------------------------------------------------
+# -------------------------          TEST PHASE      ---------------------------
+
+    7:
+        phasenumber: 7
+        label: "Test datasets"
+        description: "Please make submissions by clicking on following 'Submit' button. Then you can view the submission results of your algorithm on each dataset in corresponding tab (Dataset 1, Dataset 2, etc)."
+        color: orange # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        max_submissions: 100
+        max_submissions_per_day: 5
+        is_parallel_parent: True
+        is_scoring_only: True
+        scoring_program: AutoDL_parent_scoring_program.zip
+        hidden_columns: "score, Duration"
+
+    8:
+        phasenumber: 8
+        label: "Dataset 1"
+        description: "This tab contains submission results of your algorithm on Dataset 1."
+        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 7
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_1.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_1.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+
+    9:
+        phasenumber: 9              # NO submission, auto-migration
+        label: "Dataset 2"
+        description: "This tab contains submission results of your algorithm on Dataset 2."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 7
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_2.zip # 37a6461e-7c1f-468a-bc4a-fa66c6847d95
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_2.zip # 8b92f40f-f193-4026-9ef8-a06d8bc82934
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+
+    10:
+        phasenumber: 10              # NO submission, auto-migration
+        label: "Dataset 3"
+        description: "This tab contains submission results of your algorithm on Dataset 3."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 7
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_3.zip # b1ad71fe-b597-4f8d-8b56-afff66002c62
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_3.zip # 8436224e-e958-457e-bd8d-7c18ac43a6c0
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+
+    11:
+        phasenumber: 11              # NO submission, auto-migration
+        label: "Dataset 4"
+        description: "This tab contains submission results of your algorithm on Dataset 4."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 7
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_4.zip # 8f0c139f-c6c8-4433-bf38-51e7d0486bea
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_4.zip # 8528974d-b0f2-45bd-bd9c-2c859acb8ebc
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+
+    12:
+        phasenumber: 12              # NO submission, auto-migration
+        label: "Dataset 5"
+        description: "This tab contains submission results of your algorithm on Dataset 5."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 7
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data:  AutoDL_input_data_5.zip # ce683464-561e-472f-886d-4d04039f6c39
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data:  AutoDL_reference_data_5.zip # 65acfcae-9b8f-4cb5-ad8c-1032ad038856
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+
+# -------------------------          PUBLIC PHASE      -------------------------
+
+    13:
+        phasenumber: 13
+        label: "Public datasets"
+        description: "Please make submissions by clicking on following 'Submit' button. Then you can view the submission results of your algorithm on each dataset in corresponding tab (Dataset 1, Dataset 2, etc)."
+        color: orange # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        max_submissions: 100
+        max_submissions_per_day: 5
+        is_parallel_parent: True
+        is_scoring_only: True
+        scoring_program: AutoDL_parent_scoring_program.zip
+        hidden_columns: "score, Duration"
+
+    14:
+        phasenumber: 14
+        label: "Dataset 1"
+        description: "This tab contains submission results of your algorithm on Dataset 1."
+        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 13
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_1.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_1.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+    15:
+        phasenumber: 15              # NO submission, auto-migration
+        label: "Dataset 2"
+        description: "This tab contains submission results of your algorithm on Dataset 2."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 13
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_2.zip # 37a6461e-7c1f-468a-bc4a-fa66c6847d95
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_2.zip # 8b92f40f-f193-4026-9ef8-a06d8bc82934
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+    16:
+        phasenumber: 16              # NO submission, auto-migration
+        label: "Dataset 3"
+        description: "This tab contains submission results of your algorithm on Dataset 3."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 13
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_3.zip # b1ad71fe-b597-4f8d-8b56-afff66002c62
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_3.zip # 8436224e-e958-457e-bd8d-7c18ac43a6c0
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+    17:
+        phasenumber: 17              # NO submission, auto-migration
+        label: "Dataset 4"
+        description: "This tab contains submission results of your algorithm on Dataset 4."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 13
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data: AutoDL_input_data_4.zip # 8f0c139f-c6c8-4433-bf38-51e7d0486bea
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data: AutoDL_reference_data_4.zip # 8528974d-b0f2-45bd-bd9c-2c859acb8ebc
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+    18:
+        phasenumber: 18              # NO submission, auto-migration
+        label: "Dataset 5"
+        description: "This tab contains submission results of your algorithm on Dataset 5."
+        color: green               # Tab colors (white, orange, yellow, green, blue, purple)
+        start_date: 2018-10-22
+        parent_phasenumber: 13
+        is_scoring_only: False      # if false: code submission
+        execution_time_limit: 7200  # (in sec) must be given when code submission enabled
+        max_submissions: 100        # no max
+        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
+        auto_migration: True        # first submission = last one of previous phase
+        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
+        input_data:  AutoDL_input_data_5.zip # ce683464-561e-472f-886d-4d04039f6c39
+        ingestion_program: AutoDL_ingestion_program.zip
+        scoring_program: AutoDL_scoring_program.zip
+        reference_data:  AutoDL_reference_data_5.zip # 65acfcae-9b8f-4cb5-ad8c-1032ad038856
+        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
+
+# ------------------------------------------------------------------------------
+# ----------------------              LEADERBOARD                ---------------
+# ------------------------------------------------------------------------------
 
 leaderboard:
     leaderboards:
-        Results: &RESULTS
-            label: RESULTS
+        Results: &VALIDATION
+            label: VALIDATION
+            rank: 1
+        Results: &TEST
+            label: TEST
+            rank: 1
+        Results: &PUBLIC
+            label: PUBLIC
             rank: 1
     columns:
+        # VALIDATION PHASE -----------------------------------------------------
         score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Score
             numeric_format: 4
             rank: 2
         set1_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Dataset 1
             numeric_format: 4
             rank: 2
         set2_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Dataset 2
             numeric_format: 4
             rank: 3
         set3_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Dataset 3
             numeric_format: 4
             rank: 4
         set4_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Dataset 4
             numeric_format: 4
             rank: 5
         set5_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: Dataset 5
             numeric_format: 4
             rank: 6
         ave_score:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
             label: <Rank>
             numeric_format: 4
             rank: 1
@@ -203,7 +436,101 @@ leaderboard:
                 operation: Avg
                 fields: set1_score, set2_score, set3_score, set4_score, set5_score
         Duration:
-            leaderboard: *RESULTS
+            leaderboard: *VALIDATION
+            label: Duration
+            numeric_format: 2
+            rank: 7
+
+        # TEST PHASE -----------------------------------------------------------
+        score:
+            leaderboard: *TEST
+            label: Score
+            numeric_format: 4
+            rank: 2
+        set1_score:
+            leaderboard: *TEST
+            label: Dataset 1
+            numeric_format: 4
+            rank: 2
+        set2_score:
+            leaderboard: *TEST
+            label: Dataset 2
+            numeric_format: 4
+            rank: 3
+        set3_score:
+            leaderboard: *TEST
+            label: Dataset 3
+            numeric_format: 4
+            rank: 4
+        set4_score:
+            leaderboard: *TEST
+            label: Dataset 4
+            numeric_format: 4
+            rank: 5
+        set5_score:
+            leaderboard: *TEST
+            label: Dataset 5
+            numeric_format: 4
+            rank: 6
+        ave_score:
+            leaderboard: *TEST
+            label: <Rank>
+            numeric_format: 4
+            rank: 1
+            selection_default: 1
+            sorting: ascending
+            computed:
+                operation: Avg
+                fields: set1_score, set2_score, set3_score, set4_score, set5_score
+        Duration:
+            leaderboard: *TEST
+            label: Duration
+            numeric_format: 2
+            rank: 7
+
+        # PUBLIC PHASE ---------------------------------------------------------
+        score:
+            leaderboard: *PUBLIC
+            label: Score
+            numeric_format: 4
+            rank: 2
+        set1_score:
+            leaderboard: *PUBLIC
+            label: Dataset 1
+            numeric_format: 4
+            rank: 2
+        set2_score:
+            leaderboard: *PUBLIC
+            label: Dataset 2
+            numeric_format: 4
+            rank: 3
+        set3_score:
+            leaderboard: *PUBLIC
+            label: Dataset 3
+            numeric_format: 4
+            rank: 4
+        set4_score:
+            leaderboard: *PUBLIC
+            label: Dataset 4
+            numeric_format: 4
+            rank: 5
+        set5_score:
+            leaderboard: *PUBLIC
+            label: Dataset 5
+            numeric_format: 4
+            rank: 6
+        ave_score:
+            leaderboard: *PUBLIC
+            label: <Rank>
+            numeric_format: 4
+            rank: 1
+            selection_default: 1
+            sorting: ascending
+            computed:
+                operation: Avg
+                fields: set1_score, set2_score, set3_score, set4_score, set5_score
+        Duration:
+            leaderboard: *PUBLIC
             label: Duration
             numeric_format: 2
             rank: 7
