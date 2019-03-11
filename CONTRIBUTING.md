@@ -2,7 +2,7 @@ How to Contribute
 =================
 
 ## Contributing License Agreement
-TODO (@madclam)
+By contributing to this repo, you agree to become a [Codalab framework contributor](https://github.com/codalab/codalab-competitions/blob/master/docs/Community-Governance.md).
 
 ## Python coding style
 
