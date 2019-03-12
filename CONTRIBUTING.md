@@ -43,6 +43,10 @@ Some material is borrowed from https://reflectoring.io/github-fork-and-pull/)
 
 ## Tips
 1. For changes of Jupyter notebooks, please do test by *Cell -> Run All* then save the notebook after doing *Kernel -> Restart & Clear Output*. This is to avoid the useless cell numbering, metadata and images changes.
+2. To update your repo and synchronize it with the main branch:
+    ```
+    git pull upstream master
+    ```
 
 ## Further reading
 - [About pull requests](https://help.github.com/en/articles/about-pull-requests)
