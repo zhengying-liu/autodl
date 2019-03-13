@@ -7,8 +7,8 @@ The directories correspond to:
 - `docker`: the Dockerfile used to generate the Docker image for the challenge;
 - `how_to_format_data`: a tutorial on how to format participants' own data in this challenge's format, namely the standard TensorFlow TFRecords format.
 
-### TODO
-[Add description here]
+### How to contribute
+[See instructions](https://github.com/zhengying-liu/autodl/blob/master/CONTRIBUTING.md)
 
 ### To Prepare a Competition Bundle and Create a Copy of AutoDL competition
 Please run
