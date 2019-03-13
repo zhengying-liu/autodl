@@ -122,6 +122,13 @@ class Model(algorithm.Algorithm):
           should keep track of its execution time to avoid exceeding its time
           budget. If remaining_time_budget is None, no time budget is imposed.
     """
+    # DEBUG
+    if self.estimated_time_test:
+      tentative_estimated_time_test = self.estimated_time_test
+    else:
+      tentative_estimated_time_test = 50
+    ########
+
     # Get number of steps to train according to some strategy
     steps_to_train = self.get_steps_to_train(remaining_time_budget)
 
