@@ -3,8 +3,7 @@ services:
     - docker
 before_install:
     - docker pull evariste/autodl
-    - docker run -d --memory=4g -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl /bin/sh -c "cd /root/autodl; bundle exec foreman start;"
+    - docker run --memory=4g -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl
     - docker ps -a
 script:
-    - bundle exec rake test
     - python unit-testing.py
