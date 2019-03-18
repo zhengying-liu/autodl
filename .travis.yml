@@ -2,6 +2,6 @@ language: python
 services:
     - docker
 before_install:
-    - docker run --memory=4g -it -u root -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl
+    - docker run --memory=4g -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl
 script:
     - python unit-testing.py
