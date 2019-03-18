@@ -24,7 +24,8 @@ pylint --rcfile=/tmp/pylintrc myfile.py
 ```
 
 ## How to contribute your code using pull request
-For this project, we follow the *fork and pull model* collaborative development. This means that collaborators have to suggest code changes by making pull requests from their own fork. These changes can then be pulled into the source repository by the project maintainer.
+For this project, we follow the *fork and pull model* of collaborative development. 
+This means that collaborators have to suggest code changes by making pull requests from their own fork. These changes can then be pulled into the source repository by the project maintainer.
 
 For collaborators, the steps to follow are:
 1. **Create a fork**, i.e. a copy of the source repository under your own GitHub account. To do this, go to the [project main page](https://github.com/zhengying-liu/autodl), sign in and click on the *Fork* button on right top of the page;
@@ -43,6 +44,10 @@ Some material is borrowed from https://reflectoring.io/github-fork-and-pull/)
 
 ## Tips
 1. For changes of Jupyter notebooks, please do test by *Cell -> Run All* then save the notebook after doing *Kernel -> Restart & Clear Output*. This is to avoid the useless cell numbering, metadata and images changes.
+2. To update your repo and synchronize it with the original repo (`zhengying-liu/autodl`):
+    ```
+    git pull upstream master
+    ```
 
 ## Further reading
 - [About pull requests](https://help.github.com/en/articles/about-pull-requests)
