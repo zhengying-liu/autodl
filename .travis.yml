@@ -3,7 +3,7 @@ services:
     - docker
 before_install:
     - docker pull evariste/autodl
-    - docker run -d --memory=4g -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl /bin/sh -c "cd /root/autodl; python unit-testing.py;"
-    - docker ps -a
+    - docker run --name autodl-container -d --memory=4g -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl
 script:
+    - docker exec -it autodl-container python unit-testing.py
     - python unit-testing.py
