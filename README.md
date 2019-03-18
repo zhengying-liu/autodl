@@ -1,5 +1,5 @@
 # AutoDL
-A data challenge in Automatic Deep Learning (AutoDL), co-organized with Google.
+A data challenge in Automated Deep Learning (AutoDL), co-organized with Google.
 
 
 The directories correspond to:
