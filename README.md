@@ -1,6 +1,7 @@
 # AutoDL
 A data challenge in Automated Deep Learning (AutoDL), co-organized with Google.
 
+[![Build Status](https://travis-ci.org/zhengying-liu/autodl.svg?branch=master)](https://travis-ci.org/zhengying-liu/autodl)
 
 The directories correspond to:
 - `codalab_competition_bundle`: the current competition bundle used on [CodaLab](http://35.193.242.121/competitions/8);
