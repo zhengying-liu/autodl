@@ -140,9 +140,12 @@ def zipdir(archivename, basedir):
         for root, dirs, files in os.walk(basedir):
             #NOTE: ignore empty directories
             for fn in files:
-                if fn[-4:]!='.zip':
+                if not fn.endswith('.zip'):
                     absfn = os.path.join(root, fn)
-                    zfn = absfn[len(basedir)+len(os.sep):] #XXX: relative path
+                    zfn = absfn[len(basedir):] #XXX: relative path
+                    assert absfn[:len(basedir)] == basedir
+                    if zfn[0] == os.sep:
+                        zfn = zfn[1:]
                     z.write(absfn, zfn)
 
 # ================ Inventory input data and create data structure =================
