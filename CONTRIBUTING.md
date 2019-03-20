@@ -29,7 +29,7 @@ Whenever you notice a bug or an issue, you should create an issue in the **Issue
 When creating a new issue, copy this form and fill out:
 
 ```
-*System information*
+**System information**
 
 - OS Platform and Distribution (e.g., Linux Ubuntu 16.04): Linux Debian 9
 - Did you use the Docker image `evariste/autodl`?: Yes
@@ -37,13 +37,13 @@ When creating a new issue, copy this form and fill out:
 - CUDA/cuDNN version (optional): 9.0 / 7.0.3
 - GPU model and memory (optional): GeForce GTX 1080 Ti, 10405 MB
 
-*Describe the current behavior*
+**Describe the current behavior**
 (Write description here. Can include for example a part of the copy of the error message and/or the script + the line number  that produces the error)
 
-*Describe the expected behavior*
+**Describe the expected behavior**
 (Write description here.)
 
-*Additional info*
+**Additional info**
 ```
 
 For more information on creating issues on GitHub, please read official guide: [Creating an issue](https://help.github.com/en/articles/creating-an-issue).
