@@ -43,7 +43,7 @@ When creating a new issue, copy this form and fill out:
 *Describe the expected behavior*
 (Write description here.)
 
-* *
+*Additional info*
 ```
 
 For more information on creating issues on GitHub, please read official guide: [Creating an issue](https://help.github.com/en/articles/creating-an-issue).
