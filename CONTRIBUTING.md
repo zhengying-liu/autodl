@@ -38,10 +38,12 @@ When creating a new issue, copy this form and fill out:
 - GPU model and memory (optional): GeForce GTX 1080 Ti, 10405 MB
 
 *Describe the current behavior*
-(description)
+(Write description here. Can include for example a part of the copy of the error message and/or the script + the line number  that produces the error)
 
 *Describe the expected behavior*
-(description)
+(Write description here.)
+
+* *
 ```
 
 For more information on creating issues on GitHub, please read official guide: [Creating an issue](https://help.github.com/en/articles/creating-an-issue).
