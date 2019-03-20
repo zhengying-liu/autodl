@@ -23,6 +23,30 @@ To check a file with `pylint`:
 pylint --rcfile=/tmp/pylintrc myfile.py
 ```
 
+## Use *Issues* to keep track of bugs
+Whenever you notice a bug or an issue, you should create an issue in the **Issues** page of this project. DO NOT SEND EMAILS ON ANY ISSUES!
+
+When creating a new issue, copy this form and fill out:
+
+```
+*System information*
+
+- OS Platform and Distribution (e.g., Linux Ubuntu 16.04): Linux Debian 9
+- Did you use the Docker image `evariste/autodl`?: Yes
+- Python version: 2.7.13
+- CUDA/cuDNN version (optional): 9.0 / 7.0.3
+- GPU model and memory (optional): GeForce GTX 1080 Ti, 10405 MB
+
+*Describe the current behavior*
+(description)
+
+*Describe the expected behavior*
+(description)
+```
+
+For more information on creating issues on GitHub, please read official guide: [Creating an issue](https://help.github.com/en/articles/creating-an-issue).
+
+
 ## How to contribute your code using pull request
 For this project, we follow the *fork and pull model* of collaborative development. 
 This means that collaborators have to suggest code changes by making pull requests from their own fork. These changes can then be pulled into the source repository by the project maintainer.
