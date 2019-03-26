@@ -43,6 +43,8 @@ When creating a new issue, copy this form and fill out:
 **Describe the expected behavior**
 (Write description here.)
 
+**Command line to reproduce the issue**
+
 **Additional info**
 ```
 
