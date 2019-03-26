@@ -184,9 +184,9 @@ def draw_learning_curve(solution_file, prediction_files,
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
   if len(timestamps) > 0:
-    latest_bac = sorted_pairs[-1][1]
-    print_log("BAC of the latest prediction is {:.4f}."\
-              .format(latest_bac))
+    latest_nbac = sorted_pairs[-1][1]
+    print_log("NBAC (2 * BAC - 1) of the latest prediction is {:.4f}."\
+              .format(latest_nbac))
     if is_multiclass_task:
       sorted_pairs_acc = sorted(zip(timestamps, accuracy_scores))
       latest_acc = sorted_pairs_acc[-1][1]
