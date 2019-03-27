@@ -37,6 +37,9 @@ import datetime
 # To compute area under learning curve
 from sklearn.metrics import auc
 
+# To compute ROC AUC metric
+from sklearn.metrics import roc_auc_score
+
 from libscores import read_array, sp, ls, mvmean
 
 # Convert images to Base64 to show in scores.html
@@ -166,6 +169,7 @@ def draw_learning_curve(solution_file, prediction_files,
   """Draw learning curve for one task."""
   solution = read_array(solution_file) # numpy array
   scores = []
+  roc_auc_scores = []
   timestamps = []
   if is_multiclass_task:
     accuracy_scores = []
@@ -175,18 +179,22 @@ def draw_learning_curve(solution_file, prediction_files,
     if (solution.shape != prediction.shape): raise ValueError(
         "Bad prediction shape: {}. ".format(prediction.shape) +
         "Expected shape: {}".format(solution.shape))
-    score = scoring_function(solution, prediction)
-    scores.append(score)
+    scores.append(scoring_function(solution, prediction))
+    roc_auc_scores.append(roc_auc_score(solution, prediction))
     timestamps.append(timestamp)
     if is_multiclass_task:
       acc = accuracy(solution, prediction)
       accuracy_scores.append(acc)
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
+  roc_auc_sorted_pairs = sorted(zip(timestamps, roc_auc_scores))
   if len(timestamps) > 0:
     latest_nbac = sorted_pairs[-1][1]
+    latest_roc_auc = roc_auc_sorted_pairs[-1][1]
     print_log("NBAC (2 * BAC - 1) of the latest prediction is {:.4f}."\
               .format(latest_nbac))
+    print_log("ROC AUC of the latest prediction is {:.4f}."\
+              .format(latest_roc_auc))
     if is_multiclass_task:
       sorted_pairs_acc = sorted(zip(timestamps, accuracy_scores))
       latest_acc = sorted_pairs_acc[-1][1]
