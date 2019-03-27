@@ -180,14 +180,17 @@ def draw_learning_curve(solution_file, prediction_files,
         "Bad prediction shape: {}. ".format(prediction.shape) +
         "Expected shape: {}".format(solution.shape))
     scores.append(scoring_function(solution, prediction))
-    roc_auc_scores.append(roc_auc_score(solution, prediction))
+    try: # if only one class present in y_true. ROC AUC score is not defined in that case.
+        roc_auc_scores.append(roc_auc_score(solution, prediction))
+    except:
+        roc_auc_scores.append(-1)
     timestamps.append(timestamp)
     if is_multiclass_task:
-      acc = accuracy(solution, prediction)
-      accuracy_scores.append(acc)
+      accuracy_scores.append(accuracy(solution, prediction))
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
   roc_auc_sorted_pairs = sorted(zip(timestamps, roc_auc_scores))
+
   if len(timestamps) > 0:
     latest_nbac = sorted_pairs[-1][1]
     latest_roc_auc = roc_auc_sorted_pairs[-1][1]
