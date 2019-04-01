@@ -79,6 +79,13 @@ class AutoDLMetadata(object):
     num_channels = self.get_num_channels(bundle_index)
     return matrix_size[0], matrix_size[1], num_channels
 
+  def get_tensor_shape(self, bundle_index):
+    """ get_tensor_size updated with sequence size """
+    sequence_size = self.get_sequence_size()
+    row_count, col_count = self.get_matrix_size(bundle_index)
+    num_channels = self.get_num_channels(bundle_index)
+    return (sequence_size, row_count, col_count, num_channels)
+
   def get_sequence_size(self):
     return self.metadata_.sequence_size
 
@@ -232,7 +239,7 @@ class AutoDLDataset(object):
                       dataset_file_pattern(self.dataset_name_) + "'.")
       # logging.info("Number of training files: %s.", str(len(files)))
       self.dataset_ = tf.data.TFRecordDataset(files)
-      
+
   def get_class_labels(self):
     """Get all class labels"""
     # -- IG: inefficient, but... not needed very often
@@ -254,7 +261,7 @@ class AutoDLDataset(object):
       for _ in range(num+1):
         tensor_4d, labels = sess.run(next_element)
     return tensor_4d, labels
-    
+
   def show_image(self, num):
     """Visualize a image represented by `tensor_4d` in RGB or grayscale."""
     # -- IG: replaced previous 3d version
@@ -273,12 +280,12 @@ class AutoDLDataset(object):
       plt.imshow(image)
     labels = self.get_class_labels()
     if labels:
-      lbl_list = [lbl for lbl, pos in zip(labels, label_confidence_pairs) if pos]      
+      lbl_list = [lbl for lbl, pos in zip(labels, label_confidence_pairs) if pos]
       plt.title('Label(s): ' + ' '.join(lbl_list))
     else:
       plt.title('Labels: ' + str(label_confidence_pairs))
     plt.show()
-    return plt    
+    return plt
 
 def main(argv):
   del argv  # Unused.
