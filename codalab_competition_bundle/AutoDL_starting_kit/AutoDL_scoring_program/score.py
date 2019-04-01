@@ -123,8 +123,12 @@ def is_one_hot_vector(x, axis=None, keepdims=False):
   return np.logical_and(norm_1 == 1, norm_inf == 1)
 
 def is_multiclass(solution):
-  """Return if a task is a multi-class classification task, according to its
-  solution.
+  """Return if a task is a multi-class classification task, i.e.  each example
+  only has one label and thus each binary vector in `solution` only has
+  one '1' and all the rest components are '0'.
+
+  This function is useful when we want to compute metrics (e.g. accuracy) that
+  are only applicable for multi-class task (and not for multi-label task).
 
   Args:
     solution: a numpy.ndarray object of shape [num_examples, num_classes].
