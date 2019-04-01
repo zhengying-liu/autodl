@@ -200,8 +200,9 @@ def draw_learning_curve(solution_file, prediction_files,
     latest_roc_auc = roc_auc_sorted_pairs[-1][1]
     print_log("NBAC (2 * BAC - 1) of the latest prediction is {:.4f}."\
               .format(latest_nbac))
-    print_log("ROC AUC of the latest prediction is {:.4f}."\
-              .format(latest_roc_auc))
+    if not latest_roc_auc == -1:
+      print_log("ROC AUC of the latest prediction is {:.4f}."\
+                .format(latest_roc_auc))
     if is_multiclass_task:
       sorted_pairs_acc = sorted(zip(timestamps, accuracy_scores))
       latest_acc = sorted_pairs_acc[-1][1]
