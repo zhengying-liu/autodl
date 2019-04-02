@@ -207,6 +207,10 @@ def show_examples(input_dir, num_examples=5):
 
         data_browser.show_an_example()
 
+def get_tensor_shape(input_dir, bundle_index=0):
+    data_browser = DataBrowser(input_dir)
+    metadata = data_browser.d_train.get_metadata()
+    return metadata.get_tensor_shape(bundle_index)
 
 def main(*argv):
   """Do you really need a docstring?"""

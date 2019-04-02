@@ -75,6 +75,8 @@ class AutoDLMetadata(object):
       return num_channels
 
   def get_tensor_size(self, bundle_index):
+    """For a dataset with examples of shape (T,H,W,C), return the shape (H,W,C).
+    """
     matrix_size = self.get_matrix_size(bundle_index)
     num_channels = self.get_num_channels(bundle_index)
     return matrix_size[0], matrix_size[1], num_channels
