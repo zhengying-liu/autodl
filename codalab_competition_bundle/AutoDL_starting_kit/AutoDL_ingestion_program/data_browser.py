@@ -3,7 +3,10 @@
 """Visualize examples and labels for given AutoDL dataset.
 
 Usage:
-  `python data_browser.py -input_dir=../formatted_datasets/itwas`
+  `python data_browser.py -input_dir=../AutoDL_sample_data/`
+
+Full usage:
+  `python data_browser.py -input_dir=../AutoDL_sample_data/ -subset=test -num_examples=7`
 """
 
 import os
@@ -90,6 +93,9 @@ class DataBrowser(object):
       tf.logging.info("No label_to_index_map found in metadata. Labels will "
                       "only be represented by integers.")
     self.d_train, self.d_test, self.other_info = d_train, d_test, other_info
+    if with_solution:
+      solution_path = os.path.join(dataset_dir, solution_files[0])
+      self.other_info['Y_test'] = np.loadtxt(solution_path)
     return d_train, d_test, other_info
 
   def infer_domain(self):
@@ -167,7 +173,12 @@ class DataBrowser(object):
     next_element = iterator.get_next()
     with tf.Session() as sess:
       for _ in range(num+1):
-        tensor_4d, labels = sess.run(next_element)
+        try:
+          tensor_4d, labels = sess.run(next_element)
+        except tf.errors.OutOfRangeError:
+          tf.logging.info("Reached the end of dataset. " +
+                          "Return the last example.")
+          break
     return tensor_4d, labels
 
   @property
@@ -182,13 +193,23 @@ class DataBrowser(object):
       raise NotImplementedError("Show method not implemented for domain: " +\
                                  "{}".format(domain))
 
-  def show_an_example(self, default_max_range=1000):
+  def show_an_example(self, default_max_range=1000, subset='train'):
     """Visualize an example whose index is randomly chosen in the interval
     [0, `max_range`).
     """
-    max_range = min(self.d_train.metadata_.size(), default_max_range)
+    if subset == 'train':
+      d = self.d_train
+    else:
+      d = self.d_test
+    max_range = min(d.metadata_.size(), default_max_range)
     idx = np.random.randint(max_range)
-    tensor_4d, labels = DataBrowser.get_nth_element(self.d_train, idx)
+    tensor_4d, labels = DataBrowser.get_nth_element(d, idx)
+    if subset != 'train':
+      if self.other_info['with_solution']:
+        labels = self.other_info['Y_test'][idx]
+      else:
+        tf.logging.info("No solution file found for test set. " +
+                        "Only showing examples (without labels).")
     if 'classes_list' in self.other_info:
       c_l = self.other_info['classes_list']
       label_conf_pairs = {c_l[idx]: c for idx, c in enumerate(labels) if c != 0}
@@ -197,7 +218,7 @@ class DataBrowser(object):
     self.show(tensor_4d, label_confidence_pairs=label_conf_pairs)
 
 
-def show_examples(input_dir, num_examples=5):
+def show_examples(input_dir, num_examples=5, subset='train'):
       print("Start visualizing process for dataset: {}...".format(input_dir))
       data_browser = DataBrowser(input_dir)
       num_examples = min(10, int(num_examples))
@@ -205,7 +226,7 @@ def show_examples(input_dir, num_examples=5):
         print("Visualizing example {}.".format(i+1) +
               " Close the corresponding window to continue...")
 
-        data_browser.show_an_example()
+        data_browser.show_an_example(subset=subset)
 
 def get_tensor_shape(input_dir, bundle_index=0):
     data_browser = DataBrowser(input_dir)
@@ -217,14 +238,20 @@ def main(*argv):
   # Actually here input_dir should be dataset_dir since input_dir/ is the folder
   # that contains all datasets but dataset_dir is the folder that contains the
   # content of one single dataset
-  default_input_dir = _HERE('../formatted_datasets/katze')
+  default_input_dir = _HERE('../AutoDL_sample_data/')
   tf.flags.DEFINE_string('input_dir', default_input_dir,
                          "Path to dataset.")
+  tf.flags.DEFINE_string('subset', 'train',
+                         "Can be 'train' or 'test'.")
+  tf.flags.DEFINE_integer('num_examples', 5,
+                         "Number of examples to show.")
 
   FLAGS = tf.flags.FLAGS
   del argv
   input_dir = FLAGS.input_dir
-  show_examples(input_dir)
+  subset = FLAGS.subset
+  num_examples = FLAGS.num_examples
+  show_examples(input_dir, num_examples=num_examples, subset=subset)
 
 
 if __name__ == '__main__':
