@@ -7,8 +7,9 @@
 
 STARTING_KIT_DIR='codalab_competition_bundle/AutoDL_starting_kit/'
 SCRIPT=$STARTING_KIT_DIR'run_local_test.py'
-DATASET_DIR_1=$STARTING_KIT_DIR'AutoDL_sample_data'
-DATASET_DIR_2=$STARTING_KIT_DIR'AutoDL_another_sample_data'
+SAMPLE_DATA_DIR=$STARTING_KIT_DIR'AutoDL_sample_data/'
+DATASET_DIR_1=$SAMPLE_DATA_DIR'miniciao'
+DATASET_DIR_2=$SAMPLE_DATA_DIR'Monkeys'
 CODE_DIR_1=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/all_zero/'
 CODE_DIR_2=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/linear/'
 
