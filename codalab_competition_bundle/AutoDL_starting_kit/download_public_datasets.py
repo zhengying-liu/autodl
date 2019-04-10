@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Author: Liu Zhengying
 # Date: 10 Apr 2019
-# Description: This script download the 5 datasets used in AutoCV challenge and
+# Description: This script downloads the 5 datasets used in AutoCV challenge and
 #   put them under the folder AutoDL_sample_data/. This script supports
 #   breakpoint resume, which means that you can recover downloading from where
 #   your network broke down.
@@ -44,7 +44,8 @@ def main(*argv):
     dataset_dir = os.path.join(sample_date_dir, dataset_name)
     os.system('mkdir -p {}'.format(dataset_dir))
     data_zip_file = os.path.join(dataset_dir, dataset_name + '.data.zip')
-    solution_zip_file = os.path.join(dataset_dir, dataset_name + '.solution.zip')
+    solution_zip_file = os.path.join(dataset_dir,
+                                     dataset_name + '.solution.zip')
     os.system('wget -q --show-progress -c -N {} -O {}'\
               .format(data_url, data_zip_file))
     os.system('wget -q --show-progress -c -N {} -O {}'\
@@ -53,8 +54,10 @@ def main(*argv):
               .format(dataset_dir, data_zip_file))
     os.system('unzip -n -d {} {}'\
               .format(dataset_dir, solution_zip_file))
-  print("\nFinished downloading 5 public datasets: 'Munster', 'Chucky','Pedro', 'Decal', 'Hammer'.")
-  print("Now you should find them under the directory: {}".format(sample_date_dir))
+  print("\nFinished downloading 5 public datasets: 'Munster', 'Chucky', " +
+        "'Pedro', 'Decal', 'Hammer'.")
+  print("Now you should find them under the directory: {}"\
+        .format(sample_date_dir))
 
 if __name__ == '__main__':
   main(sys.argv)
