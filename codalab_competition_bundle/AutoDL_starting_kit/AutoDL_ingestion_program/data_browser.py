@@ -3,10 +3,10 @@
 """Visualize examples and labels for given AutoDL dataset.
 
 Usage:
-  `python data_browser.py -input_dir=../AutoDL_sample_data/`
+  `python data_browser.py -dataset_dir=../AutoDL_sample_data/miniciao`
 
 Full usage:
-  `python data_browser.py -input_dir=../AutoDL_sample_data/ -subset=test -num_examples=7`
+  `python data_browser.py -dataset_dir=../AutoDL_sample_data/miniciao -subset=test -num_examples=7`
 """
 
 import os
@@ -14,7 +14,6 @@ import sys
 
 import tensorflow as tf
 import numpy as np
-# import cv2 # Run `pip install opencv-python` to install
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -25,7 +24,7 @@ def _HERE(*args):
 tf.logging.set_verbosity(tf.logging.INFO)
 
 # STARTING_KIT_DIR = 'autodl/codalab_competition_bundle/AutoDL_starting_kit'
-RELATIVE_STARTING_KIT_DIR = '../../autodl/codalab_competition_bundle/AutoDL_starting_kit'
+RELATIVE_STARTING_KIT_DIR = '../'
 STARTING_KIT_DIR = _HERE(RELATIVE_STARTING_KIT_DIR)
 INGESTION_DIR = os.path.join(STARTING_KIT_DIR, 'AutoDL_ingestion_program')
 SCORING_DIR = os.path.join(STARTING_KIT_DIR, 'AutoDL_scoring_program')
@@ -39,7 +38,7 @@ class DataBrowser(object):
   """A class for visualizing datasets."""
 
   def __init__(self, dataset_dir):
-    self.dataset_dir = dataset_dir
+    self.dataset_dir = os.path.expanduser(dataset_dir) # Expand the tilde `~/`
     self.domain = self.infer_domain()
     self.d_train, self.d_test, self.other_info = self.read_data()
 
@@ -57,7 +56,6 @@ class DataBrowser(object):
         `label_to_index_map`).
     """
     dataset_dir = self.dataset_dir
-    dataset_dir = os.path.expanduser(dataset_dir) # Expand the tilde `~/`
     files = os.listdir(dataset_dir)
     data_files = [x for x in files if x.endswith('.data')]
     assert len(data_files) == 1
@@ -81,6 +79,7 @@ class DataBrowser(object):
     d_test = AutoDLDataset(os.path.join(dataset_dir, dataset_name + '.data',
                                         "test"))
     other_info = {}
+    other_info['dataset_name'] = dataset_name
     other_info['with_solution'] = with_solution
     label_to_index_map = d_train.get_metadata().get_label_to_index_map()
     if label_to_index_map:
@@ -218,9 +217,9 @@ class DataBrowser(object):
     self.show(tensor_4d, label_confidence_pairs=label_conf_pairs)
 
 
-def show_examples(input_dir, num_examples=5, subset='train'):
-      print("Start visualizing process for dataset: {}...".format(input_dir))
-      data_browser = DataBrowser(input_dir)
+def show_examples(dataset_dir, num_examples=5, subset='train'):
+      print("Start visualizing process for dataset: {}...".format(dataset_dir))
+      data_browser = DataBrowser(dataset_dir)
       num_examples = min(10, int(num_examples))
       for i in range(num_examples):
         print("Visualizing example {}.".format(i+1) +
@@ -228,18 +227,18 @@ def show_examples(input_dir, num_examples=5, subset='train'):
 
         data_browser.show_an_example(subset=subset)
 
-def get_tensor_shape(input_dir, bundle_index=0):
-    data_browser = DataBrowser(input_dir)
+def get_tensor_shape(dataset_dir, bundle_index=0):
+    data_browser = DataBrowser(dataset_dir)
     metadata = data_browser.d_train.get_metadata()
     return metadata.get_tensor_shape(bundle_index)
 
 def main(*argv):
   """Do you really need a docstring?"""
-  # Actually here input_dir should be dataset_dir since input_dir/ is the folder
+  # Actually here dataset_dir should be dataset_dir since dataset_dir/ is the folder
   # that contains all datasets but dataset_dir is the folder that contains the
   # content of one single dataset
-  default_input_dir = _HERE('../AutoDL_sample_data/')
-  tf.flags.DEFINE_string('input_dir', default_input_dir,
+  default_dataset_dir = _HERE('../AutoDL_sample_data/miniciao')
+  tf.flags.DEFINE_string('dataset_dir', default_dataset_dir,
                          "Path to dataset.")
   tf.flags.DEFINE_string('subset', 'train',
                          "Can be 'train' or 'test'.")
@@ -248,10 +247,10 @@ def main(*argv):
 
   FLAGS = tf.flags.FLAGS
   del argv
-  input_dir = FLAGS.input_dir
+  dataset_dir = FLAGS.dataset_dir
   subset = FLAGS.subset
   num_examples = FLAGS.num_examples
-  show_examples(input_dir, num_examples=num_examples, subset=subset)
+  show_examples(dataset_dir, num_examples=num_examples, subset=subset)
 
 
 if __name__ == '__main__':
