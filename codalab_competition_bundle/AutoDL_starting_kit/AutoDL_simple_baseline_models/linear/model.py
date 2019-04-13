@@ -26,6 +26,7 @@ and has nothing to do with the dataset metadata.
 
 import tensorflow as tf
 import os
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 # Import the challenge algorithm (model) API from algorithm.py
 import algorithm
@@ -60,9 +61,13 @@ class Model(algorithm.Algorithm):
 
     model_fn = self.model_fn
 
+    # Change to True if you want to show device info at each operation
+    log_device_placement = False
+    session_config = tf.ConfigProto(log_device_placement=log_device_placement)
     # Classifier using model_fn (see below)
     self.classifier = tf.estimator.Estimator(
-      model_fn=model_fn)
+      model_fn=model_fn,
+      config=tf.estimator.RunConfig(session_config=session_config))
 
     # Attributes for preprocessing
     self.default_image_size = (112,112)
@@ -292,7 +297,13 @@ class Model(algorithm.Algorithm):
     # Set batch size
     dataset = dataset.batch(batch_size=self.batch_size)
 
-    iterator = dataset.make_one_shot_iterator()
+    iterator_name = 'iterator_train' if is_training else 'iterator_test'
+
+    if not hasattr(self, iterator_name):
+      self.iterator = dataset.make_one_shot_iterator()
+
+    # iterator = dataset.make_one_shot_iterator()
+    iterator = self.iterator
     example, labels = iterator.get_next()
     return example, labels
 
