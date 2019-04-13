@@ -4,4 +4,7 @@ FROM tensorflow/tensorflow:latest-gpu-py3
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+# Overwrite the GPU version of TensorFlow to support environment with only CPU
+RUN pip install tensorflow
+
 WORKDIR /app/codalab
