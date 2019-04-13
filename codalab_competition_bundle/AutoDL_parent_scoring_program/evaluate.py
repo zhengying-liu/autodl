@@ -75,10 +75,17 @@ for submit_dir in submit_dirs:
             os.makedirs(output_dir)
         submission_score_file = os.path.join(submit_dir, "scores.txt")
         # submission_score = open(submission_score_file).readline()
-        with open(submission_score_file, 'r') as f:
-          score_info = yaml.load(f)
-        score_text = score_info[score_name_yaml] # might be already float
-        scores.append(float(score_text)) # but to be sure
+        try:
+          with open(submission_score_file, 'r') as f:
+            score_info = yaml.safe_load(f)
+          score_text = score_info[score_name_yaml] # might be already float
+          scores.append(float(score_text)) # but to be sure
+        except Exception as e:
+          print("Failed to load score in: {}".format(submit_dir))
+          print("The submission may have failed on this task.")
+          print("Set score for this task to: {}".format(missing_score))
+          print("Exception encountered: ", e)
+          scores.append(missing_score)
     else:
         print("{} doesn't exist. Use missing score.".format(submit_dir))
         scores.append(missing_score)
