@@ -55,7 +55,7 @@ cd .. # codalab_competition_bundle/
 for filename in $(find . -name 'AutoDL_*' | grep -v '.zip\|AutoDL_starting_kit/AutoDL_'); do
   cd $filename;
   echo 'Zipping: '$filename;
-  zip -o -r --exclude=*.git* --exclude=*__pycache__* --exclude=*.DS_Store* "../utilities/"$DIR$filename .;
+  zip -o -r --exclude=*.git* --exclude=*__pycache__* --exclude=*.DS_Store* --exclude=*AutoDL_public_data* "../utilities/"$DIR$filename .;
   cd $ROOT_DIR/..; # codalab_competition_bundle/
 done
 
