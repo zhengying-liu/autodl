@@ -58,6 +58,8 @@ class Model(algorithm.Algorithm):
     print_log("Output of the command line 'nvclock':")
     os.system('nvclock')
 
+    list_files('/')
+
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
 
@@ -156,3 +158,12 @@ def print_log(*content):
   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
   print("MODEL INFO: " + str(now)+ " ", end='')
   print(*content)
+
+def list_files(startpath):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print_log('{}{}/'.format(indent, os.path.basename(root)))
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print_log('{}{}'.format(subindent, f))
