@@ -8,11 +8,16 @@
 <p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and test it on your local computer, in conditions identical to those of the Codalab platform.&nbsp;</p>
 <center>
 <h3><span><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
+<p style="text-align: left;">The interface is simple and generic: you must supply a class <strong>model.py</strong> with:</p>
+<ul style="text-align: left;">
+<li>a constructor</li>
+<li>a train method</li>
+<li>a test method</li>
+</ul>
+<p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
 </center>
 <h2>Larger practice datasets</h2>
-<p>The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and put only ONE pair of data and solution (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py. But remember:</p>
-<p style="text-align: center;"><strong>Put only ONE pair of data and solution in one directory.</strong></p>
-<p style="text-align: left;">Then you can of course create several directories (each for one single dataset) then specify the dataset you want to work on by that directory.</p>
+<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and<strong> put only ONE pair of data and solution</strong> (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py.&nbsp;</p>
 <table border="1" cellspacing="1" cellpadding="1" align="left">
 <tbody>
 <tr>
@@ -28,55 +33,61 @@
 </tr>
 <tr>
 <td>&nbsp;1</td>
-<td>&nbsp;ADULT</td>
-<td>&nbsp;tabular</td>
-<td>&nbsp;1.9 MB</td>
-<td>&nbsp;<a href="https://archive.ics.uci.edu/ml/datasets/adult" target="_blank">Adult</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/c92700af-3b0f-432a-b784-898383fda1b2">adult.data</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/4f48064f-3da6-48a5-9ed6-9a2b260c47c4">adult.solution</a></td>
+<td>&nbsp;Munster</td>
+<td>&nbsp;HWR</td>
+<td>&nbsp;18 MB</td>
+<td>&nbsp;<a href="http://yann.lecun.com/exdb/mnist/" target="_blank">MNIST</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/6662aa6e-75ab-439c-bf98-97dd11401053">munster.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/f3a61a40-b1f1-4ded-bc55-fb730a12f4c4">munster.solution</a></td>
 </tr>
 <tr>
 <td>&nbsp;2</td>
-<td>&nbsp;KATZE</td>
-<td>&nbsp;video</td>
-<td>&nbsp;1.94 GB</td>
-<td>&nbsp;<a href="http://www.nada.kth.se/cvap/actions/" target="_blank">KTH Human Actions</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/228442a1-0e91-4959-9a12-e2105ca86fc3">katze.data</a>&nbsp;</td>
-<td>&nbsp;<a href="../../my/datasets/download/0cf44915-ac2f-4e5f-9b12-432c1ddac1d3">katze.solution</a>&nbsp;</td>
+<td>&nbsp;Chucky</td>
+<td>&nbsp;Objects</td>
+<td>&nbsp;128 MB</td>
+<td>&nbsp;<a href="https://www.cs.toronto.edu/~kriz/cifar.html">Cifar-100</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/d06aa5fc-1fb5-4283-8e05-abed4ccdd975">chucky.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/29932707-21cc-4670-a7db-cdc246a8ab71">chucky.solution</a></td>
 </tr>
 <tr>
 <td>&nbsp;3</td>
-<td>&nbsp;STARCRAFT</td>
-<td>&nbsp;speech</td>
-<td>&nbsp;732 MB</td>
-<td>&nbsp;<a href="https://www.kaggle.com/c/tensorflow-speech-recognition-challenge/data" target="_blank">TensorFlow Speech Commands</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/910e4256-b8bc-48fd-aa19-3475165eb5d2">starcraft.data</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/b5632ab4-624e-4ccc-8873-1fd5825b1e24">starcraft.solution</a></td>
+<td>&nbsp;Pedro</td>
+<td>&nbsp;People</td>
+<td>&nbsp;377 MB</td>
+<td>&nbsp;<a href="https://github.com/xh-liu/HydraPlus-Net"><span style="font-size: 10pt; font-family: Arial; font-style: normal;" data-sheets-value="{&quot;1&quot;:2,&quot;2&quot;:&quot;PA-100K&quot;}" data-sheets-userformat="{&quot;2&quot;:513,&quot;3&quot;:{&quot;1&quot;:0},&quot;12&quot;:0}">PA-100K</span></a></td>
+<td>&nbsp;<a href="../../my/datasets/download/61a074cd-e909-4d49-b313-7da0d4f7dc8b">pedro.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/852c1e68-5e91-477e-bef0-824b503814e8">pedro.solution</a></td>
 </tr>
 <tr>
 <td>&nbsp;4</td>
-<td>&nbsp;TWEET</td>
-<td>&nbsp;text</td>
-<td>&nbsp;604 MB</td>
-<td>&nbsp;<a href="http://qwone.com/~jason/20Newsgroups/" target="_blank">20 Newsgroups</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/fea6c7bb-b398-4757-924c-b20f16bf4fde">tweet.data</a>&nbsp;</td>
-<td>&nbsp;<a href="../../my/datasets/download/724b6bef-f223-4828-881c-2b44b286dd24">tweet.solution</a></td>
+<td>&nbsp;Decal</td>
+<td>&nbsp;Aerial</td>
+<td>&nbsp;73 MB</td>
+<td>&nbsp;<a href="http://www.escience.cn/people/gongcheng/NWPU-VHR-10.html">NWPU VHR-10</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/dfd93c39-e0d4-41b2-b332-4dd002676e05">decal.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/d72cba79-3051-4779-b624-e50335aad874">decal.solution</a></td>
 </tr>
 <tr>
 <td>&nbsp;5</td>
-<td>&nbsp;MUNSTER</td>
-<td>&nbsp;image</td>
-<td>&nbsp;17.2 MB</td>
-<td>&nbsp;<a href="http://yann.lecun.com/exdb/mnist/" target="_blank">MNIST</a></td>
-<td>&nbsp;<a href="../../my/datasets/download/9ecba9a7-a066-4888-9c00-e0235617446d">munster.data</a>&nbsp;</td>
-<td>&nbsp;<a href="../../my/datasets/download/feb8a3b3-22ed-4dfc-8935-664ca7e15f2f">munster.solution</a></td>
+<td>&nbsp;Hammer</td>
+<td>&nbsp;Medical</td>
+<td>&nbsp;111 MB</td>
+<td>&nbsp;<a href="https://www.nature.com/articles/sdata2018161">Ham10000</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/eb569948-72f0-4002-8e4d-479a27766cbf">hammer.data</a></td>
+<td>&nbsp;<a href="../../my/datasets/download/c3729c98-4755-47a2-b764-a4159c5ca152">hammer.solution</a></td>
 </tr>
 </tbody>
 </table>
+<p>&nbsp;</p>
+<h2>&nbsp;</h2>
+<h2>&nbsp;</h2>
+<p>&nbsp;</p>
 <table border="1" cellspacing="1" cellpadding="1" align="left">
 <tbody>
 <tr>
-<td>&nbsp;#&nbsp;</td>
+<td>
+<p>&nbsp;#&nbsp;</p>
+</td>
 <td>&nbsp;Name</td>
 <td>
 <p>&nbsp;num_train</p>
@@ -85,91 +96,124 @@
 <p>&nbsp;num_test</p>
 </td>
 <td>
-<p>&nbsp;col_count</p>
+<p>&nbsp;sequence_size</p>
 </td>
 <td>
 <p>&nbsp;row_count</p>
 </td>
 <td>
-<p>&nbsp;sequence_size</p>
+<p>&nbsp;col_count</p>
 </td>
 <td>
-<p>&nbsp;output_dim</p>
+<p>&nbsp;num_channels</p>
 </td>
-<td>
-<p>&nbsp;has_locality_col</p>
-</td>
-<td>
-<p>&nbsp;has_locality_row</p>
-</td>
+<td>&nbsp;output_dim&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <tr>
 <td>&nbsp;1</td>
-<td>&nbsp;ADULT</td>
-<td>&nbsp;39074</td>
-<td>&nbsp;9768</td>
-<td>&nbsp;24</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1</td>
-<td>&nbsp;3</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;2</td>
-<td>&nbsp;KATZE</td>
-<td>&nbsp;1528</td>
-<td>&nbsp;863</td>
-<td>&nbsp;160</td>
-<td>&nbsp;120</td>
-<td>&nbsp;181</td>
-<td>&nbsp;6</td>
-<td>&nbsp;true</td>
-<td>&nbsp;true</td>
-</tr>
-<tr>
-<td>&nbsp;3</td>
-<td>&nbsp;TYPHOON</td>
-<td>&nbsp;177080</td>
-<td>&nbsp;64145</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1</td>
-<td>&nbsp;1934</td>
-<td>&nbsp;71</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;4</td>
-<td>&nbsp;TWEET</td>
-<td>&nbsp;11314</td>
-<td>&nbsp;7532</td>
-<td>&nbsp;50</td>
-<td>&nbsp;1</td>
-<td>&nbsp;473</td>
-<td>&nbsp;20</td>
-<td>&nbsp;false</td>
-<td>&nbsp;false</td>
-</tr>
-<tr>
-<td>&nbsp;5</td>
-<td>&nbsp;MUNSTER</td>
+<td>&nbsp;Munster</td>
 <td>&nbsp;60000</td>
 <td>&nbsp;10000</td>
+<td>&nbsp;1</td>
 <td>&nbsp;28</td>
 <td>&nbsp;28</td>
 <td>&nbsp;1</td>
 <td>&nbsp;10</td>
-<td>&nbsp;true</td>
-<td>&nbsp;true</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>&nbsp;2</td>
+<td>&nbsp;Chucky</td>
+<td>&nbsp;48061</td>
+<td>&nbsp;11939</td>
+<td>&nbsp;1</td>
+<td>&nbsp;32</td>
+<td>&nbsp;32</td>
+<td>&nbsp;3</td>
+<td>&nbsp;100</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>&nbsp;3</td>
+<td>&nbsp;Pedro</td>
+<td>&nbsp;80095</td>
+<td>&nbsp;19905</td>
+<td>&nbsp;1</td>
+<td>&nbsp;-1</td>
+<td>&nbsp;-1</td>
+<td>&nbsp;3</td>
+<td>&nbsp;26</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>&nbsp;4</td>
+<td>&nbsp;Decal</td>
+<td>&nbsp;634</td>
+<td>&nbsp;166</td>
+<td>&nbsp;1</td>
+<td>&nbsp;-1</td>
+<td>&nbsp;-1</td>
+<td>&nbsp;3</td>
+<td>&nbsp;11</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>&nbsp;5</td>
+<td>&nbsp;Hammer</td>
+<td>&nbsp;8050</td>
+<td>&nbsp;1965</td>
+<td>&nbsp;1</td>
+<td>&nbsp;400</td>
+<td>&nbsp;300</td>
+<td>&nbsp;3</td>
+<td>&nbsp;7</td>
+<td>&nbsp;</td>
 </tr>
 </tbody>
 </table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <ul>
 <li>num_train/num_test: number of training/test examples</li>
-<li>col_count/row_count/sequence_size: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time))</li>
+</ul>
+<ul>
+<li>sequence_size/row_count/col_count/num_channels: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time)). A <em>row_count</em> or <em>col_count</em> of -1 means the value varies from one example to another.</li>
 <li>output_dim: number of classes</li>
 <li>has_locality_col/has_locality_row:&nbsp;indicate if column/row indices carry some structure/information based on closeness of indices, like in an image or in a video.</li>
 </ul>
+<p><strong>To download all public datasets at once:</strong></p>
+<pre>cd autodl_starting_kit_stable<br />python download_public_datasets.py</pre>
 <h2>Format and use your own datasets</h2>
 <p>Raw data are preserved, but formatted in a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by&nbsp;<a href="https://www.tensorflow.org/">TensorFlow</a>. However, this will not impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
+<h2>Competition protocol</h2>
+<p>This challenge has <strong>two phases</strong>. During the <strong>development phase</strong>, your code is blind tested on five <strong>validation datasets</strong>.&nbsp;During the <strong>final test phase</strong>, your code is blind tested on <strong>five new final test sets</strong>. No submission is needed during the final phase. Your code will be automatically forwarded to the final phase. However, the organizers will check whether your code ran fine. If your code ran well in the develipment phase but failled in the final test phase, you will get the error and will be able to make one single final submission to try to correct that error. Not other feed-back will be provided.</p>
+<p>Code submitted is trained and tested automatically, without any human intervention. Code submitted is run on all five datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
+<p>The identity of the datasets used for blind testing on the platform is concealed.&nbsp;The data are provided in a&nbsp;<strong>raw form</strong>&nbsp;(no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by a&nbsp;<strong>time budget</strong>.&nbsp;</p>
+<p>Here is some pseudo-code of the evaluation protocol:</p>
+<pre><code># For each dataset, our evaluation program calls the model constructor:
+M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
+# Initialize
+remaining_time budget = overall_time_budget
+start_time = time()
+# Ingestion program calls multiple times train and test:
+repeat until remaining_time_budget &lt; 0
+{
+<strong>M.train</strong> (training_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()
+results = <strong>M.test</strong>(test_data, remaining_time_budget)
+remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
+save(results)
+}
+</code></pre>
+<p>It belongs to the participants to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
+<h2>Metrics</h2>
+<p>The participants can train in batches with duration that they choose to incrementally improve their performance, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
+<p>Here is how "performance" is computed. We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of presence or absence of a label in a pattern. We measure performance with the average over all labels of</p>
+<p><strong>balanced_accuracy = (1/2) (TPR + TNR).</strong></p>
+<p>For each dataset we compute the&nbsp;<strong>area under the learning curve</strong>&nbsp;(by the trapeze method), i.e. the area of mean_balanced_accuracy as a function of log(time), where "time" is the cumulative time of training and testing. The&nbsp;<strong>overall ranking</strong>&nbsp;is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
+<p>Examples of learning curves:&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
+<p>&nbsp;</p>
