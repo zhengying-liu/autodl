@@ -99,8 +99,7 @@ _duration = _start - _end
 
 output_filename = os.path.join(output_dir, 'scores.txt')
 with open(output_filename, 'w') as output_file:
-  for i in range(n_datasets):
-    score_name = score_names[i]
-    score = scores[i]
-    output_file.write("{}: {}\n".format(score_name, score))
+  score_name = score_names[0]
+  score = sum(scores) / len(scores) # mean
+  output_file.write("{}: {}\n".format(score_name, score))
   output_file.write("Duration: {:.6f}\n".format(_duration))
