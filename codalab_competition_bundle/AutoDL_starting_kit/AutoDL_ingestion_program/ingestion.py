@@ -216,19 +216,21 @@ if __name__=="__main__" and debug_mode<4:
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
         score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
 
-    # if verbose: # For debugging
-    #     print_log("sys.argv = ", sys.argv)
-    #     print_log("Using input_dir: " + input_dir)
-    #     print_log("Using output_dir: " + output_dir)
-    #     print_log("Using program_dir: " + program_dir)
-    #     print_log("Using submission_dir: " + submission_dir)
+    if verbose: # For debugging
+        print_log("sys.argv = ", sys.argv)
+        print_log("Using input_dir: " + input_dir)
+        print_log("Using output_dir: " + output_dir)
+        print_log("Using program_dir: " + program_dir)
+        print_log("Using submission_dir: " + submission_dir)
 
     # Redirect standard output to have live debugging info (esp. on CodaLab)
     if REDIRECT_STDOUT:
         sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
         print = partial(print, flush=True)
 
-	# Our libraries
+
+
+	  # Our libraries
     path.append(program_dir)
     path.append(submission_dir)
     #IG: to allow submitting the starting kit as sample submission
@@ -269,72 +271,71 @@ if __name__=="__main__" and debug_mode<4:
         data_io.write_list(datanames)
         datanames = [] # Do not proceed with learning and testing
 
-    #### MAIN LOOP OVER DATASETS:
-    overall_time_budget = 0
-    time_left_over = 0
+    if len(datanames) != 1:
+      raise ValueError("Multiple (or zero) datasets found in dataset_dir={}!\n"\
+                       .format(input_dir) +
+                       "Please put only ONE dataset under dataset_dir.")
 
-    # Loop over datasets (if several)
-    # For AutoDL challenge, there is only 1 dataset for each track, so this loop
-    # can actually be ignored. Here basename is e.g. 'adult.data'
-    for i, basename in enumerate(datanames):
+    basename = datanames[0]
 
-        print_log("========== Ingestion program version " + str(version) + " ==========")
-        print_log("************************************************")
-        print_log("******** Processing dataset " + basename[:-5].capitalize() + " ********")
-        print_log("************************************************")
 
-        # ======== Learning on a time budget:
-        # Keep track of time not to exceed your time budget. Time spent to inventory data neglected.
-        start = time.time()
+    print_log("========== Ingestion program version " + str(version) + " ==========")
+    print_log("************************************************")
+    print_log("******** Processing dataset " + basename[:-5].capitalize() + " ********")
+    print_log("************************************************")
 
-        # ======== Creating a data object with data, informations about it
-        print_log("Reading training set and test set...")
+    # ======== Learning on a time budget:
+    # Keep track of time not to exceed your time budget. Time spent to inventory data neglected.
+    start = time.time()
 
-        ##### Begin creating training set and test set #####
-        D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
-        D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
-        ##### End creating training set and test set #####
+    # ======== Creating a data object with data, informations about it
+    print_log("Reading training set and test set...")
 
-        # ======== Keep track of time
-        if debug_mode<1:
-            time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
-        else:
-            time_budget = max_time
+    ##### Begin creating training set and test set #####
+    D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
+    D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
+    ##### End creating training set and test set #####
 
-        # ========= Creating a model
-        print_log("Creating model...")
-        ##### Begin creating model #####
-        M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
-        ###### End creating model ######
+    # ======== Keep track of time
+    if debug_mode<1:
+        time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
+    else:
+        time_budget = max_time
 
-        # Keeping track of how many predictions are made
-        prediction_order_number = 0
+    # ========= Creating a model
+    print_log("Creating model...")
+    ##### Begin creating model #####
+    M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
+    ###### End creating model ######
 
-        # Start the CORE PART: train/predict process
-        start = time.time()
-        while(True):
-          remaining_time_budget = start + time_budget - time.time()
-          print_log("Training the model...")
-          # Train the model
-          M.train(D_train.get_dataset(),
-                  remaining_time_budget=remaining_time_budget)
-          remaining_time_budget = start + time_budget - time.time()
-          # Make predictions using the trained model
-          Y_pred = M.test(D_test.get_dataset(),
-                          remaining_time_budget=remaining_time_budget)
-          if Y_pred is None: # Stop train/predict process if Y_pred is None
-            break
-          # Prediction files: adult.predict_0, adult.predict_1, ...
-          filename_test = basename[:-5] + '.predict_' +\
-            str(prediction_order_number)
-          # Write predictions to output_dir
-          data_io.write(os.path.join(output_dir,filename_test), Y_pred)
-          prediction_order_number += 1
-          print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-          remaining_time_budget = start + time_budget - time.time()
-          print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
-          if remaining_time_budget<=0:
-            break
+    # Keeping track of how many predictions are made
+    prediction_order_number = 0
+
+    # Start the CORE PART: train/predict process
+    start = time.time()
+    while(True):
+      remaining_time_budget = start + time_budget - time.time()
+      print_log("Training the model...")
+      # Train the model
+      M.train(D_train.get_dataset(),
+              remaining_time_budget=remaining_time_budget)
+      remaining_time_budget = start + time_budget - time.time()
+      # Make predictions using the trained model
+      Y_pred = M.test(D_test.get_dataset(),
+                      remaining_time_budget=remaining_time_budget)
+      if Y_pred is None: # Stop train/predict process if Y_pred is None
+        break
+      # Prediction files: adult.predict_0, adult.predict_1, ...
+      filename_test = basename[:-5] + '.predict_' +\
+        str(prediction_order_number)
+      # Write predictions to output_dir
+      data_io.write(os.path.join(output_dir,filename_test), Y_pred)
+      prediction_order_number += 1
+      print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
+      remaining_time_budget = start + time_budget - time.time()
+      print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
+      if remaining_time_budget<=0:
+        break
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
@@ -355,3 +356,5 @@ if __name__=="__main__" and debug_mode<4:
     else:
         print_log("[-] Done, but some tasks aborted because time limit exceeded")
         print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
+
+    os.system("cp -R {} {}".format(os.path.join(output_dir, '*'), score_dir))
