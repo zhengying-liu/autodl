@@ -52,17 +52,19 @@ metadata_path = os.path.join(input_dir, 'metadata')
 f = open(metadata_path, 'r')
 metadata = f.read().split('\n')
 f.close()
-metadata = [x for x in metadata if x.startswith('res_')]
+metadata = [x.split(':')[0] for x in metadata if x.startswith('res_')]
+metadata = sorted(metadata, key=lambda x: int(x.split('_')[1])) # sort by number
 
 if len(metadata) != n_datasets:
     raise Exception(str(os.listdir(input_dir)))
 
 for i, l in enumerate(metadata):
-    submit_dir = os.path.join(input_dir, l.split(':')[0])
+    submit_dir = os.path.join(input_dir, l)
     submit_dirs.append(submit_dir)
     score_name = 'set{}_score'.format(i+1)
     score_names.append(score_name)
     learning_curve_images = glob(os.path.join(submit_dir,'learning-curve-*.png'))
+    learning_curve_images = sorted(learning_curve_images) # alphabetic sort
     for image_path in learning_curve_images:
       image_paths.append(image_path)
 
