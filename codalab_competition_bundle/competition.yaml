@@ -29,6 +29,7 @@ html:
     evaluation: evaluation.html
     terms: terms.html
     data: data.html
+    help: help.html
     credits: credits.html
 
 # ------------------------------------------------------------------------------
