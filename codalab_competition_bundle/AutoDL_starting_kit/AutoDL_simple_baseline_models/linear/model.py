@@ -178,18 +178,11 @@ class Model(algorithm.Algorithm):
           performance of the last prediction will be used to compute area under
           learning curve.
     """
-    self.test_begin_times.append(time.time())
-
     if self.done_training:
       return None
 
-    # The following snippet of code intends to do:
-    # 0. Use the function self.choose_to_stop_early() to decide if stop the whole
-    #    train/predict process for next call
-    # 1. If there is time budget limit, and some testing has already been done,
-    #    but not enough remaining time for testing, then return None to stop
-    # 2. Otherwise: make predictions normally, and update some
-    #    variables for time management
+    self.test_begin_times.append(time.time())
+
     if self.choose_to_stop_early():
       print_log("Oops! Choose to stop early for next call!")
       self.done_training = True
