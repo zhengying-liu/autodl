@@ -1,35 +1,204 @@
-<h2>Tasks and submissions</h2>
-<p>The identity of the datasets used for blind testing on the platform is concealed.&nbsp;The data are provided in a <strong>raw form</strong> (no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by a&nbsp;<strong>time budget</strong>.&nbsp;</p>
-<p>A&nbsp;<strong>starting kit</strong>&nbsp;is provided to help you prepare a submission under the "<strong>Instructions</strong>" tab.&nbsp;The interface is simple and generic: you must supply a class model.py with:</p>
-<ul>
-<li>a constructor</li>
-<li>a train method</li>
-<li>a test method</li>
-</ul>
-<p>To make submissions,&nbsp;<strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
-<p>This challenge has a single phase during which participants get immediate feed-back on<strong>&nbsp;five datasets&nbsp;</strong>when they submit their code, without having access to them.&nbsp;Code submitted is trained and tested automatically, without any human intervention. All five datasets are run in parallel on separate compute workers, each one with its own time budget. After this challenge terminates, the participants will be invited to a shoters re-match to submit their favorite methods on 5 fresh test datasets.</p>
-<h2>Evaluation protocol</h2>
-<p>Here is some pseudo-code of the evaluation protocol:</p>
-<pre><code># For each dataset, our evaluation program calls the model constructor:
-M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
-# Initialize
-remaining_time budget = overall_time_budget
-start_time = time()
-# Ingestion program calls multiple times train and test:
-repeat until remaining_time_budget &lt; 0
-{
-<strong>M.train</strong> (training_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()
-results = <strong>M.test</strong>(test_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
-save(results)
-}
-</code></pre>
-<p>It belongs to the participants to make sure that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
-<h2>Metrics</h2>
-<p>The participants can train in batches with duration that they choose to incrementally improve their performance, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
-<p>Here is how "performance" is computed. We treat both multi-class and multi-label problems alike. The participants are asked to make binary predictions of presence or absence of a label in a pattern. We measure performance with the average over all labels of</p>
-<p><strong>balanced_accuracy = (1/2) (TPR + TNR).</strong></p>
-<p>For each dataset we compute the&nbsp;<strong>area under the learning curve</strong>&nbsp;(by the trapeze method), i.e. the area of mean_balanced_accuracy as a function of log(time), where "time" is the cumulative time of training and testing. The&nbsp;<strong>overall ranking</strong>&nbsp;is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
-<p>Examples of learning curves:&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
-<p>&nbsp;</p>
+<h1>Help</h1>
+<p><a name="help"></a></p>
+<h3>Are there prerequisites to enter the challenge?</h3>
+<p>No, except accepting the TERMS AND CONDITIONS.</p>
+<h3>Can I enter any time?</h3>
+<p>You can enter during the development phase only. Registration closes at the end of the development phase.</p>
+<h3>Where can I download the data?</h3>
+<p>From the "Data" page, under the "Participate" tab. You first need to register and accept the TERMS AND CONDITIONS.</p>
+<h3>How do I make submissions?</h3>
+<p>Register and go to the "Participate" tab where you find data, and a submission form.</p>
+<h3>Do you provide tips on how to get started?</h3>
+<p>We provide a Starting Kit in Python with step-by-step instructions in a Jupyter notebook. We also provide some tutorial material and fact sheets on benchmark methods.</p>
+<h3>Are there prizes?</h3>
+<p>Yes,&nbsp;</p>
+<table style="border-collapse: collapse;"><colgroup> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> </colgroup>
+<tbody>
+<tr>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">&nbsp;</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">1st place </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">2nd place </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">3rd place </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">Best paper </span></p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-style: italic;">Prize </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">2000 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1200 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">600 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD </span></p>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: Arial; font-style: italic;">Travel grant </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD </span></p>
+</div>
+</div>
+</td>
+<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
+<div>
+<div>
+<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD</span></p>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Do I need to submit code to participate?</h3>
+<p>Yes, participation is by code submission.</p>
+<h3>When I submit code, do I surrender all rights to that code to the SPONSORS or ORGANIZERS?</h3>
+<p>No. You just grant to the ORGANIZERS a license to use your code for evaluation purposes during the challenge. You retain all other rights.</p>
+<h3>If I win, I must submit a fact sheet, do you have a template?</h3>
+<p>Yes, please download it <a href="https://forms.gle/WrpnZ1TKh9CY5AaRA">[HERE</a>].</p>
+<h3>How much computational power and memory are available?</h3>
+<p>You are sharing resources with other users on X servers with the following specifications:</p>
+<table class="tg">
+<tbody>
+<tr><th>Component</th><th>Number</th><th>Type</th><th>Total cores</th></tr>
+<tr>
+<td>CPU</td>
+<td>xxx</td>
+<td>xxx</td>
+<td>xxx</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>xxx</td>
+<td>xxx</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>GPU</td>
+<td>xxx</td>
+<td>xxx</td>
+<td>xxx</td>
+</tr>
+</tbody>
+</table>
+<p>The PARTICIPANTS will be informed if the computational resources increase. They will NOT decrease.</p>
+<h3>Can I pre-train a model on my local machine and submit it?</h3>
+<p>This is not explicitly forbidden, but it is discouraged. We prefer if all calculations are performed on the server. If you submit a pre-trained model, you will have to disclose it in the fact sheets. All data "past" will be available to your program on the server. See the "Data" page for details.</p>
+<h3>Do I have to re-submit my code in the final validation round?</h3>
+<p>No. Submissions of the development phase will be forwarded automatically to the last round. However, you will have 3 days in the final phase to make one final submission if you wish, which will overwrite the last submission you made in the development phase. During that time, no feedback will be provided on the leaderboard. The results on final evaluation data will only be revealed once the jury has deliberated, and at the latest on the day of the workshop.</p>
+<h3>What is my time budget?</h3>
+<p>Your execution must run in less than 10 minutes (600 seconds) in the development phase and 20 minutes (1200 seconds) in the final evaluation phase.</p>
+<h3>Does the time budget correspond to wall time or CPU/GPU time?</h3>
+<p>CPU/GPU time.</p>
+<h3>My submission seems stuck, how long will it run?</h3>
+<p>In principle no more than its time budget. We kill the process if the time budget is exceeded. Submissions are queued and run on a first time first serve basis. We are using several identical servers. <a href="mailto:organizers@company.com">Contact us</a> if your submission is stuck more than 24 hours. Check on the leaderboard the execution time.</p>
+<h3>How many submissions can I make?</h3>
+<p>Five per day during the feedback phase (and up to a total of 100). Only ONE during the final validation phase. Please respect other users. It is forbidden to register under multiple user IDs to gain an advantage and make more submissions. Violators will be DISQUALIFIED FROM THE CONTEST.</p>
+<h3>Do my failed submissions count towards my number of submissions per day?</h3>
+<p>No. Please <a href="mailto:organizers@company.com">contact us</a> if you think the failure is due to the platform rather than to your code and we will try to resolve the problem promptly.</p>
+<h3>If I under-use my time budget in one phase, can I use it later?</h3>
+<p>No.</p>
+<h3>What happens if I exceed my time budget?</h3>
+<p>Your submission does not get scored. The process gets killed.</p>
+<h3>The time budget is too small, can you increase it?</h3>
+<p>We may eventually increase it if the burden on our servers is no too high and we see that this is required to beat baseline results. But do not count on it.</p>
+<h3>Why are you using MSE as a metric?</h3>
+<p>Because of simplicity. Everyone understands MSE. We are aware that this may not be the best metric for the task. Other metrics will be computed. However the PARTICIPANTS will be ranked with MSE to determine the winners.</p>
+<h3>Which version of Python are you using?</h3>
+<p>The code was tested under Anaconda Python 3.6. We are running Python 3.6 on the server and the same libraries are available.</p>
+<h3>Can I use something else than Python code?</h3>
+<p>Yes. Any Linux executable can run on the system, provided that it fulfills our Python interface</p>
+<h3>How do I test my code in the same environment that you are using before submitting?</h3>
+<p>When you submit code to Codalab, your code is executed inside a docker container. This environment can be exactly reproduced on your local machine by downloading the corresponding docker image. The docker environment of the challenge contains Anaconda libraries. <br /> Non GPU users, if you are new to docker, <a href="https://competitions.codalab.org/competitions/edit_competition/">follow these instructions to install docker.</a> GPU users, follow these <a href="https://competitions.codalab.org/competitions/edit_competition/">more detailed instructions</a>.</p>
+<h3>Are there publication opportunities?</h3>
+<p>No, except for presenting at the workshop.</p>
+<h3>What is meant by "Leaderboard modifying disallowed"?</h3>
+<p>Your last submission is shown automatically on the leaderboard. You cannot choose which submission to select. If you want another submission than the last one you submitted to "count" and be displayed on the leaderboard, you need to re-submit it.</p>
+<h3>Can I register multiple times?</h3>
+<p>No. If you accidentally register multiple times or have multiple accounts from members of the same team, please notify the ORGANIZERS. Teams or solo PARTICIPANTS with multiple accounts will be disqualified.</p>
+<h3>How can I create a team?</h3>
+<p>We have disabled Codalab team registration. To join as a team, just share one account with your team. The team leader is responsible for making submissions and observing the rules.</p>
+<h3>How can I destroy a team?</h3>
+<p>You cannot. If you need to destroy your team, <a href="mailto:organizers@company.com">contact us</a>.</p>
+<h3>Can I join or leave a team?</h3>
+<p>It is up to you and the team leader to make arrangements. However, you cannot participate in multiple teams.</p>
+<h3>Can cheat by trying to get a hold of the evaluation data and/or future frames while my code is running?</h3>
+<p>No. If we discover that you are trying to cheat in this way you will be disqualified. All your actions are logged and your code will be examined if you win.</p>
+<h3>Can I give an arbitrary hard time to the ORGANIZERS?</h3>
+<p>ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS". UPSUD, CHALEARN, IDF, AND/OR OTHER ORGANIZERS AND SPONSORS DISCLAIM ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS. IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. In case of dispute or possible exclusion/disqualification from the competition, the PARTICIPANTS agree not to take immediate legal action against the ORGANIZERS or SPONSORS. Decisions can be appealed by submitting a letter to the EXPERT PANEL chair person, and disputes will be resolved by the EXPERT PANEL. <br /> The EXPERT PANEL chair person is:</p>
+<pre>ADD COORDINATES
+</pre>
+<h3>Where can I get additional help?</h3>
+<p>For questions of general interest, THE PARTICIPANTS should post their questions to the forum.</p>
+<p>This challenge is brought to you by <a href="mailto:organizers@company.com">the organizers</a>.</p>
