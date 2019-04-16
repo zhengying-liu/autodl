@@ -39,6 +39,9 @@ _start = time.time()
 input_dir = sys.argv[1]
 output_dir = sys.argv[2]
 
+# Phase number of first dataset
+first = 2 # won't work for multi-phases (= AutoDL)
+
 # We have 5 datasets (tasks) in total
 n_datasets = 5
 
@@ -48,23 +51,26 @@ score_names = []
 image_paths = []
 
 # Read result folders (submit_dirs) from metadata file
+# Now the failed phases doesn't produce folder or metadata so the...
+# ...Parent Scoring Program can't guess which score belong to which dataset
+"""
 metadata_path = os.path.join(input_dir, 'metadata')
 f = open(metadata_path, 'r')
 metadata = f.read().split('\n')
 f.close()
 metadata = [x.split(':')[0] for x in metadata if x.startswith('res_')]
 metadata = sorted(metadata, key=lambda x: int(x.split('_')[1])) # sort by number
-
 if len(metadata) != n_datasets:
     raise Exception(str(os.listdir(input_dir)))
-
-for i, l in enumerate(metadata):
-    submit_dir = os.path.join(input_dir, l)
+"""
+for i, n in enumerate(range(first, first + n_datasets)):
+#for i, l in enumerate(metadata):
+    submit_dir = os.path.join(input_dir, 'res_'+str(n))
     submit_dirs.append(submit_dir)
     score_name = 'set{}_score'.format(i+1)
     score_names.append(score_name)
     learning_curve_images = glob(os.path.join(submit_dir,'learning-curve-*.png'))
-    learning_curve_images = sorted(learning_curve_images) # alphabetic sort
+    #learning_curve_images = sorted(learning_curve_images) # alphabetic sort
     for image_path in learning_curve_images:
       image_paths.append(image_path)
 
