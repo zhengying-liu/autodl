@@ -92,10 +92,6 @@ max_cycle = 1
 max_estimators = 1000
 max_samples = float('Inf')
 
-# Redirect stardant output to live results page (detailed_results.html)
-# to have live output for debugging
-REDIRECT_STDOUT = False
-
 # I/O defaults
 ##############
 # If true, the previous output directory is not overwritten, it changes name
@@ -104,12 +100,39 @@ save_previous_results = False
 # Use default location for the input and output data:
 # If no arguments to run.py are provided, this is where the data will be found
 # and the results written to. Change the root_dir to your local directory.
+import logging
 import os
 from os import getcwd as pwd
 from os.path import join
-import shutil # for deleting a whole directory
 from functools import partial
 import glob
+
+# Redirect stardant output to live results page (detailed_results.html)
+# to have live output for debugging
+REDIRECT_STDOUT = False
+
+def create_logger(log_filename=None):
+  """Setup the logging environment
+  """
+  log = logging.getLogger()  # root logger
+  log.setLevel(logging.INFO)
+  format_str = '{} %(levelname)s: %(asctime)s %(message)s'\
+               .format(os.path.basename(__file__).upper()[:-3].ljust(10))
+  date_format = '%y-%m-%d %H:%M:%S'
+  formatter = logging.Formatter(format_str, date_format)
+  if log_filename is None:
+    handler = logging.StreamHandler()
+  else:
+    handler = logging.FileHandler(log_filename, 'w')
+  handler.setFormatter(formatter)
+  log.addHandler(handler)
+  return logging.getLogger(__name__)
+
+def print_log(*content, redirect=REDIRECT_STDOUT):
+  """Logging function."""
+  end_of_line = '<br>' if redirect else ''
+  message = ' '.join(list(map(str, content)))
+  logger.info(message + end_of_line)
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -141,13 +164,6 @@ from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
-def print_log(*content):
-  """Logging function. (could've also used `import logging`.)"""
-  if verbose:
-    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("INGESTION INFO: " + str(now)+ " ", end='')
-    print(*content)
-
 def write_start_file_with_pid(output_dir):
   """Create start file 'start.txt' in `output_dir` with ingestion's pid.
   """
@@ -156,36 +172,6 @@ def write_start_file_with_pid(output_dir):
   start_filepath = os.path.join(output_dir, start_filename)
   with open(start_filepath, 'w') as f:
     f.write('pid:' + str(pid) + '\n')
-
-def clean_last_output(output_dir):
-  """Clean existing output_dir of possible last execution.
-
-  This includes directories such as:
-    AutoDL_sample_result_submission/
-    AutoDL_scoring_output/
-    checkpoints_adult/
-    /tmp/checkpoints_adult/
-    ...
-
-  Using this function, the user doesn't need to worry about the generated
-  folders of last execution.
-  """
-  if os.path.isdir(output_dir):
-    if verbose:
-      print_log("Cleaning existing output_dir: {}".format(output_dir))
-    shutil.rmtree(output_dir)
-  model_dir = os.path.join(os.path.dirname(os.path.realpath(model.__file__)),
-                           os.pardir)
-  for parent_dir in ['/tmp/', os.path.join(output_dir, os.pardir), model_dir]:
-    # Clean existing checkpoints
-    checkpoints_glob =\
-      os.path.abspath(os.path.join(parent_dir, 'checkpoints*'))
-    checkpoints_dirs = glob.glob(checkpoints_glob)
-    for checkpoints_dir in checkpoints_dirs:
-      if verbose:
-        print_log("Cleaning existing checkpoints_dir: {}"\
-                  .format(checkpoints_dir))
-      shutil.rmtree(checkpoints_dir)
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
@@ -225,19 +211,27 @@ if __name__=="__main__" and debug_mode<4:
         submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
         score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
 
-    if verbose: # For debugging
-        print_log("sys.argv = ", sys.argv)
-        print_log("Using input_dir: " + input_dir)
-        print_log("Using output_dir: " + output_dir)
-        print_log("Using program_dir: " + program_dir)
-        print_log("Using submission_dir: " + submission_dir)
-
     # Redirect standard output to have live debugging info (esp. on CodaLab)
     if REDIRECT_STDOUT:
-        sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
-        print = partial(print, flush=True)
+      if not os.path.exists(score_dir):
+        os.makedirs(score_dir)
+      detailed_results_filepath = os.path.join(score_dir,
+                                               'detailed_results.html')
+      logger = create_logger(detailed_results_filepath)
+      sys.stdout = open(detailed_results_filepath, 'a')
+      print = partial(print, flush=True)
+      print_log("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
+      print_log("Redirecting standard output. " +
+                "Please check out output at {}."\
+                .format(detailed_results_filepath))
+    else:
+      logger = create_logger()
 
-
+    logger.debug("sys.argv = ", sys.argv)
+    logger.debug("Using input_dir: " + input_dir)
+    logger.debug("Using output_dir: " + output_dir)
+    logger.debug("Using program_dir: " + program_dir)
+    logger.debug("Using submission_dir: " + submission_dir)
 
 	  # Our libraries
     path.append(program_dir)
@@ -249,9 +243,6 @@ if __name__=="__main__" and debug_mode<4:
     import model # participants' model.py
     from model import Model
     from dataset import AutoDLDataset # THE class of AutoDL datasets
-
-    # Clear potentiablly results of previous execution (for local run)
-    clean_last_output(output_dir)
 
     if debug_mode >= 4: # Show library version and directory structure
         data_io.show_dir(".")
@@ -318,30 +309,34 @@ if __name__=="__main__" and debug_mode<4:
 
     # Start the CORE PART: train/predict process
     start = time.time()
-    while(True):
-      remaining_time_budget = start + time_budget - time.time()
-      print_log("Training the model...")
-      # Train the model
-      M.train(D_train.get_dataset(),
-              remaining_time_budget=remaining_time_budget)
-      remaining_time_budget = start + time_budget - time.time()
-      # Make predictions using the trained model
-      Y_pred = M.test(D_test.get_dataset(),
-                      remaining_time_budget=remaining_time_budget)
-      if Y_pred is None: # Stop train/predict process if Y_pred is None
-        break
-      # Prediction files: adult.predict_0, adult.predict_1, ...
-      filename_test = basename[:-5] + '.predict_' +\
-        str(prediction_order_number)
-      # Write predictions to output_dir
-      data_io.write(os.path.join(output_dir,filename_test), Y_pred)
-      prediction_order_number += 1
-      print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
-      remaining_time_budget = start + time_budget - time.time()
-      print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
-      if remaining_time_budget<=0:
-        break
-
+    try:
+      while(True):
+        remaining_time_budget = start + time_budget - time.time()
+        print_log("Training the model...")
+        # Train the model
+        M.train(D_train.get_dataset(),
+                remaining_time_budget=remaining_time_budget)
+        remaining_time_budget = start + time_budget - time.time()
+        # Make predictions using the trained model
+        Y_pred = M.test(D_test.get_dataset(),
+                        remaining_time_budget=remaining_time_budget)
+        if Y_pred is None: # Stop train/predict process if Y_pred is None
+          break
+        # Prediction files: adult.predict_0, adult.predict_1, ...
+        filename_test = basename[:-5] + '.predict_' +\
+          str(prediction_order_number)
+        # Write predictions to output_dir
+        data_io.write(os.path.join(output_dir,filename_test), Y_pred)
+        prediction_order_number += 1
+        print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
+        remaining_time_budget = start + time_budget - time.time()
+        print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
+        if remaining_time_budget<=0:
+          break
+    except Exception as e:
+      execution_success = False
+      print_log("Failed to run ingestion.")
+      print_log("Encountered exception:\n", e)
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
@@ -355,14 +350,15 @@ if __name__=="__main__" and debug_mode<4:
     # Write overall_time_spent to a duration.txt file
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
-      f.write(str(overall_time_spent))
+      f.write('Duration: ' + str(overall_time_spent) + '\n')
       if verbose:
           print_log("Successfully write duration to {}.".format(duration_filename))
-    if execution_success:
-        print_log("[+] Done")
-        print_log("[+] Overall time spent %5.2f sec " % overall_time_spent)
-    else:
-        print_log("[-] Done, but some tasks aborted because time limit exceeded")
-        print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
+      if execution_success:
+          print_log("[+] Done")
+          print_log("[+] Overall time spent %5.2f sec " % overall_time_spent)
+      else:
+          print_log("[-] Done, but some tasks aborted because time limit exceeded")
+          print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
+      f.write('Success: ' + str(int(execution_success)) + '\n')
 
     os.system("cp -R {} {}".format(os.path.join(output_dir, '*'), score_dir))

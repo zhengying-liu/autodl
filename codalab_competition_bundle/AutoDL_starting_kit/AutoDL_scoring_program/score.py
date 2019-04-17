@@ -19,11 +19,40 @@
 TIME_BUDGET = 7200
 
 # Some libraries and options
+import logging
 import os
 import sys
+import yaml
 from sys import argv
 from os import getcwd as pwd
-import shutil
+
+# Redirect stardant output to live results page (detailed_results.html)
+# to have live output for debugging
+REDIRECT_STDOUT = False
+from functools import partial
+
+def create_logger(log_filename=None):
+    """Setup the logging environment
+    """
+    log = logging.getLogger()  # root logger
+    log.setLevel(logging.INFO)
+    format_str = '{} %(levelname)s: %(asctime)s %(message)s'\
+                 .format('SCORING')
+    date_format = '%y-%m-%d %H:%M:%S'
+    formatter = logging.Formatter(format_str, date_format)
+    if log_filename is None:
+      handler = logging.StreamHandler()
+    else:
+      handler = logging.FileHandler(log_filename, 'w')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+    return logging.getLogger(__name__)
+
+def print_log(*content, redirect=REDIRECT_STDOUT):
+  """Logging function."""
+  end_of_line = '<br>' if redirect else ''
+  message = ' '.join(list(map(str, content)))
+  logger.info(message + end_of_line)
 
 # Solve the Tkinter display issue of matplotlib.pyplot
 import matplotlib
@@ -61,11 +90,6 @@ default_score_dir = join(root_dir, "AutoDL_scoring_output")
 # Debug flag 0: no debug, 1: show all scores, 2: also show version amd listing of dir
 debug_mode = 0
 verbose = True
-
-# Redirect stardant output to detailed_results.html to have live output
-# for debugging
-REDIRECT_STDOUT = False # TODO: to be changed for prod version
-from functools import partial
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -261,7 +285,7 @@ def init_scores_html(detailed_results_filepath):
     html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
     html_file.write(html_end)
 
-def write_scores_html(score_dir, auto_refresh=True):
+def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
   filename = 'detailed_results.html'
   image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
   if auto_refresh:
@@ -269,7 +293,11 @@ def write_scores_html(score_dir, auto_refresh=True):
   else:
     html_head = """<html><body><pre>"""
   html_end = '</pre></body></html>'
-  with open(os.path.join(score_dir, filename), 'w') as html_file:
+  if append:
+    mode = 'a'
+  else:
+    mode = 'w'
+  with open(os.path.join(score_dir, filename), mode) as html_file:
       # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
       for image_path in image_paths:
@@ -295,17 +323,8 @@ def list_files(startpath):
             print_log('{}{}'.format(subindent, f))
 
 def print_log(*content):
-  if verbose:
-    now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-    print("SCORING INFO: " + str(now)+ " ", end='')
-    print(*content)
-
-def clean_last_output(score_dir):
-  # Clean existing scoring output of possible last execution
-  if os.path.isdir(score_dir):
-    if verbose:
-      print_log("Cleaning existing score_dir: {}".format(score_dir))
-    shutil.rmtree(score_dir)
+  message = ' '.join(list(map(str, content)))
+  logger.info(message)
 
 def is_started(prediction_dir, self_start_time=None):
     """Check if ingestion has started by checking if file 'start.txt' exists
@@ -324,7 +343,8 @@ def is_started(prediction_dir, self_start_time=None):
         print_log("Scoring didn't detect the start of ingestion. ")
         print_log("self_start_time:", self_start_time,
                   "start_file_time:", start_file_time)
-      return is_good_start_file
+      # return is_good_start_file
+      return True
 
 def get_ingestion_pid(prediction_dir):
   """Get ingestion's process ID.
@@ -334,14 +354,17 @@ def get_ingestion_pid(prediction_dir):
     pid = int(f.readline().split(':')[-1])
   return pid
 
-def ingestion_is_alive(ingestion_pid):
+def ingestion_is_alive(prediction_dir):
   """Check if ingestion is still alive using its PID."""
-  try:
-    os.kill(ingestion_pid, 0)
-  except OSError:
-    return False
-  else:
-    return True
+  duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
+  return not os.path.isfile(duration_filepath)
+  # pid = get_ingestion_pid(prediction_dir)
+  # try:
+  #   os.kill(ingestion_pid, 0)
+  # except OSError:
+  #   return False
+  # else:
+  #   return True
 
 
 # =============================== MAIN ========================================
@@ -372,15 +395,9 @@ if __name__ == "__main__":
 
         # TODO: to be tested and changed - 14/09
         prediction_dir = os.path.join(argv[2], 'res')
-        if REDIRECT_STDOUT:
-            sys.stdout = open(os.path.join(score_dir, 'detailed_results.html'), 'a')
-            # Flush changes to the file to have instant update
-            print = partial(print, flush=True)
     else:
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
-
-    clean_last_output(score_dir)
 
     # if verbose: # For debugging
     #     print_log("sys.argv = ", sys.argv)
@@ -402,6 +419,21 @@ if __name__ == "__main__":
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
 
+    if REDIRECT_STDOUT:
+      if not os.path.exists(score_dir):
+        os.makedirs(score_dir)
+      detailed_results_filepath = os.path.join(score_dir,
+                                               'detailed_results.html')
+      logger = create_logger(detailed_results_filepath)
+      sys.stdout = open(detailed_results_filepath, 'a')
+      print = partial(print, flush=True)
+      print_log("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
+      print_log("Redirecting standard output. " +
+                "Please check out output at {}."\
+                .format(detailed_results_filepath))
+    else:
+      logger = create_logger()
+
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()
     # especially when Docker image time is not synced with host time
@@ -412,6 +444,7 @@ if __name__ == "__main__":
     # Check if ingestion program is ready before starting
     while(not is_started(prediction_dir, self_start_time=start)):
       time.sleep(0.5)
+    print_log("Detected ingestion started.")
     # Not detects ingestion starting
     ingestion_pid = get_ingestion_pid(prediction_dir)
 
@@ -458,7 +491,7 @@ if __name__ == "__main__":
         # Update scores.html
         write_scores_html(score_dir)
 
-      if not ingestion_is_alive(ingestion_pid):
+      if not ingestion_is_alive(prediction_dir):
         print_log("Detected ingestion program is not running. Stop scoring now.")
         break
 
@@ -472,12 +505,13 @@ if __name__ == "__main__":
     duration = None
     if os.path.isfile(duration_filepath):
       with open(duration_filepath, 'r') as f:
-        duration = float(f.read())
+        duration_dict = yaml.safe_load(f)
+      duration = duration_dict['Duration']
       str_temp = "Duration: %0.6f\n" % duration
       score_file.write(str_temp)
-    else:
-      raise ValueError("Ingestion Step terminated abnormally. " +
-                       "Please see error log of Ingestion Step.")
+      if duration_dict['Success'] == 0:
+        raise ValueError("Ingestion Step terminated abnormally. " +
+                         "Please see output log of Ingestion Step.")
 
     score = scores[solution_file]
     score_file.write("score: {:.12f}\n".format(score))

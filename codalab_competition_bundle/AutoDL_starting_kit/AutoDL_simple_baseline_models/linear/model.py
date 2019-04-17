@@ -384,12 +384,6 @@ class Model(algorithm.Algorithm):
     print_log("Model already trained for {:.4f} epochs.".format(num_epochs))
     return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
 
-def print_log(*content):
-  """Logging function. (could've also used `import logging`.)"""
-  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-  print("MODEL INFO: " + str(now)+ " ", end='')
-  print(*content)
-
 def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
   """Re-implementation of this function:
     https://www.tensorflow.org/api_docs/python/tf/nn/sigmoid_cross_entropy_with_logits
@@ -467,3 +461,9 @@ def resize_space_axes(tensor_4d, new_row_count, new_col_count):
   resized_images = tf.image.resize_images(tensor_4d,
                                           size=(new_row_count, new_col_count))
   return resized_images
+
+def print_log(*content):
+  """Logging function. (could've also used `import logging`.)"""
+  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+  print("MODEL INFO: " + str(now)+ " ", end='')
+  print(*content)
