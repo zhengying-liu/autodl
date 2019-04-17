@@ -148,6 +148,15 @@ def print_log(*content):
     print("INGESTION INFO: " + str(now)+ " ", end='')
     print(*content)
 
+def write_start_file_with_pid(output_dir):
+  """Create start file 'start.txt' in `output_dir` with ingestion's pid.
+  """
+  pid = os.getpid()
+  start_filename =  'start.txt'
+  start_filepath = os.path.join(output_dir, start_filename)
+  with open(start_filepath, 'w') as f:
+    f.write('pid:' + str(pid) + '\n')
+
 def clean_last_output(output_dir):
   """Clean existing output_dir of possible last execution.
 
@@ -252,11 +261,7 @@ if __name__=="__main__" and debug_mode<4:
         data_io.mvdir(output_dir, output_dir+'_'+the_date)
     data_io.mkdir(output_dir)
 
-    # Create start file to tell scoring program that submission has begin
-    start_filename =  'start.txt'
-    start_filepath = os.path.join(output_dir, start_filename)
-    with open(start_filepath, 'w') as f:
-      f.write('Started!')
+    write_start_file_with_pid(output_dir)
 
     #### INVENTORY DATA (and sort dataset names alphabetically)
     datanames = data_io.inventory_data(input_dir)
@@ -337,10 +342,13 @@ if __name__=="__main__" and debug_mode<4:
       if remaining_time_budget<=0:
         break
 
+
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
 
     # Delete start file to clean folder
+    start_filename =  'start.txt'
+    start_filepath = os.path.join(output_dir, start_filename)
     if os.path.exists(start_filepath):
       os.remove(start_filepath)
 

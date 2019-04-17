@@ -307,10 +307,42 @@ def clean_last_output(score_dir):
       print_log("Cleaning existing score_dir: {}".format(score_dir))
     shutil.rmtree(score_dir)
 
-def is_started(prediction_dir):
-    # Check if file start.txt exists
+def is_started(prediction_dir, self_start_time=None):
+    """Check if ingestion has started by checking if file 'start.txt' exists
+    and if it's really the good file produced in this run.
+    """
+    if self_start_time is None:
+      self_start_time = time.time()
     start_filepath = os.path.join(prediction_dir, 'start.txt')
-    return os.path.isfile(start_filepath)
+    start_file_exists = os.path.isfile(start_filepath)
+    if not start_file_exists:
+      return False
+    else:
+      start_file_time = os.path.getmtime(start_filepath)
+      is_good_start_file = np.absolute(start_file_time - self_start_time) < 10
+      if not is_good_start_file and verbose:
+        print_log("Scoring didn't detect the start of ingestion. ")
+        print_log("self_start_time:", self_start_time,
+                  "start_file_time:", start_file_time)
+      return is_good_start_file
+
+def get_ingestion_pid(prediction_dir):
+  """Get ingestion's process ID.
+  """
+  start_filepath = os.path.join(prediction_dir, 'start.txt')
+  with open(start_filepath, 'r') as f:
+    pid = int(f.readline().split(':')[-1])
+  return pid
+
+def ingestion_is_alive(ingestion_pid):
+  """Check if ingestion is still alive using its PID."""
+  try:
+    os.kill(ingestion_pid, 0)
+  except OSError:
+    return False
+  else:
+    return True
+
 
 # =============================== MAIN ========================================
 
@@ -370,16 +402,18 @@ if __name__ == "__main__":
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
 
-    # Check if ingestion program is ready before starting
-    while(not is_started(prediction_dir)):
-      time.sleep(0.5)
-
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()
     # especially when Docker image time is not synced with host time
     start = os.path.getmtime(detailed_results_filepath)
     start_str = time.ctime(start)
     print_log("Start scoring program at " + start_str)
+
+    # Check if ingestion program is ready before starting
+    while(not is_started(prediction_dir, self_start_time=start)):
+      time.sleep(0.5)
+    # Not detects ingestion starting
+    ingestion_pid = get_ingestion_pid(prediction_dir)
 
     # Get the metric
     scoring_function = autodl_bac
@@ -396,9 +430,6 @@ if __name__ == "__main__":
     basename = get_basename(solution_file)
     nb_preds = {x:0 for x in solution_names}
     scores = {x:0 for x in solution_names}
-
-    # Use 'duration.txt' file to detect if ingestion program exits early
-    duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
 
     # Begin scoring process, along with ingestion program
     # Moniter training processes while time budget is not attained
@@ -422,12 +453,13 @@ if __name__ == "__main__":
                                   is_multiclass_task=is_multiclass_task)
         nb_preds[solution_file] = nb_preds_new
         scores[solution_file] = alc
-        print_log("Current area under learning curve for {}: {:.4f}".format(basename, scores[solution_file]))
+        print_log("Current area under learning curve for {}: {:.4f}"\
+                  .format(basename, scores[solution_file]))
         # Update scores.html
         write_scores_html(score_dir)
-      # Use 'duration.txt' file to detect if ingestion program exits early
-      if os.path.isfile(duration_filepath):
-        print_log("Detected early stop of ingestion program. Stop scoring now.")
+
+      if not ingestion_is_alive(ingestion_pid):
+        print_log("Detected ingestion program is not running. Stop scoring now.")
         break
 
     # Write one last time the detailed results page without auto-refreshing
@@ -435,18 +467,17 @@ if __name__ == "__main__":
 
     # Read the execution time and add it to score_file (scores.txt)
     # Spend 30 seconds to search for a duration.txt file
+    # Use 'duration.txt' file to detect if ingestion program exits early
+    duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
     duration = None
-    max_loop = 30
-    n_loop = 0
-    while n_loop < max_loop:
-        time.sleep(1)
-        if os.path.isfile(duration_filepath):
-            with open(duration_filepath, 'r') as f:
-              duration = float(f.read())
-            str_temp = "Duration: %0.6f\n" % duration
-            score_file.write(str_temp)
-            break
-        n_loop += 1
+    if os.path.isfile(duration_filepath):
+      with open(duration_filepath, 'r') as f:
+        duration = float(f.read())
+      str_temp = "Duration: %0.6f\n" % duration
+      score_file.write(str_temp)
+    else:
+      raise ValueError("Ingestion Step terminated abnormally. " +
+                       "Please see error log of Ingestion Step.")
 
     score = scores[solution_file]
     score_file.write("score: {:.12f}\n".format(score))
