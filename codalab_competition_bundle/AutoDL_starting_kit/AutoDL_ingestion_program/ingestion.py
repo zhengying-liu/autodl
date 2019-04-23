@@ -111,6 +111,16 @@ import glob
 # to have live output for debugging
 REDIRECT_STDOUT = False
 
+VERSION = 'v20190423'
+DESCRIPTION =\
+"""Move 'import model' to try-except clause.
+Previous updates:
+20190419: Try-except clause for training process;
+always terminates successfully."""
+
+def log_version_info(logger):
+  logger.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
+
 def create_logger(log_filename=None):
   """Setup the logging environment
   """
@@ -240,8 +250,6 @@ if __name__=="__main__" and debug_mode<4:
     path.append(submission_dir + '/AutoDL_sample_code_submission')
     import data_io
     from data_io import vprint
-    import model # participants' model.py
-    from model import Model
     from dataset import AutoDLDataset # THE class of AutoDL datasets
 
     if debug_mode >= 4: # Show library version and directory structure
@@ -280,9 +288,7 @@ if __name__=="__main__" and debug_mode<4:
     print_log("******** Processing dataset " + basename[:-5].capitalize() + " ********")
     print_log("************************************************")
 
-    # ======== Learning on a time budget:
-    # Keep track of time not to exceed your time budget. Time spent to inventory data neglected.
-    start = time.time()
+    log_version_info(logger)
 
     # ======== Creating a data object with data, informations about it
     print_log("Reading training set and test set...")
@@ -298,18 +304,19 @@ if __name__=="__main__" and debug_mode<4:
     else:
         time_budget = max_time
 
-    # ========= Creating a model
-    print_log("Creating model...")
-    ##### Begin creating model #####
-    M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
-    ###### End creating model ######
-
-    # Keeping track of how many predictions are made
-    prediction_order_number = 0
-
-    # Start the CORE PART: train/predict process
-    start = time.time()
     try:
+      # ========= Creating a model
+      from model import Model # in participants' model.py
+      print_log("Creating model...")
+      ##### Begin creating model #####
+      M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
+      ###### End creating model ######
+
+      # Keeping track of how many predictions are made
+      prediction_order_number = 0
+
+      # Start the CORE PART: train/predict process
+      start = time.time()
       while(True):
         remaining_time_budget = start + time_budget - time.time()
         print_log("Training the model...")
@@ -357,8 +364,9 @@ if __name__=="__main__" and debug_mode<4:
           print_log("[+] Done")
           print_log("[+] Overall time spent %5.2f sec " % overall_time_spent)
       else:
-          print_log("[-] Done, but some tasks aborted because time limit exceeded")
+          print_log("[-] Done, but encountered some errors during ingestion")
           print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
       f.write('Success: ' + str(int(execution_success)) + '\n')
 
+    # Copy all files in output_dir to score_dir
     os.system("cp -R {} {}".format(os.path.join(output_dir, '*'), score_dir))

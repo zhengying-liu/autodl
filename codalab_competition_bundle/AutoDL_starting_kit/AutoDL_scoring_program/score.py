@@ -31,6 +31,15 @@ from os import getcwd as pwd
 REDIRECT_STDOUT = False
 from functools import partial
 
+VERSION = 'v20190423'
+DESCRIPTION =\
+"""Add version and description.
+Previous updates:
+20190419: Judge if ingestion is alive by duration.txt; use logging."""
+
+def log_version_info(logger):
+  logger.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
+
 def create_logger(log_filename=None):
     """Setup the logging environment
     """
@@ -337,12 +346,12 @@ def is_started(prediction_dir, self_start_time=None):
     if not start_file_exists:
       return False
     else:
-      start_file_time = os.path.getmtime(start_filepath)
-      is_good_start_file = np.absolute(start_file_time - self_start_time) < 10
-      if not is_good_start_file and verbose:
-        print_log("Scoring didn't detect the start of ingestion. ")
-        print_log("self_start_time:", self_start_time,
-                  "start_file_time:", start_file_time)
+      # start_file_time = os.path.getmtime(start_filepath)
+      # is_good_start_file = np.absolute(start_file_time - self_start_time) < 10
+      # if not is_good_start_file and verbose:
+      #   print_log("Scoring didn't detect the start of ingestion. ")
+      #   print_log("self_start_time:", self_start_time,
+      #             "start_file_time:", start_file_time)
       # return is_good_start_file
       return True
 
@@ -433,6 +442,8 @@ if __name__ == "__main__":
                 .format(detailed_results_filepath))
     else:
       logger = create_logger()
+
+    log_version_info(logger)
 
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()
