@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Usage: python ingestion.py input_dir output_dir ingestion_program_dir submission_program_dir
 #                            data      result     ingestion             code of participants
 
@@ -70,7 +68,12 @@ verbose = True # outputs messages to stdout and stderr for debug purposes
 # 2: run everything, but do not train, generate random outputs in max_time
 # 3: stop before the loop on datasets
 # 4: just list the directories and program version
-debug_mode = 4
+debug_mode = 0
+
+# Verbosity level of logging:
+##############
+# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+verbosity_level = 'DEBUG'
 
 # Time budget
 #############
@@ -115,34 +118,16 @@ VERSION = 'v20190423'
 DESCRIPTION =\
 """Move 'import model' to try-except clause.
 Previous updates:
-20190419: Try-except clause for training process;
-always terminates successfully."""
+20190424: [ZY] Use logging instead of logger; remove start.txt checking.
+20190419: [ZY] Try-except clause for training process;
+always terminates successfully.
+"""
 
-def log_version_info(logger):
-  logger.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
-
-def create_logger(log_filename=None):
-  """Setup the logging environment
-  """
-  log = logging.getLogger()  # root logger
-  log.setLevel(logging.INFO)
-  format_str = '{} %(levelname)s: %(asctime)s %(message)s'\
-               .format(os.path.basename(__file__).upper()[:-3].ljust(10))
-  date_format = '%y-%m-%d %H:%M:%S'
-  formatter = logging.Formatter(format_str, date_format)
-  if log_filename is None:
-    handler = logging.StreamHandler()
-  else:
-    handler = logging.FileHandler(log_filename, 'w')
-  handler.setFormatter(formatter)
-  log.addHandler(handler)
-  return logging.getLogger(__name__)
-
-def print_log(*content, redirect=REDIRECT_STDOUT):
-  """Logging function."""
-  end_of_line = '<br>' if redirect else ''
-  message = ' '.join(list(map(str, content)))
-  logger.info(message + end_of_line)
+logging.basicConfig(
+    level=getattr(logging, verbosity_level),
+    format='%(asctime)s %(levelname)s %(filename)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -160,9 +145,6 @@ default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
 # =============================================================================
 # =========================== END USER OPTIONS ================================
 # =============================================================================
-
-# Version of the sample code
-version = 1
 
 # General purpose functions
 import time
@@ -182,6 +164,7 @@ def write_start_file_with_pid(output_dir):
   start_filepath = os.path.join(output_dir, start_filename)
   with open(start_filepath, 'w') as f:
     f.write('pid:' + str(pid) + '\n')
+    f.write('ingestion_start:' + str(overall_start) + '\n')
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
@@ -230,18 +213,17 @@ if __name__=="__main__" and debug_mode<4:
       logger = create_logger(detailed_results_filepath)
       sys.stdout = open(detailed_results_filepath, 'a')
       print = partial(print, flush=True)
-      print_log("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
-      print_log("Redirecting standard output. " +
+      logging.info("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
+      logging.info("Redirecting standard output. " +
                 "Please check out output at {}."\
                 .format(detailed_results_filepath))
-    else:
-      logger = create_logger()
 
-    logger.debug("sys.argv = ", sys.argv)
-    logger.debug("Using input_dir: " + input_dir)
-    logger.debug("Using output_dir: " + output_dir)
-    logger.debug("Using program_dir: " + program_dir)
-    logger.debug("Using submission_dir: " + submission_dir)
+
+    logging.debug("sys.argv = " + str(sys.argv))
+    logging.debug("Using input_dir: " + input_dir)
+    logging.debug("Using output_dir: " + output_dir)
+    logging.debug("Using program_dir: " + program_dir)
+    logging.debug("Using submission_dir: " + submission_dir)
 
 	  # Our libraries
     path.append(program_dir)
@@ -249,7 +231,6 @@ if __name__=="__main__" and debug_mode<4:
     #IG: to allow submitting the starting kit as sample submission
     path.append(submission_dir + '/AutoDL_sample_code_submission')
     import data_io
-    from data_io import vprint
     from dataset import AutoDLDataset # THE class of AutoDL datasets
 
     if debug_mode >= 4: # Show library version and directory structure
@@ -271,7 +252,7 @@ if __name__=="__main__" and debug_mode<4:
     if debug_mode>=3:
         data_io.show_version()
         data_io.show_io(input_dir, output_dir)
-        print_log('****** Ingestion program version ' + str(version) + ' ******\n\n' + '========== DATASETS ==========\n')
+        logging.info('****** Ingestion program version ' + str(VERSION) + ' ******\n\n' + '========== DATASETS ==========\n')
         data_io.write_list(datanames)
         datanames = [] # Do not proceed with learning and testing
 
@@ -283,15 +264,15 @@ if __name__=="__main__" and debug_mode<4:
     basename = datanames[0]
 
 
-    print_log("========== Ingestion program version " + str(version) + " ==========")
-    print_log("************************************************")
-    print_log("******** Processing dataset " + basename[:-5].capitalize() + " ********")
-    print_log("************************************************")
+    logging.info("========== Ingestion program version " + str(VERSION) + " ==========")
+    logging.info("************************************************")
+    logging.info("******** Processing dataset " + basename[:-5].capitalize() + " ********")
+    logging.info("************************************************")
 
-    log_version_info(logger)
+    logging.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
 
     # ======== Creating a data object with data, informations about it
-    print_log("Reading training set and test set...")
+    logging.info("Reading training set and test set...")
 
     ##### Begin creating training set and test set #####
     D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
@@ -307,7 +288,7 @@ if __name__=="__main__" and debug_mode<4:
     try:
       # ========= Creating a model
       from model import Model # in participants' model.py
-      print_log("Creating model...")
+      logging.info("Creating model...")
       ##### Begin creating model #####
       M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
       ###### End creating model ######
@@ -319,7 +300,7 @@ if __name__=="__main__" and debug_mode<4:
       start = time.time()
       while(True):
         remaining_time_budget = start + time_budget - time.time()
-        print_log("Training the model...")
+        logging.info("Training the model...")
         # Train the model
         M.train(D_train.get_dataset(),
                 remaining_time_budget=remaining_time_budget)
@@ -335,38 +316,38 @@ if __name__=="__main__" and debug_mode<4:
         # Write predictions to output_dir
         data_io.write(os.path.join(output_dir,filename_test), Y_pred)
         prediction_order_number += 1
-        print_log("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
+        logging.info("[+] Prediction success, time spent so far %5.2f sec" % (time.time() - start))
         remaining_time_budget = start + time_budget - time.time()
-        print_log( "[+] Time left %5.2f sec" % remaining_time_budget)
+        logging.info( "[+] Time left %5.2f sec" % remaining_time_budget)
         if remaining_time_budget<=0:
           break
     except Exception as e:
       execution_success = False
-      print_log("Failed to run ingestion.")
-      print_log("Encountered exception:\n", e)
+      logging.info("Failed to run ingestion.")
+      logging.info("Encountered exception:\n" + str(e))
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
 
-    # Delete start file to clean folder
-    start_filename =  'start.txt'
-    start_filepath = os.path.join(output_dir, start_filename)
-    if os.path.exists(start_filepath):
-      os.remove(start_filepath)
+    # # Delete start file to clean folder
+    # start_filename =  'start.txt'
+    # start_filepath = os.path.join(output_dir, start_filename)
+    # if os.path.exists(start_filepath):
+    #   os.remove(start_filepath)
 
     # Write overall_time_spent to a duration.txt file
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
       f.write('Duration: ' + str(overall_time_spent) + '\n')
-      if verbose:
-          print_log("Successfully write duration to {}.".format(duration_filename))
-      if execution_success:
-          print_log("[+] Done")
-          print_log("[+] Overall time spent %5.2f sec " % overall_time_spent)
-      else:
-          print_log("[-] Done, but encountered some errors during ingestion")
-          print_log("[-] Overall time spent %5.2f sec " % overall_time_spent)
       f.write('Success: ' + str(int(execution_success)) + '\n')
+      if verbose:
+          logging.info("Successfully write duration to {}.".format(duration_filename))
+      if execution_success:
+          logging.info("[+] Done")
+          logging.info("[+] Overall time spent %5.2f sec " % overall_time_spent)
+      else:
+          logging.info("[-] Done, but encountered some errors during ingestion")
+          logging.info("[-] Overall time spent %5.2f sec " % overall_time_spent)
 
     # Copy all files in output_dir to score_dir
     os.system("cp -R {} {}".format(os.path.join(output_dir, '*'), score_dir))

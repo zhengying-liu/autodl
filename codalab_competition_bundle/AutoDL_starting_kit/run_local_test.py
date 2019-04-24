@@ -17,6 +17,10 @@ python run_local_test.py
 ```
 """
 
+# Verbosity level of logging.
+# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+verbosity_level = 'INFO'
+
 import logging
 import os
 import tensorflow as tf
@@ -25,21 +29,11 @@ import shutil # for deleting a whole directory
 import webbrowser
 from multiprocessing import Process
 
-def create_logger():
-    """Setup the logging environment
-    """
-    log = logging.getLogger()  # root logger
-    log.setLevel(logging.INFO)
-    format_str = '{} %(levelname)s: %(asctime)s %(message)s'\
-                 .format(os.path.basename(__file__).upper()[:-3])
-    date_format = '%y-%m-%d %H:%M:%S'
-    formatter = logging.Formatter(format_str, date_format)
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-    log.addHandler(stream_handler)
-    return logging.getLogger(__name__)
-
-logger = create_logger()
+logging.basicConfig(
+    level=getattr(logging, verbosity_level),
+    format='%(asctime)s %(levelname)s %(filename)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -59,7 +53,7 @@ def remove_dir(output_dir):
   This aims to clean existing output of last run of local test.
   """
   if os.path.isdir(output_dir):
-    logger.info("Cleaning existing output directory of last run: {}"\
+    logging.info("Cleaning existing output directory of last run: {}"\
                 .format(output_dir))
     shutil.rmtree(output_dir)
 
