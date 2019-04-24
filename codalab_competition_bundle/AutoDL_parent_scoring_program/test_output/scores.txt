@@ -1,6 +1,6 @@
-set1_score: 0.0
-set2_score: 0.0
-set3_score: 0.0
-set4_score: 0.0
-set5_score: 0.0
-Duration: -0.011079
+set1_score: 0.163517560301
+set2_score: 0.166633899545
+set3_score: 0.167772716699
+set4_score: -0.999999
+set5_score: 0.162562493886
+Duration: -0.003164
