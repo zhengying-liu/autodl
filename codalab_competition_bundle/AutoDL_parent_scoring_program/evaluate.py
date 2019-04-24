@@ -2,7 +2,7 @@
 
 ################################################################################
 # Name:         Parent Scoring Program
-# Author:       Zhengying Liu, Zhen Xu
+# Author:       Zhengying Liu, Zhen Xu, Isabelle Guyon
 # Update time:  Apr 23 2019
 # Version:      1.0
 # Description: This is the parent scoring program. It reads from input folder
@@ -11,10 +11,12 @@
 
 import os
 from os.path import join
-import re
+import sys
 import yaml
 import argparse
+import base64
 from shutil import copyfile
+from glob import glob
 
 ################################################################################
 # User defined constants
@@ -23,7 +25,7 @@ DEFAULT_NUM_DATASET = 5
 DEFAULT_FIRST_DATASET_PHASE = 2   # hardcode for now
 DEFAULT_YAML_SCORE_NAME = 'score'
 DEFAULT_SCORE = './default_scores.txt'
-DEFAULT_CURVE = './default_curve.jpg'
+DEFAULT_CURVE = './default_curve.png'
 
 def validate_full_res(args):
   """
@@ -39,14 +41,20 @@ def validate_full_res(args):
       os.mkdir(check_path)
       copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
       copyfile(DEFAULT_CURVE, join(check_path,"learning-curve-default.png"))
-    elif not os.path.exists(join(check_path,"scores.txt")) or \
-         not os.path.exists(join(check_path,"learning-curve-*.png")): 
-      # if res folder exists but no score or learning curve
-      # we copy default learning curve and score to this folder
-      print ("WARNING! Score file or learning curve does not exist." + 
-              "Default values will be used.")
-      copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
-      copyfile(DEFAULT_CURVE, join(check_path,"learning-curve-default.png"))
+    else:
+      if not os.path.exists(join(check_path,"scores.txt")):
+        print ("WARNING! Score file does not exist. Default values will be used.")
+        copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
+      
+      is_curve_exist = False
+      for f in os.listdir():
+        if f[-4:] == ".png":
+          is_curve_exist = True
+          break
+
+      if not is_curve_exist:
+        print ("WARNING! Learning curve does not exist. Default values will be used.")
+        copyfile(DEFAULT_CURVE, join(check_path,"learning-curve-default.png"))
 
   return
 
@@ -67,11 +75,14 @@ def read_score(args):
 
 def read_curve(args):
   curve_ls = []
-  for i in range(DEFAULT_NUM_DATASET):
+  try:
+    for i in range(DEFAULT_NUM_DATASET):
       curve_dir = join(args.input_dir, 'res_'+str(i+DEFAULT_FIRST_DATASET_PHASE))
-      _img = re.search('learning-curve-*.png')
-      img = join(curve_dir,_img)
-      curve_ls.append(img)
+      _img = glob(os.path.join(curve_dir,'learning-curve-*.png'))
+      curve_ls.append(_img[0])
+  except Exception as e:
+    print ("Failed to read curves.")
+    print (e)
   return curve_ls
 
 def write_score(score_ls, args):
@@ -101,7 +112,9 @@ def write_curve(curve_ls, args):
         html_file.write(html_head)
         for image_path in curve_ls:
           with open(image_path, "rb") as image_file:
-            s = '<img src={} >'.format(image_file)
+            encoded_string = base64.b64encode(image_file.read())
+            encoded_string = encoded_string.decode('utf-8')
+            s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
             html_file.write(s + '<br>')
         html_file.write(html_end)
   except Exception as e:
@@ -112,40 +125,48 @@ def write_curve(curve_ls, args):
   return is_written
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--input_dir', type=str, default='./test_input', 
-                      help='where input results are stored')
-  parser.add_argument('--output_dir', type=str, default='./test_output', 
-                      help='where to store aggregated outputs')
-  args = parser.parse_args()
-  print ("Parsed args are:", args)
-  print ("-" * 80)
+  try:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_dir', type=str, default='./test_input', 
+                        help='where input results are stored')
+    parser.add_argument('--output_dir', type=str, default='./test_output', 
+                        help='where to store aggregated outputs')
+    args = parser.parse_args()
+    print ("Parsed args are:", args)
+    print ("-" * 80)
 
-  input_ls = sorted(os.listdir(args.input_dir))
-  print ("Input dir contains: ", input_ls)
+    if not os.path.exists(args.input_dir):
+      print ("ERROR! No input folder! Exit!")
+      sys.exit()
 
-  # check if we have enouge results and copy default values otherwise
-  is_valid = validate_full_res(args)
-  print ("Results validation finished!")
-  print ("-" * 80)
-  print ("Start aggregation...")
+    input_ls = sorted(os.listdir(args.input_dir))
+    print ("Input dir contains: ", input_ls)
 
-  # read all scores
-  score_ls = read_score(args)
-  print ("Score reading finished.")
-  print (score_ls)
+    # check if we have enouge results and copy default values otherwise
+    is_valid = validate_full_res(args)
+    print ("Results validation finished!")
+    print ("-" * 80)
+    print ("Start aggregation...")
 
-  # aggregate all scores and write to output
-  if not os.path.exists(args.output_dir):
-    os.mkdir(args.output_dir)
-  is_written_score = write_score(score_ls, args)
+    # read all scores
+    score_ls = read_score(args)
+    print ("Score reading finished.")
+    print (score_ls)
 
-  # read all learning curves
-  curve_ls = read_curve(args)
-  print ("Learning curve reading finished.")
-  print ("Curve list: ", curve_ls)
+    # aggregate all scores and write to output
+    if not os.path.exists(args.output_dir):
+      os.mkdir(args.output_dir)
+    is_written_score = write_score(score_ls, args)
 
-  # aggregate all learning curves and write to output
-  is_written_curve = write_curve(curve_ls, args)
+    # read all learning curves
+    curve_ls = read_curve(args)
+    print ("Learning curve reading finished.")
+    print ("Curve list: ", curve_ls)
 
-  print ("Parent scoring program finished!")
+    # aggregate all learning curves and write to output
+    is_written_curve = write_curve(curve_ls, args)
+
+    print ("Parent scoring program finished!")
+  except Exception as e:
+    print ("Unexpected exception raised! Check parent scoring program!")
+    print (e)
