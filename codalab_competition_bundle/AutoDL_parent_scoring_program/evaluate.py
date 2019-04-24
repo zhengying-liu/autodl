@@ -47,7 +47,7 @@ def validate_full_res(args):
         copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
       
       is_curve_exist = False
-      for f in os.listdir():
+      for f in os.listdir(check_path):
         if f[-4:] == ".png":
           is_curve_exist = True
           break
@@ -144,13 +144,13 @@ if __name__ == "__main__":
 
     # check if we have enouge results and copy default values otherwise
     is_valid = validate_full_res(args)
-    print ("Results validation finished!")
+    print ("Results validation finished!\n")
     print ("-" * 80)
     print ("Start aggregation...")
 
     # read all scores
     score_ls = read_score(args)
-    print ("Score reading finished.")
+    print ("Score reading finished.\n")
     print (score_ls)
 
     # aggregate all scores and write to output
@@ -160,13 +160,13 @@ if __name__ == "__main__":
 
     # read all learning curves
     curve_ls = read_curve(args)
-    print ("Learning curve reading finished.")
+    print ("Learning curve reading finished.\n")
     print ("Curve list: ", curve_ls)
 
     # aggregate all learning curves and write to output
     is_written_curve = write_curve(curve_ls, args)
 
-    print ("Parent scoring program finished!")
+    print ("Parent scoring program finished!\n")
   except Exception as e:
     print ("Unexpected exception raised! Check parent scoring program!")
     print (e)
