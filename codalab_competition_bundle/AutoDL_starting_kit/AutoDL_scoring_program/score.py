@@ -25,6 +25,20 @@ import sys
 import yaml
 from sys import argv
 from os import getcwd as pwd
+# Solve the Tkinter display issue of matplotlib.pyplot
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+import datetime
+# To compute area under learning curve
+from sklearn.metrics import auc
+# To compute ROC AUC metric
+from sklearn.metrics import roc_auc_score
+from libscores import read_array, sp, ls, mvmean
+# Convert images to Base64 to show in scores.html
+import base64
 
 # Redirect stardant output to live results page (detailed_results.html)
 # to have live output for debugging
@@ -36,6 +50,27 @@ DESCRIPTION =\
 """Add version and description.
 Previous updates:
 20190419: Judge if ingestion is alive by duration.txt; use logging."""
+
+# Verbosity level of logging.
+# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+verbosity_level = logging.DEBUG
+debug_mode = 1
+
+# Constant used for a missing score
+missing_score = -0.999999
+
+def _HERE(*args):
+    h = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(h, *args)
+
+# Default I/O directories:
+root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
+from os.path import join
+default_solution_dir = join(root_dir, "AutoDL_sample_data")
+default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
+default_score_dir = join(root_dir, "AutoDL_scoring_output")
+
+logging.basicConfig(level=verbosity_level)
 
 def log_version_info(logger):
   logger.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
@@ -62,49 +97,6 @@ def print_log(*content, redirect=REDIRECT_STDOUT):
   end_of_line = '<br>' if redirect else ''
   message = ' '.join(list(map(str, content)))
   logger.info(message + end_of_line)
-
-# Solve the Tkinter display issue of matplotlib.pyplot
-import matplotlib
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-import numpy as np
-import time
-import datetime
-
-# To compute area under learning curve
-from sklearn.metrics import auc
-
-# To compute ROC AUC metric
-from sklearn.metrics import roc_auc_score
-
-from libscores import read_array, sp, ls, mvmean
-
-# Convert images to Base64 to show in scores.html
-import base64
-
-# Libraries for reconstructing the model
-
-def _HERE(*args):
-    h = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(h, *args)
-
-# Default I/O directories:
-root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
-from os.path import join
-default_solution_dir = join(root_dir, "AutoDL_sample_data")
-default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
-default_score_dir = join(root_dir, "AutoDL_scoring_output")
-
-# Debug flag 0: no debug, 1: show all scores, 2: also show version amd listing of dir
-debug_mode = 0
-verbose = True
-
-# Constant used for a missing score
-missing_score = -0.999999
-
-# Version number
-scoring_version = 1.0
 
 # Metric used to compute the score of a point on the learning curve
 def autodl_bac(solution, prediction):
@@ -322,14 +314,14 @@ def append_to_detailed_results_page(detailed_results_filepath, content):
     html_file.write(content)
 
 # List a tree structure of directories and files from startpath
-def list_files(startpath):
+def list_files(startpath,logger):
     for root, dirs, files in os.walk(startpath):
         level = root.replace(startpath, '').count(os.sep)
         indent = ' ' * 4 * (level)
-        print_log('{}{}/'.format(indent, os.path.basename(root)))
+        logger.debug('{}{}/'.format(indent, os.path.basename(root)))
         subindent = ' ' * 4 * (level + 1)
         for f in files:
-            print_log('{}{}'.format(subindent, f))
+            logger.debug('{}{}'.format(subindent, f))
 
 def print_log(*content):
   message = ' '.join(list(map(str, content)))
@@ -408,17 +400,6 @@ if __name__ == "__main__":
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
 
-    # if verbose: # For debugging
-    #     print_log("sys.argv = ", sys.argv)
-    #     list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir))) # /tmp/codalab/
-    #     with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
-    #       print_log("Content of the metadata file: ")
-    #       print_log(f.read())
-    #     print_log("Using solution_dir: " + solution_dir)
-    #     print_log("Using prediction_dir: " + prediction_dir)
-    #     print_log("Using score_dir: " + score_dir)
-    #     print_log("Scoring datetime:", the_date)
-
 
     # Create the output directory, if it does not already exist and open output files
     if not os.path.isdir(score_dir):
@@ -444,6 +425,16 @@ if __name__ == "__main__":
       logger = create_logger()
 
     log_version_info(logger)
+
+    logger.debug("sys.argv = " + str(sys.argv))
+    list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir)), logger) # /tmp/codalab/
+    with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
+      logger.debug("Content of the metadata file: ")
+      logger.debug(str(f.read()))
+    logger.debug("Using solution_dir: " + str(solution_dir))
+    logger.debug("Using prediction_dir: " + str(prediction_dir))
+    logger.debug("Using score_dir: " + str(score_dir))
+    logger.debug("Scoring datetime: ", str(the_date))
 
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()
