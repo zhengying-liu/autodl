@@ -1,9 +1,5 @@
-### Building an evaluation program that works with CodaLab
+### This is the master phase scoring program for the AutoDL challenge
 
-This example uses python.
+`evaluate.py` - is an example that gathers all the results of the children phases and put them into two files: scores.txt and detailed_results.html. The former contains the scores and duration to be shown on the leaderboard. The latter contains the detailed results (learning curves).
 
-`evaluate.py` - is an example that checks that the submission data matches the truth data, which is "Hello World!"
-`metadata` - this is a file that lists the contents of the program.zip bundle for the CodaLab system.
-
-Once these pieces are assembled they are packages as program.zip which CodaLab can then use to evaluate the submissions
-for a competition.
+`metadata` - is a file that instructs Codalab what to do to execute the code.

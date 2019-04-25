@@ -1,112 +1,221 @@
-#!/usr/bin/env python
-"""For testing parent scoring program locally.
+################################################################################
+# Name:         Parent Scoring Program
+# Author:       Zhengying Liu, Zhen Xu, Isabelle Guyon
+# Update time:  Apr 25 2019
+# Usage: 		    python evaluate.py input_dir output_dir         
 
-To do this, run
-```
-python evaluate.py test_input/ test_output/
-```
-"""
-import sys
+VERISION = "1.0"
+DESCRIPTION = '''This is the parent scoring program. It reads from \
+input_dir/res_i/ all partial results from children phases, and outputs \
+aggregated learning curves and scores to output_dir.'''
+               
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
+# ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
+# ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
+# WARRANTY OF NON-INFRINGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
+# INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
+# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
+# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
+################################################################################
+
+
+
+################################################################################
+# USER DEFINED CONSTANTS
+################################################################################
+
+# Number of children phases/datasets (as defined in competition bundle)
+DEFAULT_NUM_DATASET = 5			
+DEFAULT_SCORE = './default_scores.txt'
+DEFAULT_CURVE = './default_curve.png'
+
 import os
-import os.path
-import time
-from glob import glob
-import base64
+from os.path import join
+import sys
 import yaml
+import argparse
+import base64
+from shutil import copyfile
+from glob import glob
+import logging
+logging.basicConfig(
+   level=logging.DEBUG,
+   format="%(asctime)s %(levelname)s %(filename)s: %(message)s",
+   datefmt='%Y-%m-%d %H:%M:%S'
+)
 
-def write_scores_html(output_dir, image_paths):
+################################################################################
+# FUNCTIONS
+################################################################################
+		
+def validate_full_res(args):
+  """
+    Check if we have DEFAULT_NUM_DATASET results in the args.input_dir.
+    Replace by defaulta values otherwise.
+  """
+  for i in range(DEFAULT_NUM_DATASET):
+  	# Check whether res_i/ exists
+    check_path = join(args.input_dir, "res_"+str(i+2))
+    logging.info("Checking " + str(check_path))
+    if not os.path.exists(check_path):
+      # Replace both learning curve and score by default:
+      logging.warning(str(check_path) + 
+                    " does not exist. Default values will be used.")
+      # Create this folder and copy default values
+      os.mkdir(check_path)
+      copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
+      copyfile(DEFAULT_CURVE, join(check_path,"learning-curve-default.png"))
+    else:
+    # Replace either learning curve or score by default, depending...
+      if not os.path.exists(join(check_path,"scores.txt")):
+        logging.warning("Score file" +
+                       " does not exist. Default values will be used.")
+        copyfile(DEFAULT_SCORE, join(check_path,"scores.txt"))
+      is_curve_exist = False
+      for f in os.listdir(check_path):
+        if f[-4:] == ".png":
+          is_curve_exist = True
+          break
+      if not is_curve_exist:
+        logging.warning("Learning curve" +
+                       " does not exist. Default values will be used.")
+        copyfile(DEFAULT_CURVE, join(check_path,"learning-curve-default.png"))
+  return
+
+def read_score(args):
+  """
+    Fetch scores from scores.txt
+  """
+  # TODO: should not be hard coded: figure out which phase you are in.
+  score_ls = []
+  for i in range(DEFAULT_NUM_DATASET):
+    score_dir = args.input_dir + "/res_"+str(i+2)
+    score_file = join(score_dir, "scores.txt")
+    try:
+      with open(score_file, 'r') as f:
+        score_info = yaml.safe_load(f)
+      score_ls.append(float(score_info['score']))
+    except Exception as e:
+      logging.exception("Failed to load score in: {}".format(score_dir))
+      logging.exception(e)
+  return score_ls
+
+def read_curve(args):
+  """
+    Fetch learning curve from learning-curve-*.png
+  """
+  curve_ls = []
+  try:
+    for i in range(DEFAULT_NUM_DATASET):
+      curve_dir = join(args.input_dir, 'res_'+str(i+2))
+      _img = glob(os.path.join(curve_dir,'learning-curve-*.png'))
+      curve_ls.append(_img[0])
+  except Exception as e:
+    logging.exception("Failed to read curves.")
+    logging.exception(e)
+  return curve_ls
+
+def write_score(score_ls, args):
+  """
+    Write scores to master phase scores.txt, as setj_score, where j = 1 to DEFAULT_NUM_DATASET
+  """
+  output_file = join(args.output_dir, 'scores.txt')
+  try:
+    with open(output_file, 'w') as f:
+      for i in range(DEFAULT_NUM_DATASET):
+        score_name = 'set{}_score'.format(i+1)
+        score = score_ls[i]
+        f.write("{}: {}\n".format(score_name, score))
+  except Exception as e:
+    logging.exception("Failed to write to" + output_file)
+    logging.exception(e)
+  return
+
+def write_curve(curve_ls, args):
+  """
+    Write learning curves concatenated
+  """
   filename = 'detailed_results.html'
-  detailed_results_path = os.path.join(output_dir, filename)
-  html_head = """<html><body><pre>"""
+  detailed_results_path = join(args.output_dir, filename)
+  html_head = '<html><body><pre>'
   html_end = '</pre></body></html>'
-  with open(detailed_results_path, 'w') as html_file:
-      # Automatic refreshing the page on file change using Live.js
+  try:
+    with open(detailed_results_path, 'w') as html_file:
       html_file.write(html_head)
-      # html_file.write("Oh yeah! Now AutoDL is ready for beta testing!<br>")
-      for image_path in image_paths:
+      for id,image_path in enumerate(curve_ls):
         with open(image_path, "rb") as image_file:
           encoded_string = base64.b64encode(image_file.read())
           encoded_string = encoded_string.decode('utf-8')
+          t = '<font size="7">Dataset ' + str(id+1) + '.</font>'
+          html_file.write(t + '<br>')
           s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
           html_file.write(s + '<br>')
       html_file.write(html_end)
+  except Exception as e:
+    logging.exception("Failed to write to" + detailed_results_path)
+    logging.exception(e)
+  return
+  
+  
+################################################################################
+# MAIN
+################################################################################
 
-# Constant used for a missing score
-missing_score = -0.999999
+if __name__ == "__main__":
+  try:
+    # Logging version information and description
+    logging.info('#' * 80)
+    logging.info("Version: " + VERISION)
+    logging.info(DESCRIPTION)
+    logging.info('#' * 80)
 
-_start = time.time()
+  	# Get input and output dir from input arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_dir', type=str, default='./test_input', 
+                        help='where input results are stored')
+    parser.add_argument('--output_dir', type=str, default='./test_output', 
+                        help='where to store aggregated outputs')
+    args = parser.parse_args()
+    logging.debug("Parsed args are: " + str(args))
+    print ("-" * 80)
+    if not os.path.exists(args.input_dir):
+      logging.error("No input folder! Exit!")
+      sys.exit()
+    if not os.path.exists(args.output_dir):
+      os.mkdir(args.output_dir)
 
-input_dir = sys.argv[1]
-output_dir = sys.argv[2]
+	  # List the contents of the input directory (should be a bunch of resi/ subdirectories)
+    input_ls = sorted(os.listdir(args.input_dir))
+    logging.debug("Input dir contains: " + str(input_ls))
 
-# Phase number of first dataset
-first = 2 # won't work for multi-phases (= AutoDL)
+    # Check if we have correct results in input_dir/resi/ and copy default values otherwise
+    validate_full_res(args)
+    logging.info("[+] Results validation done.")
+    logging.debug("-" * 80)
+    logging.debug("Start aggregation...")
 
-# We have 5 datasets (tasks) in total
-n_datasets = 5
+    # Read all scores from input_dir/resi/ subdirectories
+    score_ls = read_score(args)
+    logging.info("[+] Score reading done.")
+    logging.debug(score_ls)
 
-# Parent phase has 1 as phase number by default
-submit_dirs = []
-score_names = []
-image_paths = []
+    # Aggregate all scores and write to output    
+    write_score(score_ls, args)
+    logging.info("[+] Score writing done.")
 
-# Read result folders (submit_dirs) from metadata file
-# Now the failed phases doesn't produce folder or metadata so the...
-# ...Parent Scoring Program can't guess which score belong to which dataset
-"""
-metadata_path = os.path.join(input_dir, 'metadata')
-f = open(metadata_path, 'r')
-metadata = f.read().split('\n')
-f.close()
-metadata = [x.split(':')[0] for x in metadata if x.startswith('res_')]
-metadata = sorted(metadata, key=lambda x: int(x.split('_')[1])) # sort by number
-if len(metadata) != n_datasets:
-    raise Exception(str(os.listdir(input_dir)))
-"""
-for i, n in enumerate(range(first, first + n_datasets)):
-#for i, l in enumerate(metadata):
-    submit_dir = os.path.join(input_dir, 'res_'+str(n))
-    submit_dirs.append(submit_dir)
-    score_name = 'set{}_score'.format(i+1)
-    score_names.append(score_name)
-    learning_curve_images = glob(os.path.join(submit_dir,'learning-curve-*.png'))
-    #learning_curve_images = sorted(learning_curve_images) # alphabetic sort
-    for image_path in learning_curve_images:
-      image_paths.append(image_path)
+    # Read all learning curves
+    curve_ls = read_curve(args)
+    logging.info("[+] Learning curve reading done.")
+    logging.info("Curve list: " + str(curve_ls))
 
-scores = []
+    # Aggregate all learning curves and write to output
+    write_curve(curve_ls, args)
+    logging.info("[+] Learning curve writing done.")
 
-score_name_yaml = 'score'
-for submit_dir in submit_dirs:
-    if os.path.isdir(submit_dir):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        submission_score_file = os.path.join(submit_dir, "scores.txt")
-        # submission_score = open(submission_score_file).readline()
-        try:
-          with open(submission_score_file, 'r') as f:
-            score_info = yaml.safe_load(f)
-          score_text = score_info[score_name_yaml] # might be already float
-          scores.append(float(score_text)) # but to be sure
-        except Exception as e:
-          print("Failed to load score in: {}".format(submit_dir))
-          print("The submission may have failed on this task.")
-          print("Set score for this task to: {}".format(missing_score))
-          print("Exception encountered: ", e)
-          scores.append(missing_score)
-    else:
-        print("{} doesn't exist. Use missing score.".format(submit_dir))
-        scores.append(missing_score)
-
-write_scores_html(output_dir, image_paths)
-
-_end = time.time()
-_duration = _start - _end
-
-output_filename = os.path.join(output_dir, 'scores.txt')
-with open(output_filename, 'w') as output_file:
-  for i in range(n_datasets):
-    score_name = score_names[i]
-    score = scores[i]
-    output_file.write("{}: {}\n".format(score_name, score))
-  output_file.write("Duration: {:.6f}\n".format(_duration))
+    logging.info("[+] Parent scoring program finished!")
+    
+  except Exception as e:
+    logging.exception("Unexpected exception raised! Check parent scoring program!")
+    logging.exception(e)
