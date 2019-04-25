@@ -179,7 +179,7 @@ if __name__ == "__main__":
                         help='where to store aggregated outputs')
     args = parser.parse_args()
     logging.debug("Parsed args are: " + str(args))
-    print ("-" * 80)
+    logging.debug("-" * 80)
     if not os.path.exists(args.input_dir):
       logging.error("No input folder! Exit!")
       sys.exit()
