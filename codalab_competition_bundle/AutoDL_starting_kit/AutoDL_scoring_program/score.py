@@ -1,7 +1,7 @@
 ################################################################################
-# Name:         Parent Scoring Program
-# Author:       Zhengying Liu, Zhen Xu, Isabelle Guyon
-# Update time:  Apr 23 2019
+# Name:         Scoring Program
+# Author:       Zhengying Liu, Isabelle Guyon
+# Update time:  Apr 25 2019
 # Usage: 		python score.py input_dir output_dir
 #           input_dir contains two subdirectories 'res' and 'ref'
 #                   'ref' contains e.g. adult.solution
@@ -53,7 +53,7 @@ REDIRECT_STDOUT = False
 
 # Verbosity level of logging.
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
-verbosity_level = 'DEBUG'
+verbosity_level = 'DEBUG' # To be changed to INFO for real competition
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -92,8 +92,9 @@ logging.basicConfig(
 ################################################################################
 
 def _HERE(*args):
+    """Helper function """
     h = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(h, *args)
+    return os.path.abspath(os.path.join(h, *args))
 
 # Default I/O directories:
 root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
@@ -383,8 +384,6 @@ class ScoringError(Exception):
 
 if __name__ == "__main__":
 
-  #TODO: think about try-except clause
-
     the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
     #### INPUT/OUTPUT: Get input and output directory names
@@ -404,15 +403,11 @@ if __name__ == "__main__":
         score_dir = argv[2]
     elif len(argv) == 4:
         solution_dir = argv[1]
-        prediction_dir = argv[2]
-        score_dir = argv[3]
-
-        # TODO: to be tested and changed - 14/09
         prediction_dir = os.path.join(argv[2], 'res')
+        score_dir = argv[3]
     else:
         swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
         exit(1)
-
 
     # Create the output directory, if it does not already exist and open output files
     if not os.path.isdir(score_dir):
@@ -422,7 +417,8 @@ if __name__ == "__main__":
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
 
-    #
+    # Redirect standard output to detailed_results.html to have real-time
+    # feedback for debugging
     if REDIRECT_STDOUT:
       if not os.path.exists(score_dir):
         os.makedirs(score_dir)
@@ -447,7 +443,6 @@ if __name__ == "__main__":
     logging.debug("Using prediction_dir: " + str(prediction_dir))
     logging.debug("Using score_dir: " + str(score_dir))
     logging.debug("Scoring datetime: " + str(the_date))
-
 
     # Use the timestamp of 'detailed_results.html' as start time
     # This is more robust than using start = time.time()

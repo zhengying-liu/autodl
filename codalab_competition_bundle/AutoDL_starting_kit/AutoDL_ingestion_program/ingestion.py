@@ -73,7 +73,7 @@ debug_mode = 0
 # Verbosity level of logging:
 ##############
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
-verbosity_level = 'DEBUG'
+verbosity_level = 'DEBUG' # To be changed to INFO for real competition
 
 # Time budget
 #############
@@ -175,7 +175,7 @@ def get_time_budget(autodl_dataset):
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
-    #### Check whether everything went well (no time exceeded)
+    #### Check whether everything went well
     ingestion_success = True
 
     #### INPUT/OUTPUT: Get input and output directory names
@@ -217,7 +217,6 @@ if __name__=="__main__" and debug_mode<4:
       logging.info("Redirecting standard output. " +
                 "Please check out output at {}."\
                 .format(detailed_results_filepath))
-
 
     logging.debug("sys.argv = " + str(sys.argv))
     logging.debug("Using input_dir: " + input_dir)
@@ -262,7 +261,6 @@ if __name__=="__main__" and debug_mode<4:
                        "Please put only ONE dataset under dataset_dir.")
 
     basename = datanames[0]
-
 
     logging.info("========== Ingestion program version " + str(VERSION) + " ==========")
     logging.info("************************************************")
