@@ -114,13 +114,14 @@ import glob
 # to have live output for debugging
 REDIRECT_STDOUT = False
 
-VERSION = 'v20190423'
+VERSION = 'v20190425'
 DESCRIPTION =\
 """Move 'import model' to try-except clause.
 Previous updates:
-20190424: [ZY] Use logging instead of logger; remove start.txt checking.
+20190425: [ZY] Check prediction shape.
+20190424: [ZY] Use logging instead of logger; remove start.txt checking;
 20190419: [ZY] Try-except clause for training process;
-always terminates successfully.
+          always terminates successfully.
 """
 
 logging.basicConfig(
@@ -168,15 +169,14 @@ def write_start_file_with_pid(output_dir):
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
-  # TODO: decision to make on time budget.
-  # Now it's 2 hours for any dataset (to be discussed).
+  # TODO: get this budget from CodaLab
   return 7200
 
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
     #### Check whether everything went well (no time exceeded)
-    execution_success = True
+    ingestion_success = True
 
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
@@ -269,7 +269,7 @@ if __name__=="__main__" and debug_mode<4:
     logging.info("******** Processing dataset " + basename[:-5].capitalize() + " ********")
     logging.info("************************************************")
 
-    logging.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
+    logging.debug("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
 
     # ======== Creating a data object with data, informations about it
     logging.info("Reading training set and test set...")
@@ -278,6 +278,11 @@ if __name__=="__main__" and debug_mode<4:
     D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
     D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
     ##### End creating training set and test set #####
+
+    ## Get correct prediction shape
+    num_examples_test = D_test.get_metadata().size()
+    output_dim = D_test.get_metadata().get_output_size()
+    correct_prediction_shape = (num_examples_test, output_dim)
 
     # ======== Keep track of time
     if debug_mode<1:
@@ -310,6 +315,11 @@ if __name__=="__main__" and debug_mode<4:
                         remaining_time_budget=remaining_time_budget)
         if Y_pred is None: # Stop train/predict process if Y_pred is None
           break
+        else:
+          prediction_shape = tuple(Y_pred.shape)
+          if prediction_shape != correct_prediction_shape:
+            raise ValueError("Bad prediction shape! Expected {} but got {}."\
+                          .format(correct_prediction_shape, prediction_shape))
         # Prediction files: adult.predict_0, adult.predict_1, ...
         filename_test = basename[:-5] + '.predict_' +\
           str(prediction_order_number)
@@ -322,9 +332,9 @@ if __name__=="__main__" and debug_mode<4:
         if remaining_time_budget<=0:
           break
     except Exception as e:
-      execution_success = False
+      ingestion_success = False
       logging.info("Failed to run ingestion.")
-      logging.info("Encountered exception:\n" + str(e))
+      logging.error("Encountered exception:\n" + str(e), exc_info=True)
 
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
@@ -339,10 +349,10 @@ if __name__=="__main__" and debug_mode<4:
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
       f.write('Duration: ' + str(overall_time_spent) + '\n')
-      f.write('Success: ' + str(int(execution_success)) + '\n')
+      f.write('Success: ' + str(int(ingestion_success)) + '\n')
       if verbose:
           logging.info("Successfully write duration to {}.".format(duration_filename))
-      if execution_success:
+      if ingestion_success:
           logging.info("[+] Done")
           logging.info("[+] Overall time spent %5.2f sec " % overall_time_spent)
       else:

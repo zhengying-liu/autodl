@@ -9,16 +9,20 @@
 #           output_dir should contain scores.txt, detailed_results.html
 # TODO: add tests: valid test files fetched from CodaLab output
 
-VERSION = 'v20190424'
+VERSION = 'v20190425'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190425: [ZY] Add ScoringError and IngestionError: throw error in these cases.
+               Participants will get 'Failed' for their error. But a score will
+               still by computed if applicable.
+               Improve importing order.
+               Log CPU usage.
 20190424: [ZY] Use logging instead of logger; remove start.txt checking.
 20190424: [ZY] Add version and description.
-20190419: [ZY] Judge if ingestion is alive by duration.txt; use logger.
-"""
+20190419: [ZY] Judge if ingestion is alive by duration.txt; use logger."""
 
 # Scoring program for the AutoDL challenge
 # Isabelle Guyon and Zhengying Liu, ChaLearn, April 2018-
@@ -34,7 +38,6 @@ Previous updates:
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
 
-
 ################################################################################
 # User defined constants
 ################################################################################
@@ -47,37 +50,42 @@ TIME_BUDGET = 7200
 # Redirect stardant output to live results page (detailed_results.html)
 # to have live output for debugging
 REDIRECT_STDOUT = False
-from functools import partial
 
 # Verbosity level of logging.
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 verbosity_level = 'DEBUG'
-debug_mode = 1
 
 # Constant used for a missing score
 missing_score = -0.999999
 
-# Some libraries and options
-import logging
-import os
-import sys
-import yaml
-from sys import argv
+from functools import partial
+from libscores import read_array, sp, ls, mvmean
 from os import getcwd as pwd
-# Solve the Tkinter display issue of matplotlib.pyplot
+from sys import argv
+from sklearn.metrics import auc
+from sklearn.metrics import roc_auc_score
+import base64
+import datetime
+import logging
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import psutil
+import sys
 import time
-import datetime
-# To compute area under learning curve
-from sklearn.metrics import auc
-# To compute ROC AUC metric
-from sklearn.metrics import roc_auc_score
-from libscores import read_array, sp, ls, mvmean
-# Convert images to Base64 to show in scores.html
-import base64
+import yaml
+
+# Solve the Tkinter display issue of matplotlib.pyplot
+matplotlib.use('Agg')
+
+# Set logging format to something like:
+# 2019-04-25 12:52:51 INFO score.py: <message>
+logging.basicConfig(
+    level=getattr(logging, verbosity_level),
+    format='%(asctime)s %(levelname)s %(filename)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 ################################################################################
 # Functions
@@ -93,12 +101,6 @@ from os.path import join
 default_solution_dir = join(root_dir, "AutoDL_sample_data")
 default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_score_dir = join(root_dir, "AutoDL_scoring_output")
-
-logging.basicConfig(
-    level=getattr(logging, verbosity_level),
-    format='%(asctime)s %(levelname)s %(filename)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
 
 # Metric used to compute the score of a point on the learning curve
 def autodl_bac(solution, prediction):
@@ -354,19 +356,26 @@ def get_ingestion_pid(prediction_dir):
   return pid
 
 def ingestion_is_alive(prediction_dir):
-  """Check if ingestion is still alive using its PID."""
+  """Check if ingestion is still alive by checking if the file 'duration.txt'
+  if generated in the folder of predictions.
+  """
   duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
+  logging.debug("CPU usage: {}%".format(psutil.cpu_percent()))
+  logging.debug("Virtual memory: {}".format(psutil.virtual_memory()))
   return not os.path.isfile(duration_filepath)
-  # TODO: print CPU & GPU usage (du). gather all information about ingestion
-  # pid = get_ingestion_pid(prediction_dir)
-  # try:
-  #   os.kill(ingestion_pid, 0)
-  # except OSError:
-  #   return False
-  # else:
-  #   return True
+
+def is_process_alive(pid):
+  try:
+    os.kill(ingestion_pid, 0)
+  except OSError:
+    return False
+  else:
+    return True
 
 class IngestionError(Exception):
+  pass
+
+class ScoringError(Exception):
   pass
 
 
@@ -427,10 +436,10 @@ if __name__ == "__main__":
                 "Please check out output at {}."\
                 .format(detailed_results_filepath))
 
-    logging.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
+    logging.debug("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
 
     logging.debug("sys.argv = " + str(sys.argv))
-    list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir))) # /tmp/codalab/
+    # list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir))) # /tmp/codalab/
     with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
       logging.debug("Content of the metadata file: ")
       logging.debug(str(f.read()))
@@ -439,40 +448,42 @@ if __name__ == "__main__":
     logging.debug("Using score_dir: " + str(score_dir))
     logging.debug("Scoring datetime: " + str(the_date))
 
-    try: # TODO
-      # Use the timestamp of 'detailed_results.html' as start time
-      # This is more robust than using start = time.time()
-      # especially when Docker image time is not synced with host time
-      start = os.path.getmtime(detailed_results_filepath)
-      start_str = time.ctime(start)
-      logging.info("Start scoring program at " + start_str)
 
-      # # Check if ingestion program is ready before starting
-      # while(not is_started(prediction_dir, self_start_time=start)):
-      #   time.sleep(0.5)
-      # logging.info("Detected ingestion started.")
-      # # Not detects ingestion starting
-      # ingestion_pid = get_ingestion_pid(prediction_dir)
+    # Use the timestamp of 'detailed_results.html' as start time
+    # This is more robust than using start = time.time()
+    # especially when Docker image time is not synced with host time
+    start = os.path.getmtime(detailed_results_filepath)
+    start_str = time.ctime(start)
+    logging.info("Start scoring program at " + start_str)
 
-      # Get the metric
-      scoring_function = autodl_bac
-      metric_name = "Area under Learning Curve"
+    # # Check if ingestion program is ready before starting
+    # while(not is_started(prediction_dir, self_start_time=start)):
+    #   time.sleep(0.5)
+    # logging.info("Detected ingestion started.")
+    # # Not detects ingestion starting
+    # ingestion_pid = get_ingestion_pid(prediction_dir)
 
-      # Get all the solution files from the solution directory
-      solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
-      if len(solution_names) > 1: # Assert only one file is found
-        raise ValueError("Multiple solution files found: {}!".format(solution_names))
-      solution_file = solution_names[0]
-      solution = read_array(solution_file)
-      is_multiclass_task = is_multiclass(solution)
-      # Extract the dataset name from the file name
-      basename = get_basename(solution_file)
-      nb_preds = {x:0 for x in solution_names}
-      scores = {x:0 for x in solution_names}
+    # Get the metric
+    scoring_function = autodl_bac
+    metric_name = "Area under Learning Curve"
 
+    # Get all the solution files from the solution directory
+    solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
+    if len(solution_names) > 1: # Assert only one file is found
+      raise ValueError("Multiple solution files found: {}!".format(solution_names))
+    solution_file = solution_names[0]
+    solution = read_array(solution_file)
+    is_multiclass_task = is_multiclass(solution)
+    # Extract the dataset name from the file name
+    basename = get_basename(solution_file)
+    nb_preds = {x:0 for x in solution_names}
+    scores = {x:missing_score for x in solution_names}
+
+    scoring_success = True
+
+    try:
       # Begin scoring process, along with ingestion program
       # Moniter training processes while time budget is not attained
-      known_prediction_files = {}
       while(time.time() < start + TIME_BUDGET):
         time.sleep(0.5)
         # Give list of prediction files
@@ -501,38 +512,43 @@ if __name__ == "__main__":
           logging.info("Detected ingestion program is not running. Stop scoring now.")
           break
 
-      # Write one last time the detailed results page without auto-refreshing
-      write_scores_html(score_dir, auto_refresh=False)
+    except Exception as e:
+      scoring_success = False
+      logging.error("[-] Error occurred in scoring:\n" + str(e),
+                    exc_info=True)
 
-      # Read the execution time and add it to score_file (scores.txt)
-      # Spend 30 seconds to search for a duration.txt file
-      # Use 'duration.txt' file to detect if ingestion program exits early
-      duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
-      duration = None
-      if os.path.isfile(duration_filepath):
-        with open(duration_filepath, 'r') as f:
-          duration_dict = yaml.safe_load(f)
-        duration = duration_dict['Duration']
-        str_temp = "Duration: %0.6f\n" % duration
-        score_file.write(str_temp)
-        if duration_dict['Success'] == 0:
-          raise IngestionError("Ingestion Step terminated abnormally. " +
-                           "Please see output log of Ingestion Step.")
+    # Write one last time the detailed results page without auto-refreshing
+    write_scores_html(score_dir, auto_refresh=False)
+    # Write score
+    score = scores[solution_file]
+    score_file.write("score: {:.12f}\n".format(score))
 
-      score = scores[solution_file]
-      score_file.write("score: {:.12f}\n".format(score))
+    # Read the execution time and add it to score_file (scores.txt)
+    # Spend 30 seconds to search for a duration.txt file
+    # Use 'duration.txt' file to detect if ingestion program exits early
+    duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
+    duration = None
+    if not os.path.isfile(duration_filepath) or not scoring_success:
+      logging.error("[-] Some error occurred in scoring program. " +
+                  "Please see output/error log of Scoring Step.")
       score_file.close()
-      logging.info("[+] Successfully finished scoring! " +\
-                "Duration used: {:.2f} sec. ".format(duration) +\
-                "The score of your algorithm on this task ({}) is: {:.6f}.".format(basename, score))
+      raise ScoringError("Scoring Step terminated abnormally. " +
+                       "Please see output/error log of Scoring Step.")
+    else:
+      with open(duration_filepath, 'r') as f:
+        duration_dict = yaml.safe_load(f)
+      duration = duration_dict['Duration']
+      str_temp = "Duration: %0.6f\n" % duration
+      score_file.write(str_temp)
+      score_file.close()
 
-      # Lots of debug stuff
-      if debug_mode > 1:
-          swrite('\n*** SCORING PROGRAM: PLATFORM SPECIFICATIONS ***\n\n')
-          show_platform()
-          show_io(prediction_dir, score_dir)
-          show_version(scoring_version)
-    except IngestionError as e:
-      #TODO
-      logging.info("[-] Some error occurred in ingestion program. " +
-                  "Please see output/error log of Ingestion Step.")
+      if duration_dict['Success'] == 0:
+        logging.error("[-] Some error occurred in ingestion program. " +
+                    "Please see output/error log of Ingestion Step.")
+        raise IngestionError("Ingestion Step terminated abnormally. " +
+                         "Please see output log of Ingestion Step.")
+      else:
+        logging.info("[+] Successfully finished scoring! " +\
+                  "Duration used: {:.2f} sec. ".format(duration) +\
+                  "The score of your algorithm on this task ({}) is: {:.6f}."\
+                  .format(basename, score))
