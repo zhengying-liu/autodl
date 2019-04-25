@@ -92,7 +92,7 @@ logging.basicConfig(
 ################################################################################
 
 def _HERE(*args):
-    """Helper function """
+    """Helper function for getting the current directory of the script."""
     h = os.path.dirname(os.path.realpath(__file__))
     return os.path.abspath(os.path.join(h, *args))
 
@@ -148,6 +148,7 @@ def autodl_bac(solution, prediction):
   return score
 
 def is_one_hot_vector(x, axis=None, keepdims=False):
+  """Check if a vector 'x' is one-hot (i.e. one entry is 1 and others 0)."""
   norm_1 = np.linalg.norm(x, ord=1, axis=axis, keepdims=keepdims)
   norm_inf = np.linalg.norm(x, ord=np.inf, axis=axis, keepdims=keepdims)
   return np.logical_and(norm_1 == 1, norm_inf == 1)
@@ -166,7 +167,7 @@ def is_multiclass(solution):
   return all(is_one_hot_vector(solution, axis=1))
 
 def accuracy(solution, prediction):
-  # assert(is_multiclass(solution))
+  """Get accuracy of 'prediction' w.r.t true labels 'solution'."""
   epsilon = 1e-15
   # normalize prediction
   prediction_normalized =\
@@ -184,6 +185,7 @@ def get_prediction_files(prediction_dir, basename, start):
   return prediction_files
 
 def get_fig_name(basename):
+  """Helper function for getting learning curve figure name."""
   fig_name = "learning-curve-" + basename + ".png"
   return fig_name
 
@@ -314,12 +316,8 @@ def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
           html_file.write(s + '<br>')
       html_file.write(html_end)
 
-def append_to_detailed_results_page(detailed_results_filepath, content):
-  with open(detailed_results_filepath, 'a') as html_file:
-    html_file.write(content)
-
-# List a tree structure of directories and files from startpath
 def list_files(startpath):
+    """List a tree structure of directories and files from startpath"""
     for root, dirs, files in os.walk(startpath):
         level = root.replace(startpath, '').count(os.sep)
         indent = ' ' * 4 * (level)
@@ -329,8 +327,7 @@ def list_files(startpath):
             logging.debug('{}{}'.format(subindent, f))
 
 def is_started(prediction_dir, self_start_time=None):
-    """Check if ingestion has started by checking if file 'start.txt' exists
-    and if it's really the good file produced in this run.
+    """Check if ingestion has started by checking if file 'start.txt' exists.
     """
     if self_start_time is None:
       self_start_time = time.time()
