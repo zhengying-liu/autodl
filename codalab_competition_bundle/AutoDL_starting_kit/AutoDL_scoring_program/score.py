@@ -9,12 +9,14 @@
 #           output_dir should contain scores.txt, detailed_results.html
 # TODO: add tests: valid test files fetched from CodaLab output
 
-VERSION = 'v20190426'
+VERSION = 'v20190426.3'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190426.3: [ZY] Use f.write instead of yaml.dump to write scores.txt
+20190426.2: [ZY] Add logging info when writing scores and learning curves.
 20190426: [ZY] Now write to scores.txt whenever a new prediction is made. This
                way, participants can still get a score when they exceed time
                limit (but the submission's status will be marked as 'Failed').
@@ -310,7 +312,8 @@ def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
     mode = 'a'
   else:
     mode = 'w'
-  with open(os.path.join(score_dir, filename), mode) as html_file:
+  filepath = os.path.join(score_dir, filename)
+  with open(filepath, mode) as html_file:
       # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
       for image_path in image_paths:
@@ -320,12 +323,16 @@ def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
           s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
           html_file.write(s + '<br>')
       html_file.write(html_end)
+  logging.debug("Wrote learning curve page to {}".format(filepath))
 
 def write_score(score_dir, score, duration=-1):
+  """Write score and duration to score_dir/scores.txt"""
   score_filename = os.path.join(score_dir, 'scores.txt')
-  score_info = {'score': score, 'Duration': duration}
   with open(score_filename, 'w') as f:
-    yaml.dump(score_info, f, default_flow_style=False)
+    f.write('score:' + str(score) + '\n')
+    f.write('Duration:' + str(duration) + '\n')
+  logging.debug("Wrote to score_filename={} with score={}, duration={}"\
+                .format(score_filename, score, duration))
 
 def list_files(startpath):
     """List a tree structure of directories and files from startpath"""

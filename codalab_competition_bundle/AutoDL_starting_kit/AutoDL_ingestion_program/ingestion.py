@@ -337,12 +337,6 @@ if __name__=="__main__" and debug_mode<4:
     # Finishing ingestion program
     overall_time_spent = time.time() - overall_start
 
-    # # Delete start file to clean folder
-    # start_filename =  'start.txt'
-    # start_filepath = os.path.join(output_dir, start_filename)
-    # if os.path.exists(start_filepath):
-    #   os.remove(start_filepath)
-
     # Write overall_time_spent to a duration.txt file
     duration_filename =  'duration.txt'
     with open(os.path.join(output_dir, duration_filename), 'w') as f:
