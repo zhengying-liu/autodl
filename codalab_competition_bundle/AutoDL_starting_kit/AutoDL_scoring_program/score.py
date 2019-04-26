@@ -1,7 +1,7 @@
 ################################################################################
 # Name:         Scoring Program
 # Author:       Zhengying Liu, Isabelle Guyon
-# Update time:  Apr 25 2019
+# Update time:  Apr 26 2019
 # Usage: 		python score.py input_dir output_dir
 #           input_dir contains two subdirectories 'res' and 'ref'
 #                   'ref' contains e.g. adult.solution
@@ -9,12 +9,15 @@
 #           output_dir should contain scores.txt, detailed_results.html
 # TODO: add tests: valid test files fetched from CodaLab output
 
-VERSION = 'v20190425'
+VERSION = 'v20190426'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190426: [ZY] Now write to scores.txt whenever a new prediction is made. This
+               way, participants can still get a score when they exceed time
+               limit (but the submission's status will be marked as 'Failed').
 20190425: [ZY] Add ScoringError and IngestionError: throw error in these cases.
                Participants will get 'Failed' for their error. But a score will
                still by computed if applicable.
@@ -226,8 +229,10 @@ def draw_learning_curve(solution_file, prediction_files,
   # Sort two lists according to timestamps
   sorted_pairs = sorted(zip(timestamps, scores))
   roc_auc_sorted_pairs = sorted(zip(timestamps, roc_auc_scores))
+  time_used = -1
 
   if len(timestamps) > 0:
+    time_used = sorted_pairs[-1][0] - start
     latest_nbac = sorted_pairs[-1][1]
     latest_roc_auc = roc_auc_sorted_pairs[-1][1]
     logging.info("NBAC (2 * BAC - 1) of the latest prediction is {:.4f}."\
@@ -280,7 +285,7 @@ def draw_learning_curve(solution_file, prediction_files,
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
-  return alc
+  return alc, time_used
 
 def area_under_learning_curve(X,Y):
   return auc(X,Y)
@@ -315,6 +320,12 @@ def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
           s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
           html_file.write(s + '<br>')
       html_file.write(html_end)
+
+def write_score(score_dir, score, duration=-1):
+  score_filename = os.path.join(score_dir, 'scores.txt')
+  score_info = {'score': score, 'Duration': duration}
+  with open(score_filename, 'w') as f:
+    yaml.dump(score_info, f, default_flow_style=False)
 
 def list_files(startpath):
     """List a tree structure of directories and files from startpath"""
@@ -409,7 +420,6 @@ if __name__ == "__main__":
     # Create the output directory, if it does not already exist and open output files
     if not os.path.isdir(score_dir):
       os.mkdir(score_dir)
-    score_file = open(os.path.join(score_dir, 'scores.txt'), 'w')
     detailed_results_filepath = os.path.join(score_dir, 'detailed_results.html')
     # Initialize detailed_results.html
     init_scores_html(detailed_results_filepath)
@@ -448,13 +458,6 @@ if __name__ == "__main__":
     start_str = time.ctime(start)
     logging.info("Start scoring program at " + start_str)
 
-    # # Check if ingestion program is ready before starting
-    # while(not is_started(prediction_dir, self_start_time=start)):
-    #   time.sleep(0.5)
-    # logging.info("Detected ingestion started.")
-    # # Not detects ingestion starting
-    # ingestion_pid = get_ingestion_pid(prediction_dir)
-
     # Get the metric
     scoring_function = autodl_bac
     metric_name = "Area under Learning Curve"
@@ -484,9 +487,10 @@ if __name__ == "__main__":
         nb_preds_new = len(prediction_files)
         if(nb_preds_new > nb_preds_old):
           now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-          logging.info("[+] New prediction found. Now number of predictions made = " + str(nb_preds_new))
+          logging.info("[+] New prediction found. Now number of predictions " +
+                       "made = " + str(nb_preds_new))
           alc = 0
-          alc = draw_learning_curve(solution_file=solution_file,
+          alc, time_used = draw_learning_curve(solution_file=solution_file,
                                     prediction_files=prediction_files,
                                     scoring_function=scoring_function,
                                     output_dir=score_dir,
@@ -499,9 +503,11 @@ if __name__ == "__main__":
                     .format(basename, scores[solution_file]))
           # Update scores.html
           write_scores_html(score_dir)
+          write_score(score_dir, float(alc), duration=time_used)
 
         if not ingestion_is_alive(prediction_dir):
-          logging.info("Detected ingestion program is not running. Stop scoring now.")
+          logging.info("Detected ingestion program is not running. " +
+                       "Stop scoring now.")
           break
 
     except Exception as e:
@@ -513,9 +519,8 @@ if __name__ == "__main__":
     write_scores_html(score_dir, auto_refresh=False)
     # Write score
     score = scores[solution_file]
-    score_file.write("score: {:.12f}\n".format(score))
 
-    # Read the execution time and add it to score_file (scores.txt)
+    # Read the execution time and add it to scores.txt
     # Spend 30 seconds to search for a duration.txt file
     # Use 'duration.txt' file to detect if ingestion program exits early
     duration_filepath =  os.path.join(prediction_dir, 'duration.txt')
@@ -523,16 +528,13 @@ if __name__ == "__main__":
     if not os.path.isfile(duration_filepath) or not scoring_success:
       logging.error("[-] Some error occurred in scoring program. " +
                   "Please see output/error log of Scoring Step.")
-      score_file.close()
       raise ScoringError("Scoring Step terminated abnormally. " +
                        "Please see output/error log of Scoring Step.")
     else:
       with open(duration_filepath, 'r') as f:
         duration_dict = yaml.safe_load(f)
       duration = duration_dict['Duration']
-      str_temp = "Duration: %0.6f\n" % duration
-      score_file.write(str_temp)
-      score_file.close()
+      write_score(score_dir, score, duration=duration)
 
       if duration_dict['Success'] == 0:
         logging.error("[-] Some error occurred in ingestion program. " +
