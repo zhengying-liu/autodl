@@ -8,7 +8,7 @@ VERISION = "1.0"
 DESCRIPTION = '''This is the parent scoring program. It reads from \
 input_dir/res_i/ all partial results from children phases, and outputs \
 aggregated learning curves and scores to output_dir.'''
-               
+
 # ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
 # ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -19,17 +19,6 @@ aggregated learning curves and scores to output_dir.'''
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 ################################################################################
-
-
-
-################################################################################
-# USER DEFINED CONSTANTS
-################################################################################
-
-# Number of children phases/datasets (as defined in competition bundle)
-DEFAULT_NUM_DATASET = 5			
-DEFAULT_SCORE = './default_scores.txt'
-DEFAULT_CURVE = './default_curve.png'
 
 import os
 from os.path import join
@@ -47,9 +36,24 @@ logging.basicConfig(
 )
 
 ################################################################################
+# USER DEFINED CONSTANTS
+################################################################################
+
+
+# Number of children phases/datasets (as defined in competition bundle)
+DEFAULT_NUM_DATASET = 5
+current_path = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_SCORE = join(current_path, 'default_scores.txt')
+DEFAULT_CURVE = join(current_path, 'default_curve.png')
+
+print (current_path)
+print (DEFAULT_SCORE)
+print (DEFAULT_CURVE)
+
+################################################################################
 # FUNCTIONS
 ################################################################################
-		
+
 def validate_full_res(args):
   """
     Check if we have DEFAULT_NUM_DATASET results in the args.input_dir.
