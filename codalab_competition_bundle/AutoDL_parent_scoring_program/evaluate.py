@@ -1,8 +1,8 @@
 ################################################################################
 # Name:         Parent Scoring Program
-# Author:       Zhengying Liu, Zhen Xu, Isabelle Guyon
+# Author:       Zhengying Liu, Adrien Pavao, Zhen Xu, Isabelle Guyon
 # Update time:  Apr 25 2019
-# Usage: 		    python evaluate.py input_dir output_dir         
+# Usage: 		    python evaluate.py input_dir output_dir
 
 VERISION = "v20190426"
 DESCRIPTION = '''This is the parent scoring program. It reads from \
@@ -65,7 +65,7 @@ def validate_full_res(args):
     logging.info("Checking " + str(check_path))
     if not os.path.exists(check_path):
       # Replace both learning curve and score by default:
-      logging.warning(str(check_path) + 
+      logging.warning(str(check_path) +
                     " does not exist. Default values will be used.")
       # Create this folder and copy default values
       os.mkdir(check_path)
@@ -161,8 +161,8 @@ def write_curve(curve_ls, args):
     logging.exception("Failed to write to" + detailed_results_path)
     logging.exception(e)
   return
-  
-  
+
+
 ################################################################################
 # MAIN
 ################################################################################
@@ -177,9 +177,9 @@ if __name__ == "__main__":
 
   	# Get input and output dir from input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_dir', type=str, default='./test_input', 
+    parser.add_argument('--input_dir', type=str, default='./test_input',
                         help='where input results are stored')
-    parser.add_argument('--output_dir', type=str, default='./test_output', 
+    parser.add_argument('--output_dir', type=str, default='./test_output',
                         help='where to store aggregated outputs')
     args = parser.parse_args()
     logging.debug("Parsed args are: " + str(args))
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     logging.info("[+] Score reading done.")
     logging.debug("Score list: " + str(score_ls))
 
-    # Aggregate all scores and write to output    
+    # Aggregate all scores and write to output
     write_score(score_ls, args)
     logging.info("[+] Score writing done.")
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     logging.info("[+] Learning curve writing done.")
 
     logging.info("[+] Parent scoring program finished!")
-    
+
   except Exception as e:
     logging.exception("Unexpected exception raised! Check parent scoring program!")
     logging.exception(e)

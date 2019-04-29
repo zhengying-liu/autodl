@@ -1,6 +1,6 @@
 ################################################################################
 # Name:         Ingestion Program
-# Author:       Zhengying Liu, Isabelle Guyon
+# Author:       Zhengying Liu, Isabelle Guyon, Adrien Pavao, Zhen Xu
 # Update time:  Apr 29 2019
 # Usage: python ingestion.py input_dir output_dir ingestion_program_dir submission_program_dir
 #                            data      result     ingestion             code of participants

@@ -1,13 +1,12 @@
 ################################################################################
 # Name:         Scoring Program
-# Author:       Zhengying Liu, Isabelle Guyon
-# Update time:  Apr 26 2019
+# Author:       Zhengying Liu, Isabelle Guyon, Adrien Pavao, Zhen Xu
+# Update time:  Apr 29 2019
 # Usage: 		python score.py input_dir output_dir
 #           input_dir contains two subdirectories 'res' and 'ref'
 #                   'ref' contains e.g. adult.solution
 #                   'res' contains e.g. duration.txt, adult.predict_0, adult.predict_1, etc.
 #           output_dir should contain scores.txt, detailed_results.html
-# TODO: add tests: valid test files fetched from CodaLab output
 
 VERSION = 'v20190429'
 DESCRIPTION =\
