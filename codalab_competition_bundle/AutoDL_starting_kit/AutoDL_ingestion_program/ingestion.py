@@ -114,10 +114,11 @@ import glob
 # to have live output for debugging
 REDIRECT_STDOUT = False
 
-VERSION = 'v20190425'
+VERSION = 'v20190429'
 DESCRIPTION =\
-"""Move 'import model' to try-except clause.
+"""See code comments in ingestion.py.
 Previous updates:
+20190429: [ZY] Remove useless code block
 20190425: [ZY] Check prediction shape.
 20190424: [ZY] Use logging instead of logger; remove start.txt checking;
 20190419: [ZY] Try-except clause for training process;
@@ -156,16 +157,6 @@ import sys
 from sys import argv, path
 import datetime
 the_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-
-def write_start_file_with_pid(output_dir):
-  """Create start file 'start.txt' in `output_dir` with ingestion's pid.
-  """
-  pid = os.getpid()
-  start_filename =  'start.txt'
-  start_filepath = os.path.join(output_dir, start_filename)
-  with open(start_filepath, 'w') as f:
-    f.write('pid:' + str(pid) + '\n')
-    f.write('ingestion_start:' + str(overall_start) + '\n')
 
 def get_time_budget(autodl_dataset):
   """Time budget for a given AutoDLDataset."""
@@ -210,9 +201,7 @@ if __name__=="__main__" and debug_mode<4:
         os.makedirs(score_dir)
       detailed_results_filepath = os.path.join(score_dir,
                                                'detailed_results.html')
-      logger = create_logger(detailed_results_filepath)
-      sys.stdout = open(detailed_results_filepath, 'a')
-      print = partial(print, flush=True)
+      logging.basicConfig(filename=detailed_results_filepath)
       logging.info("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
       logging.info("Redirecting standard output. " +
                 "Please check out output at {}."\
@@ -239,8 +228,6 @@ if __name__=="__main__" and debug_mode<4:
     if save_previous_results:
         data_io.mvdir(output_dir, output_dir+'_'+the_date)
     data_io.mkdir(output_dir)
-
-    write_start_file_with_pid(output_dir)
 
     #### INVENTORY DATA (and sort dataset names alphabetically)
     datanames = data_io.inventory_data(input_dir)
@@ -283,10 +270,7 @@ if __name__=="__main__" and debug_mode<4:
     correct_prediction_shape = (num_examples_test, output_dim)
 
     # ======== Keep track of time
-    if debug_mode<1:
-        time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
-    else:
-        time_budget = max_time
+    time_budget = get_time_budget(D_train)        # <== HERE IS THE TIME BUDGET!
 
     try:
       # ========= Creating a model

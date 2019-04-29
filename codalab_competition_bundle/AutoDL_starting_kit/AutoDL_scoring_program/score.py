@@ -9,12 +9,14 @@
 #           output_dir should contain scores.txt, detailed_results.html
 # TODO: add tests: valid test files fetched from CodaLab output
 
-VERSION = 'v20190426.3'
+VERSION = 'v20190429'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190429: [ZY] Remove useless code block suach the function is_started
+20190426.4: [ZY] Fix yaml format in scores.txt (add missing spaces)
 20190426.3: [ZY] Use f.write instead of yaml.dump to write scores.txt
 20190426.2: [ZY] Add logging info when writing scores and learning curves.
 20190426: [ZY] Now write to scores.txt whenever a new prediction is made. This
@@ -329,8 +331,8 @@ def write_score(score_dir, score, duration=-1):
   """Write score and duration to score_dir/scores.txt"""
   score_filename = os.path.join(score_dir, 'scores.txt')
   with open(score_filename, 'w') as f:
-    f.write('score:' + str(score) + '\n')
-    f.write('Duration:' + str(duration) + '\n')
+    f.write('score: ' + str(score) + '\n')
+    f.write('Duration: ' + str(duration) + '\n')
   logging.debug("Wrote to score_filename={} with score={}, duration={}"\
                 .format(score_filename, score, duration))
 
@@ -343,25 +345,6 @@ def list_files(startpath):
         subindent = ' ' * 4 * (level + 1)
         for f in files:
             logging.debug('{}{}'.format(subindent, f))
-
-def is_started(prediction_dir, self_start_time=None):
-    """Check if ingestion has started by checking if file 'start.txt' exists.
-    """
-    if self_start_time is None:
-      self_start_time = time.time()
-    start_filepath = os.path.join(prediction_dir, 'start.txt')
-    start_file_exists = os.path.isfile(start_filepath)
-    if not start_file_exists:
-      return False
-    else:
-      # start_file_time = os.path.getmtime(start_filepath)
-      # is_good_start_file = np.absolute(start_file_time - self_start_time) < 10
-      # if not is_good_start_file and verbose:
-      #   logging.info("Scoring didn't detect the start of ingestion. ")
-      #   logging.info("self_start_time:", self_start_time,
-      #             "start_file_time:", start_file_time)
-      # return is_good_start_file
-      return True
 
 def get_ingestion_pid(prediction_dir):
   """Get ingestion's process ID.
@@ -438,9 +421,7 @@ if __name__ == "__main__":
         os.makedirs(score_dir)
       detailed_results_filepath = os.path.join(score_dir,
                                                'detailed_results.html')
-      logger = create_logger(detailed_results_filepath)
-      sys.stdout = open(detailed_results_filepath, 'a')
-      print = partial(print, flush=True)
+      logging.basicConfig(filename=detailed_results_filepath)
       logging.info("""<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>""")
       logging.info("Redirecting standard output. " +
                 "Please check out output at {}."\
