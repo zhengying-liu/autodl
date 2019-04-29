@@ -15,7 +15,7 @@ run the code on the dataset and produce predictions on test set. For more
 information on the code/directory structure, please see comments in this
 code (ingestion.py) and the README file of the starting kit.
 Previous updates:
-20190429: [ZY] Remove useless code block
+20190429: [ZY] Remove useless code block; better code layout.
 20190425: [ZY] Check prediction shape.
 20190424: [ZY] Use logging instead of logger; remove start.txt checking;
 20190419: [ZY] Try-except clause for training process;

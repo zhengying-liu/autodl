@@ -84,7 +84,7 @@ like that:
 ```
 http://0.0.0.0:8888/?token=82e416e792c8f6a9f2194d2f4dbbd3660ad4ca29a4c58fe7
 ```
-and select `Tutorial.ipynb` in the menu.
+and select `tutorial.ipynb` in the menu.
 
 ## Download public datasets
 We provide 5 public datasets for participants. They can use these datasets to:
