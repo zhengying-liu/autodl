@@ -15,7 +15,8 @@ DESCRIPTION =\
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
-20190429: [ZY] Remove useless code block suach the function is_started
+20190429: [ZY] Remove useless code block such as the function is_started;
+               Better code layout.
 20190426.4: [ZY] Fix yaml format in scores.txt (add missing spaces)
 20190426.3: [ZY] Use f.write instead of yaml.dump to write scores.txt
 20190426.2: [ZY] Add logging info when writing scores and learning curves.
@@ -60,7 +61,7 @@ REDIRECT_STDOUT = False
 
 # Verbosity level of logging.
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
-verbosity_level = 'DEBUG' # To be changed to INFO for real competition
+verbosity_level = 'INFO'
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -68,13 +69,14 @@ missing_score = -0.999999
 from functools import partial
 from libscores import read_array, sp, ls, mvmean
 from os import getcwd as pwd
+from os.path import join
 from sys import argv
 from sklearn.metrics import auc
 from sklearn.metrics import roc_auc_score
 import base64
 import datetime
 import logging
-import matplotlib
+import matplotlib; matplotlib.use('Agg') # Solve the Tkinter display issue of matplotlib.pyplot
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -82,9 +84,6 @@ import psutil
 import sys
 import time
 import yaml
-
-# Solve the Tkinter display issue of matplotlib.pyplot
-matplotlib.use('Agg')
 
 # Set logging format to something like:
 # 2019-04-25 12:52:51 INFO score.py: <message>
@@ -104,8 +103,7 @@ def _HERE(*args):
     return os.path.abspath(os.path.join(h, *args))
 
 # Default I/O directories:
-root_dir = os.path.abspath(os.path.join(_HERE(), os.pardir))
-from os.path import join
+root_dir = _HERE(os.pardir)
 default_solution_dir = join(root_dir, "AutoDL_sample_data")
 default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
 default_score_dir = join(root_dir, "AutoDL_scoring_output")
@@ -295,18 +293,22 @@ def area_under_learning_curve(X,Y):
   return auc(X,Y)
 
 def init_scores_html(detailed_results_filepath):
-  html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
+  html_head = '<html><head> <meta http-equiv="refresh" content="5"> ' +\
+              '</head><body><pre>'
   html_end = '</pre></body></html>'
   with open(detailed_results_filepath, 'a') as html_file:
     html_file.write(html_head)
-    html_file.write("Starting training process... <br> Please be patient. Learning curves will be generated when first predictions are made.")
+    html_file.write("Starting training process... <br> Please be patient. " +
+                    "Learning curves will be generated when first " +
+                    "predictions are made.")
     html_file.write(html_end)
 
 def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
   filename = 'detailed_results.html'
   image_paths = sorted(ls(os.path.join(score_dir, '*.png')))
   if auto_refresh:
-    html_head = """<html><head> <meta http-equiv="refresh" content="5"> </head><body><pre>"""
+    html_head = '<html><head> <meta http-equiv="refresh" content="5"> ' +\
+                '</head><body><pre>'
   else:
     html_head = """<html><body><pre>"""
   html_end = '</pre></body></html>'
@@ -316,16 +318,16 @@ def write_scores_html(score_dir, auto_refresh=True, append=REDIRECT_STDOUT):
     mode = 'w'
   filepath = os.path.join(score_dir, filename)
   with open(filepath, mode) as html_file:
-      # Automatic refreshing the page on file change using Live.js
       html_file.write(html_head)
       for image_path in image_paths:
         with open(image_path, "rb") as image_file:
           encoded_string = base64.b64encode(image_file.read())
           encoded_string = encoded_string.decode('utf-8')
-          s = '<img src="data:image/png;charset=utf-8;base64,%s"/>'%encoded_string
+          s = '<img src="data:image/png;charset=utf-8;base64,{}"/>'\
+              .format(encoded_string)
           html_file.write(s + '<br>')
       html_file.write(html_end)
-  logging.debug("Wrote learning curve page to {}".format(filepath))
+  logging.info("Wrote learning curve page to {}".format(filepath))
 
 def write_score(score_dir, score, duration=-1):
   """Write score and duration to score_dir/scores.txt"""
@@ -427,10 +429,9 @@ if __name__ == "__main__":
                 "Please check out output at {}."\
                 .format(detailed_results_filepath))
 
-    logging.debug("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
+    logging.info("Version: {}. Description: {}".format(VERSION, DESCRIPTION))
 
     logging.debug("sys.argv = " + str(sys.argv))
-    # list_files(os.path.abspath(os.path.join(sys.argv[0], os.pardir, os.pardir, os.pardir, os.pardir))) # /tmp/codalab/
     with open(os.path.join(os.path.dirname(sys.argv[0]), 'metadata'), 'r') as f:
       logging.debug("Content of the metadata file: ")
       logging.debug(str(f.read()))
@@ -453,7 +454,8 @@ if __name__ == "__main__":
     # Get all the solution files from the solution directory
     solution_names = sorted(ls(os.path.join(solution_dir, '*.solution')))
     if len(solution_names) > 1: # Assert only one file is found
-      raise ValueError("Multiple solution files found: {}!".format(solution_names))
+      raise ValueError("Multiple solution files found: {}!"\
+                       .format(solution_names))
     solution_file = solution_names[0]
     solution = read_array(solution_file)
     is_multiclass_task = is_multiclass(solution)
@@ -489,8 +491,9 @@ if __name__ == "__main__":
           scores[solution_file] = alc
           logging.info("Current area under learning curve for {}: {:.4f}"\
                     .format(basename, scores[solution_file]))
-          # Update scores.html
+          # Update learning curve page (detailed_results.html)
           write_scores_html(score_dir)
+          # Write score
           write_score(score_dir, float(alc), duration=time_used)
 
         if not ingestion_is_alive(prediction_dir):
