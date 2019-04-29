@@ -4,7 +4,7 @@
 # Update time:  Apr 25 2019
 # Usage: 		    python evaluate.py input_dir output_dir         
 
-VERISION = "1.0"
+VERISION = "v20190426"
 DESCRIPTION = '''This is the parent scoring program. It reads from \
 input_dir/res_i/ all partial results from children phases, and outputs \
 aggregated learning curves and scores to output_dir.'''
@@ -184,6 +184,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.debug("Parsed args are: " + str(args))
     logging.debug("-" * 80)
+
+    # for DEBUG only
+    print ("Copying input folder....")
+    os.system("cp -R {} {}".format(join(args.input_dir, '*'), args.output_dir))
+
     if not os.path.exists(args.input_dir):
       logging.error("No input folder! Exit!")
       sys.exit()
@@ -203,7 +208,7 @@ if __name__ == "__main__":
     # Read all scores from input_dir/resi/ subdirectories
     score_ls = read_score(args)
     logging.info("[+] Score reading done.")
-    logging.debug(score_ls)
+    logging.debug("Score list: " + str(score_ls))
 
     # Aggregate all scores and write to output    
     write_score(score_ls, args)
@@ -212,7 +217,7 @@ if __name__ == "__main__":
     # Read all learning curves
     curve_ls = read_curve(args)
     logging.info("[+] Learning curve reading done.")
-    logging.info("Curve list: " + str(curve_ls))
+    logging.debug("Curve list: " + str(curve_ls))
 
     # Aggregate all learning curves and write to output
     write_curve(curve_ls, args)
