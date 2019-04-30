@@ -2,7 +2,23 @@
 
 The Docker image used for AutoCV/AutoDL challenge is created with `Dockerfile`
 in this directory.
-Some common Python packages installed in this Docker image is listed in
-`requirements.txt`.
 
 Here is the [link](https://hub.docker.com/r/evariste/autodl/) to Docker Hub.
+
+## Build Docker image for GPU/CPU
+For GPU, use
+```
+docker build -t evariste/autodl:gpu .
+```
+For CPU, use
+```
+docker build -t evariste/autodl:cpu -f Dockerfile.cpu .
+```
+If you have push access, you can do
+```
+docker push evariste/autodl:gpu
+```
+or
+```
+docker push evariste/autodl:cpu
+```
