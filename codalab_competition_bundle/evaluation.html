@@ -1,14 +1,14 @@
 <h2>Quick start</h2>
 <p>This is a challenge with code submission. We provide 3 baseline methods for test purposes:</p>
-<p><a href="../../my/datasets/download/7b0dc24f-7b4a-4c1a-ba26-4250cd9e3d74">Baseline 0</a>: Make constant predictions (all 0).</p>
-<p><a href="../../my/datasets/download/bafac8c8-f177-433a-82e6-837c748d907c">Baseline 1</a>: Linear classifier.</p>
-<p><a href="../../my/datasets/download/b3441d6d-3e1d-46fd-b6cd-cc6c3f48cbf2">Baseline 2</a>: a 3D Convolutional Neural Network (CNN).</p>
+<p><strong><a href="../../my/datasets/download/7b0dc24f-7b4a-4c1a-ba26-4250cd9e3d74">Baseline 0</a>: Make constant (zero) predictions</strong> (fast, run this one preferably for test purposes).</p>
+<p><strong><a href="../../my/datasets/download/4eaf69e8-a0f1-4cc6-a333-785e06dd4c7c">Baseline 1</a>: Linear classifier</strong> (can take several hours, do not run unless you have a good reason).</p>
+<p><strong><a href="../../my/datasets/download/f0331294-caca-491b-9eb1-98577293ba5e">Baseline 2</a>: a 3D Convolutional Neural Network</strong> (can take several hours, do not run unless you have a good reason).</p>
 <p>To make a test submission, download one of the baseline methods, click on the blue button "<strong>Upload a Submission</strong>" in the upper right corner of the page and re-upload it (you must click first the orange tab "All datasets" for this to work; known bug).&nbsp;To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.</p>
 <h2>Complete starting kit</h2>
-<p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and test it on your local computer, in conditions identical to those of the Codalab platform.&nbsp;</p>
+<p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and to test it on your local computer, in conditions identical to those of the Codalab platform. <strong><br /></strong></p>
 <center>
 <h3><span><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
-<p style="text-align: left;">This includes a jupyter notebook TUTORIAL.ipynb with step-by-step instructions. The interface is simple and generic: you must supply a Python class <strong>model.py</strong> with:</p>
+<p style="text-align: left;">This includes a <strong>jupyter notebook <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb" target="_blank">tutorial.ipynb</a></strong> with step-by-step instructions. The interface is simple and generic: you must supply a Python class <strong>model.py</strong> with:</p>
 <ul style="text-align: left;">
 <li>a constructor</li>
 <li>a train method</li>
@@ -17,7 +17,7 @@
 <p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
 </center>
 <h2>Larger practice datasets</h2>
-<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and<strong> put only ONE pair of data and solution</strong> (e.g. adult.data and adult.solution) in the directory AutoDL_sample_data/ (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py.&nbsp;</p>
+<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and<strong> put only ONE pair of data and solution</strong> (e.g. munster.data and munster.solution) in the directory AutoDL_public_data/&lt;dataset_name&gt; (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py.&nbsp;</p>
 <table border="1" cellspacing="1" cellpadding="1" align="left">
 <tbody>
 <tr>
@@ -191,7 +191,7 @@
 <h2>Format and use your own datasets</h2>
 <p>Raw data are preserved, but formatted in a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by&nbsp;<a href="https://www.tensorflow.org/">TensorFlow</a>. However, this will not impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
 <h2>Competition protocol</h2>
-<p>This challenge has <strong>two phases</strong>. During the <strong>development phase</strong>, your code is blind tested on five <strong>validation datasets</strong>.&nbsp;During the <strong>final test phase</strong>, your code is blind tested on <strong>five new final test sets</strong>. No submission is needed during the final phase. Your code will be automatically forwarded to the final phase. However, the organizers will check whether your code ran fine. If your code ran well in the develipment phase but failled in the final test phase, you will get the error and will be able to make one single final submission to try to correct that error. No other feed-back will be provided.</p>
+<p>This challenge has <strong>1 single phase</strong>. Your code is blind tested on five datasets. And the score you obtain (with your last submission) will be used for final evaluation. There is no hidden leaderboard.</p>
 <p>Code submitted is trained and tested automatically, without any human intervention. Code submitted is run on all five datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
 <p>The identities of the datasets used for blind testing on the platform are concealed.&nbsp;The data are provided in a&nbsp;<strong>raw form</strong>&nbsp;(no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by a&nbsp;<strong>time budget</strong>.&nbsp;</p>
 <p>Here is some pseudo-code of the evaluation protocol:</p>
