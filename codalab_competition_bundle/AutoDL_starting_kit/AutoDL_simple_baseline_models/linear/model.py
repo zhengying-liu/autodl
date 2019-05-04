@@ -24,45 +24,36 @@ file called metadata (this just indicates your submission is a code submission
 and has nothing to do with the dataset metadata.
 """
 
-import tensorflow as tf
+from sklearn.linear_model import LinearRegression
+import logging
+import numpy as np
 import os
+import sys
+import tensorflow as tf
+import time
+
+np.random.seed(42)
 tf.logging.set_verbosity(tf.logging.ERROR)
 
-# Import the challenge algorithm (model) API from algorithm.py
-import algorithm
-
-# Utility packages
-import time
-import datetime
-import numpy as np
-np.random.seed(42)
-
-from sklearn.linear_model import LinearRegression
-
-class Model(algorithm.Algorithm):
+class Model(object):
   """Fully connected neural network with no hidden layer."""
 
   def __init__(self, metadata):
-    super(Model, self).__init__(metadata)
-    self.output_dim = self.metadata_.get_output_size()
-    self.num_examples_train = self.metadata_.size()
-    # Get dataset name.
-    self.dataset_name = self.metadata_.get_dataset_name()\
-                          .split('/')[-2].split('.')[0]
-    print_log("The dataset {} has {} training examples and {} classes."\
-        .format(self.dataset_name, self.num_examples_train, self.output_dim))
+    """
+    Args:
+      metadata: an AutoDLMetadata object. Its definition can be found in
+          AutoDL_ingestion_program/dataset.py
+    """
+    self.done_training = False
 
-    # Boolean True if example have fixed size
-    row_count, col_count = self.metadata_.get_matrix_size(0)
-    self.fixed_matrix_size = row_count > 0 and col_count > 0
-    sequence_size = self.metadata_.get_sequence_size()
-    self.fixed_sequence_size = sequence_size > 0
+    self.metadata = metadata
+    self.output_dim = self.metadata.get_output_size()
 
     # Set batch size (for both training and testing)
     self.batch_size = 30
 
+    # Get model function from class method below
     model_fn = self.model_fn
-
     # Change to True if you want to show device info at each operation
     log_device_placement = False
     session_config = tf.ConfigProto(log_device_placement=log_device_placement)
@@ -85,11 +76,10 @@ class Model(algorithm.Algorithm):
     self.li_cycle_length = []
     self.li_estimated_time = []
     self.time_estimator = LinearRegression()
-    self.done_training = False
     # Critical number for early stopping
     # Depends on number of classes (output_dim)
     # see the function self.choose_to_stop_early() below for more details
-    self.num_epochs_we_want_to_train = max(40, self.output_dim)
+    self.num_epochs_we_want_to_train = 1
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -125,6 +115,23 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return
 
+    # Count examples on training set
+    if not hasattr(self, 'num_examples_train'):
+      logger.info("Counting number of examples on train set.")
+      iterator = dataset.make_one_shot_iterator()
+      example, labels = iterator.get_next()
+      sample_count = 0
+      with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
+        while True:
+          try:
+            sess.run(labels)
+            sample_count += 1
+          except tf.errors.OutOfRangeError:
+            break
+      self.num_examples_train = sample_count
+      logger.info("Finished counting. There are {} examples for training set."\
+                  .format(sample_count))
+
     self.train_begin_times.append(time.time())
     if len(self.train_begin_times) >= 2:
       cycle_length = self.train_begin_times[-1] - self.train_begin_times[-2]
@@ -134,8 +141,14 @@ class Model(algorithm.Algorithm):
     steps_to_train = self.get_steps_to_train(remaining_time_budget)
 
     if steps_to_train <= 0:
-      print_log("Not enough time remaining for training + test. " +
+      logger.info("Not enough time remaining for training + test. " +
                 "Skipping training...")
+      self.done_training = True
+    elif self.choose_to_stop_early():
+      logger.info("The model chooses to stop further training because " +
+                  "The preset maximum number of epochs for training is " +
+                  "obtained: self.num_epochs_we_want_to_train = " +
+                  str(self.num_epochs_we_want_to_train))
       self.done_training = True
     else:
       msg_est = ""
@@ -145,7 +158,7 @@ class Model(algorithm.Algorithm):
         msg_est = "estimated time for training + test: " +\
                   "{:.2f} sec, ".format(estimated_duration)
         msg_est += "and should finish around {}.".format(estimated_end_time)
-      print_log("Begin training for another {} steps...{}"\
+      logger.info("Begin training for another {} steps...{}"\
                 .format(steps_to_train, msg_est))
 
       # Prepare input function for training
@@ -159,7 +172,7 @@ class Model(algorithm.Algorithm):
       # Update for time budget managing
       train_duration = train_end - train_start
       self.li_steps_to_train.append(steps_to_train)
-      print_log("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
+      logger.info("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
             "Now total steps trained: {}. ".format(sum(self.li_steps_to_train)) +\
             "Total time used for training + test: {:.2f} sec. ".format(sum(self.li_cycle_length)))
 
@@ -181,13 +194,26 @@ class Model(algorithm.Algorithm):
     if self.done_training:
       return None
 
-    self.test_begin_times.append(time.time())
+    # Count examples on test set
+    if not hasattr(self, 'num_examples_test'):
+      logger.info("Counting number of examples on test set.")
+      iterator = dataset.make_one_shot_iterator()
+      example, labels = iterator.get_next()
+      sample_count = 0
+      with tf.Session(config=tf.ConfigProto(log_device_placement=False)) as sess:
+        while True:
+          try:
+            sess.run(labels)
+            sample_count += 1
+          except tf.errors.OutOfRangeError:
+            break
+      self.num_examples_test = sample_count
+      logger.info("Finished counting. There are {} examples for test set."\
+                  .format(sample_count))
 
-    if self.choose_to_stop_early():
-      print_log("Oops! Choose to stop early for next call!")
-      self.done_training = True
     test_begin = time.time()
-    print_log("Begin testing...")
+    self.test_begin_times.append(test_begin)
+    logger.info("Begin testing...")
 
     # Prepare input function for testing
     test_input_fn = lambda: self.input_function(dataset, is_training=False)
@@ -200,7 +226,7 @@ class Model(algorithm.Algorithm):
     test_end = time.time()
     # Update some variables for time management
     test_duration = test_end - test_begin
-    print_log("[+] Successfully made one prediction. {:.2f} sec used. "\
+    logger.info("[+] Successfully made one prediction. {:.2f} sec used. "\
               .format(test_duration) +\
               "Duration used for test: {:2f}".format(test_duration))
     return predictions
@@ -304,7 +330,7 @@ class Model(algorithm.Algorithm):
       A 4-D Tensor with fixed, known shape.
     """
     tensor_4d_shape = tensor_4d.shape
-    print_log("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
+    logger.info("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
 
     if tensor_4d_shape[0] > 0 and tensor_4d_shape[0] < 10:
       num_frames = tensor_4d_shape[0]
@@ -320,18 +346,18 @@ class Model(algorithm.Algorithm):
       new_col_count=self.default_image_size[1]
 
     if not tensor_4d_shape[0] > 0:
-      print_log("Detected that examples have variable sequence_size, will " +
+      logger.info("Detected that examples have variable sequence_size, will " +
                 "randomly crop a sequence with num_frames = " +
                 "{}".format(num_frames))
       tensor_4d = crop_time_axis(tensor_4d, num_frames=num_frames)
     if not tensor_4d_shape[1] > 0 or not tensor_4d_shape[2] > 0:
-      print_log("Detected that examples have variable space size, will " +
+      logger.info("Detected that examples have variable space size, will " +
                 "resize space axes to (new_row_count, new_col_count) = " +
                 "{}".format((new_row_count, new_col_count)))
       tensor_4d = resize_space_axes(tensor_4d,
                                     new_row_count=new_row_count,
                                     new_col_count=new_col_count)
-    print_log("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
+    logger.info("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
     return tensor_4d
 
   def get_steps_to_train(self, remaining_time_budget):
@@ -379,9 +405,9 @@ class Model(algorithm.Algorithm):
     process).
     """
     batch_size = self.batch_size
-    num_examples = self.metadata_.size()
+    num_examples = self.num_examples_train
     num_epochs = sum(self.li_steps_to_train) * batch_size / num_examples
-    print_log("Model already trained for {:.4f} epochs.".format(num_epochs))
+    logger.info("Model already trained for {:.4f} epochs.".format(num_epochs))
     return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
 
 def sigmoid_cross_entropy_with_logits(labels=None, logits=None):
@@ -462,8 +488,24 @@ def resize_space_axes(tensor_4d, new_row_count, new_col_count):
                                           size=(new_row_count, new_col_count))
   return resized_images
 
-def print_log(*content):
-  """Logging function. (could've also used `import logging`.)"""
-  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-  print("MODEL INFO: " + str(now)+ " ", end='')
-  print(*content)
+def get_logger(verbosity_level):
+  """Set logging format to something like:
+       2019-04-25 12:52:51,924 INFO model.py: <message>
+  """
+  logger = logging.getLogger(__file__)
+  logging_level = getattr(logging, verbosity_level)
+  logger.setLevel(logging_level)
+  formatter = logging.Formatter(
+    fmt='%(asctime)s %(levelname)s %(filename)s: %(message)s')
+  stdout_handler = logging.StreamHandler(sys.stdout)
+  stdout_handler.setLevel(logging_level)
+  stdout_handler.setFormatter(formatter)
+  stderr_handler = logging.StreamHandler(sys.stderr)
+  stderr_handler.setLevel(logging.WARNING)
+  stderr_handler.setFormatter(formatter)
+  logger.addHandler(stdout_handler)
+  logger.addHandler(stderr_handler)
+  logger.propagate = False
+  return logger
+
+logger = get_logger('INFO')

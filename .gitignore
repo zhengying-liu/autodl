@@ -12,7 +12,6 @@
 *20news*
 *baseline_methods*
 *baseline_results*
-*AutoDL_public_data*
 *raiseError*
 *all_zero_bad_prediction_shape*
 *exception_occurred_in_model*
@@ -20,3 +19,9 @@
 *linear_debug*
 *exceeds_execution_time_limit*
 *test_output*
+# Name of public datasets
+*Chucky*
+*Decal*
+*Hammer*
+*Munster*
+*Pedro*
