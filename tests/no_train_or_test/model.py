@@ -24,7 +24,7 @@ file called metadata (this just indicates your submission is a code submission
 and has nothing to do with the dataset metadata.
 """
 
-class Model(algorithm.Algorithm):
+class Model(object):
   """Fully connected neural network with no hidden layer."""
 
   def __init__(self, metadata):
