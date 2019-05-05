@@ -1,13 +1,12 @@
 ################################################################################
 # Name:         Ingestion Program
 # Author:       Zhengying Liu, Isabelle Guyon, Adrien Pavao, Zhen Xu
-# Update time:  Apr 29 2019
-# Usage: python ingestion.py input_dir output_dir ingestion_program_dir submission_program_dir
-#                            data      result     ingestion             code of participants
+# Update time:  5 May 2019
+# Usage: python ingestion.py --dataset_dir=<dataset_dir> --output_dir=<prediction_dir> --ingestion_program_dir=<ingestion_program_dir> --code_dir=<code_dir> --score_dir=<score_dir>
 
 # AS A PARTICIPANT, DO NOT MODIFY THIS CODE.
 
-VERSION = 'v20190504'
+VERSION = 'v20190505'
 DESCRIPTION =\
 """This is the "ingestion program" written by the organizers. It takes the
 code written by participants (with `model.py`) and one dataset as input,
@@ -15,6 +14,9 @@ run the code on the dataset and produce predictions on test set. For more
 information on the code/directory structure, please see comments in this
 code (ingestion.py) and the README file of the starting kit.
 Previous updates:
+20190505: [ZY] Use argparse to parse directories AND time budget;
+               Rename input_dir to dataset_dir;
+               Rename submission_dir to code_dir;
 20190504: [ZY] Check if model.py has attribute done_training and use it to
                determinate whether ingestion has ended;
                Use module-specific logger instead of logging (with root logger);
@@ -26,7 +28,7 @@ Previous updates:
 20190419: [ZY] Try-except clause for training process;
           always terminates successfully.
 """
-# The input directory input_dir (e.g. AutoDL_sample_data/) contains one dataset
+# The dataset directory dataset_dir (e.g. AutoDL_sample_data/) contains one dataset
 # folder (e.g. adult.data/) with the training set (train/)  and test set (test/),
 # each containing an some tfrecords data with a `metadata.textproto` file of
 # metadata on the dataset. So one AutoDL dataset will look like
@@ -85,16 +87,11 @@ Previous updates:
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 verbosity_level = 'INFO'
 
-# Time budget
-#############
-# Maximum time of training in seconds PER DATASET (there may be several datasets).
-# The code should keep track of time spent and NOT exceed the time limit
-time_budget = 7200
-
 # Some common useful packages
 from os import getcwd as pwd
 from os.path import join
 from sys import argv, path
+import argparse
 import datetime
 import glob
 import logging
@@ -160,64 +157,86 @@ if __name__=="__main__":
     #### Check whether everything went well
     ingestion_success = True
 
-    # Default I/O directories:
-    # root_dir is the parent directory of this script (ingestion.py)
+    # Parse directories from input arguments
     root_dir = _HERE(os.pardir)
-    default_input_dir = join(root_dir, "AutoDL_sample_data")
+    default_dataset_dir = join(root_dir, "AutoDL_sample_data")
     default_output_dir = join(root_dir, "AutoDL_sample_result_submission")
-    default_program_dir = join(root_dir, "AutoDL_ingestion_program")
-    default_submission_dir = join(root_dir, "AutoDL_sample_code_submission")
+    default_ingestion_program_dir = join(root_dir, "AutoDL_ingestion_program")
+    default_code_dir = join(root_dir, "AutoDL_sample_code_submission")
+    default_score_dir = join(root_dir, "AutoDL_scoring_output")
+    default_time_budget = 7200
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_dir', type=str,
+                        default=default_dataset_dir,
+                        help="Directory storing the dataset (containing " +
+                             "e.g. adult.data/)")
+    parser.add_argument('--output_dir', type=str,
+                        default=default_output_dir,
+                        help="Directory storing the predictions. It will " +
+                             "contain e.g. [start.txt, adult.predict_0, " +
+                             "adult.predict_1, ..., end.txt] when ingestion " +
+                             "terminates.")
+    parser.add_argument('--ingestion_program_dir', type=str,
+                        default=default_ingestion_program_dir,
+                        help="Directory storing the ingestion program " +
+                             "`ingestion.py` and other necessary packages.")
+    parser.add_argument('--code_dir', type=str,
+                        default=default_code_dir,
+                        help="Directory storing the submission code " +
+                             "`model.py` and other necessary packages.")
+    parser.add_argument('--score_dir', type=str,
+                        default=default_score_dir,
+                        help="Directory storing the scoring output " +
+                             "e.g. `scores.txt` and `detailed_results.html`.")
+    parser.add_argument('--time_budget', type=float,
+                        default=default_time_budget,
+                        help="Time budget for running ingestion program.")
+    args = parser.parse_args()
+    logger.debug("Parsed args are: " + str(args))
+    logger.debug("-" * 50)
+    dataset_dir = args.dataset_dir
+    output_dir = args.output_dir
+    ingestion_program_dir= args.ingestion_program_dir
+    code_dir= args.code_dir
+    score_dir = args.score_dir
+    time_budget = args.time_budget
+    if dataset_dir.endswith('run/input') and\
+       code_dir.endswith('run/program'):
+      logger.debug("Since dataset_dir ends with 'run/input' and code_dir "
+                  "ends with 'run/program', suppose running on " +
+                  "CodaLab platform. Modify dataset_dir to 'run/input_data' "
+                  "and code_dir to 'run/submission'. " +
+                  "Directory parsing should be more flexible in the code of " +
+                  "compute worker: we need explicit directories for " +
+                  "dataset_dir and code_dir.")
+      dataset_dir = dataset_dir.replace('run/input', 'run/input_data')
+      code_dir = code_dir.replace('run/program', 'run/submission')
 
-    #### INPUT/OUTPUT: Get input and output directory names
-    if len(argv)==1: # Use the default input and output directories if no arguments are provided
-        input_dir = default_input_dir
-        output_dir = default_output_dir
-        program_dir= default_program_dir
-        submission_dir= default_submission_dir
-        score_dir = join(root_dir, "AutoDL_scoring_output")
-    elif len(argv)==2: # the case for indicating special input_dir
-        input_dir = argv[1]
-        output_dir = default_output_dir
-        program_dir= default_program_dir
-        submission_dir= default_submission_dir
-        score_dir = join(root_dir, "AutoDL_scoring_output")
-    elif len(argv)==3: # the case for indicating special input_dir and submission_dir. The case for run_local_test.py
-        input_dir = argv[1]
-        output_dir = default_output_dir
-        program_dir= default_program_dir
-        submission_dir= argv[2]
-        score_dir = join(root_dir, "AutoDL_scoring_output")
-    else: # the case on CodaLab platform
-        input_dir = os.path.abspath(os.path.join(argv[1], '../input_data'))
-        output_dir = os.path.abspath(os.path.join(argv[1], 'res'))
-        program_dir = os.path.abspath(argv[3])
-        submission_dir = os.path.abspath(os.path.join(argv[4], '../submission'))
-        score_dir = os.path.abspath(os.path.join(argv[4], '../output'))
-
+    # Show directories for debugging
     logger.debug("sys.argv = " + str(sys.argv))
-    logger.debug("Using input_dir: " + input_dir)
+    logger.debug("Using dataset_dir: " + dataset_dir)
     logger.debug("Using output_dir: " + output_dir)
-    logger.debug("Using program_dir: " + program_dir)
-    logger.debug("Using submission_dir: " + submission_dir)
+    logger.debug("Using ingestion_program_dir: " + ingestion_program_dir)
+    logger.debug("Using code_dir: " + code_dir)
 
 	  # Our libraries
-    path.append(program_dir)
-    path.append(submission_dir)
+    path.append(ingestion_program_dir)
+    path.append(code_dir)
     #IG: to allow submitting the starting kit as sample submission
-    path.append(submission_dir + '/AutoDL_sample_code_submission')
+    path.append(code_dir + '/AutoDL_sample_code_submission')
     import data_io
     from dataset import AutoDLDataset # THE class of AutoDL datasets
 
     data_io.mkdir(output_dir)
 
     #### INVENTORY DATA (and sort dataset names alphabetically)
-    datanames = data_io.inventory_data(input_dir)
+    datanames = data_io.inventory_data(dataset_dir)
     #### Delete zip files and metadata file
     datanames = [x for x in datanames if x.endswith('.data')]
 
     if len(datanames) != 1:
       raise ValueError("Multiple (or zero) datasets found in dataset_dir={}!\n"\
-                       .format(input_dir) +
+                       .format(dataset_dir) +
                        "Please put only ONE dataset under dataset_dir.")
 
     basename = datanames[0]
@@ -232,8 +251,8 @@ if __name__=="__main__":
 
     ##### Begin creating training set and test set #####
     logger.info("Reading training set and test set...")
-    D_train = AutoDLDataset(os.path.join(input_dir, basename, "train"))
-    D_test = AutoDLDataset(os.path.join(input_dir, basename, "test"))
+    D_train = AutoDLDataset(os.path.join(dataset_dir, basename, "train"))
+    D_test = AutoDLDataset(os.path.join(dataset_dir, basename, "test"))
     ##### End creating training set and test set #####
 
     ## Get correct prediction shape
@@ -321,7 +340,8 @@ if __name__=="__main__":
       f.write('ingestion_duration: ' + str(overall_time_spent) + '\n')
       f.write('ingestion_success: ' + str(int(ingestion_success)) + '\n')
       f.write('end_time: ' + str(end_time) + '\n')
-      logger.info("Successfully write the file {}.".format(duration_filename))
+      logger.info("Wrote the file {} marking the end of ingestion."\
+                  .format(duration_filename))
       if ingestion_success:
           logger.info("[+] Done. Ingestion program successfully terminated.")
           logger.info("[+] Overall time spent %5.2f sec " % overall_time_spent)
@@ -332,3 +352,5 @@ if __name__=="__main__":
     # Copy all files in output_dir to score_dir
     os.system("cp -R {} {}".format(os.path.join(output_dir, '*'), score_dir))
     logger.debug("Copied all ingestion output to scoring output directory.")
+
+    logger.info("[Ingestion terminated]")

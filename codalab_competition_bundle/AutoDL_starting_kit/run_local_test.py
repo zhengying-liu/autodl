@@ -1,10 +1,17 @@
-# Author: Zhengying LIU
-# Creation date: 20 Sep 2018
+################################################################################
+# Name:         Run Local Test Tool
+# Author:       Zhengying Liu
+# Created on:   20 Sep 2018
+# Update time:  5 May 2019
+# Usage: 		    python run_local_test.py -dataset_dir=<dataset_dir> -code_dir=<code_dir>
+
+VERISION = "v20190505"
+DESCRIPTION =\
 """This script allows participants to run local test of their method within the
 downloaded starting kit folder (and avoid using submission quota on CodaLab). To
 do this, run:
 ```
-python run_local_test.py -dataset_dir=./AutoDL_sample_data/Monkeys -code_dir=./AutoDL_sample_code_submission/
+python run_local_test.py -dataset_dir=./AutoDL_sample_data/miniciao -code_dir=./AutoDL_sample_code_submission/
 ```
 in the starting kit directory. If you want to test the performance of a
 different algorithm on a different dataset, please specify them using respective
@@ -16,6 +23,17 @@ run
 python run_local_test.py
 ```
 """
+
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
+# ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
+# ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
+# WARRANTY OF NON-INFRINGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
+# INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
+# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
+# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
+################################################################################
 
 # Verbosity level of logging.
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -64,16 +82,19 @@ def get_basename(path):
     path = path[:-1]
   return path.split(os.sep)[-1]
 
-def run_baseline(dataset_dir, code_dir):
+def run_baseline(dataset_dir, code_dir, time_budget):
   # Current directory containing this script
   starting_kit_dir = os.path.dirname(os.path.realpath(__file__))
   path_ingestion = get_path_to_ingestion_program(starting_kit_dir)
   path_scoring = get_path_to_scoring_program(starting_kit_dir)
 
   # Run ingestion and scoring at the same time
-  command_ingestion = 'python {} {} {}'.format(path_ingestion,
-                                               dataset_dir, code_dir)
-  command_scoring = 'python {} {}'.format(path_scoring, dataset_dir)
+  command_ingestion =\
+    "python {} --dataset_dir={} --code_dir={} --time_budget={}"\
+    .format(path_ingestion, dataset_dir, code_dir, time_budget)
+  command_scoring =\
+    'python {} --solution_dir={} --time_budget={}'\
+    .format(path_scoring, dataset_dir, time_budget)
   def run_ingestion():
     os.system(command_ingestion)
   def run_scoring():
@@ -103,12 +124,13 @@ def run_baseline(dataset_dir, code_dir):
 
 
 if __name__ == '__main__':
-  default_starting_kit_dir = os.path.abspath(os.path.join(_HERE()))
+  default_starting_kit_dir = _HERE()
   # The default dataset is 'miniciao' under the folder AutoDL_sample_data/
   default_dataset_dir = os.path.join(default_starting_kit_dir,
                                      'AutoDL_sample_data', 'miniciao')
   default_code_dir = os.path.join(default_starting_kit_dir,
                                      'AutoDL_sample_code_submission')
+  default_time_budget = 7200
 
   tf.flags.DEFINE_string('dataset_dir', default_dataset_dir,
                         "Directory containing the content (e.g. adult.data/ + "
@@ -120,12 +142,18 @@ if __name__ == '__main__':
                         "argument if you want to test on a different algorithm."
                         )
 
+  tf.flags.DEFINE_float('time_budget', default_time_budget,
+                        "Time budget for running ingestion " +
+                        "(training + prediction)."
+                        )
+
   FLAGS = tf.flags.FLAGS
   dataset_dir = FLAGS.dataset_dir
   code_dir = FLAGS.code_dir
+  time_budget = FLAGS.time_budget
   logging.info("#"*50)
   logging.info("Begin running local test using")
   logging.info("code_dir = {}".format(get_basename(code_dir)))
   logging.info("dataset_dir = {}".format(get_basename(dataset_dir)))
   logging.info("#"*50)
-  run_baseline(dataset_dir, code_dir)
+  run_baseline(dataset_dir, code_dir, time_budget)

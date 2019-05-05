@@ -1,19 +1,20 @@
 ################################################################################
 # Name:         Scoring Program
 # Author:       Zhengying Liu, Isabelle Guyon, Adrien Pavao, Zhen Xu
-# Update time:  Apr 29 2019
-# Usage: 		python score.py input_dir output_dir
-#           input_dir contains two subdirectories 'res' and 'ref'
-#                   'ref' contains e.g. adult.solution
-#                   'res' contains e.g. start.txt, end.txt, adult.predict_0, adult.predict_1, etc.
-#           output_dir should contain scores.txt, detailed_results.html
+# Update time:  5 May 2019
+# Usage: 		python score.py --solution_dir=<solution_dir> --prediction_dir=<prediction_dir> --score_dir=<score_dir>
+#           solution_dir contains  e.g. adult.solution
+#           prediction_dir should contain e.g. start.txt, adult.predict_0, adult.predict_1,..., end.txt.
+#           score_dir should contain scores.txt, detailed_results.html
 
-VERSION = 'v20190429'
+VERSION = 'v20190505'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190505: [ZY] Use argparse to parse directories AND time budget;
+               Fix nb_preds not updated error.
 20190504: [ZY] Don't raise Exception anymore (for most cases) in order to
                always have 'Finished' for each submission;
                Kill ingestion when time limit is exceeded;
@@ -50,24 +51,20 @@ Previous updates:
 # INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
+################################################################################
 
 
 ################################################################################
 # User defined constants
 ################################################################################
 
-# Time budget for ingestion program (and thus for scoring)
-# This is needed since scoring program is running all along with ingestion
-# program in parallel. So we need to know how long ingestion program will run.
-TIME_BUDGET = 7200
+# Verbosity level of logging.
+# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+verbosity_level = 'INFO'
 
 # Redirect stardant output to live results page (detailed_results.html)
 # to have live output for debugging
 REDIRECT_STDOUT = False
-
-# Verbosity level of logging.
-# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
-verbosity_level = 'INFO'
 
 # Constant used for a missing score
 missing_score = -0.999999
@@ -79,6 +76,7 @@ from os.path import join
 from sys import argv
 from sklearn.metrics import auc
 from sklearn.metrics import roc_auc_score
+import argparse
 import base64
 import datetime
 import logging
@@ -122,12 +120,6 @@ def _HERE(*args):
     """Helper function for getting the current directory of the script."""
     h = os.path.dirname(os.path.realpath(__file__))
     return os.path.abspath(os.path.join(h, *args))
-
-# Default I/O directories:
-root_dir = _HERE(os.pardir)
-default_solution_dir = join(root_dir, "AutoDL_sample_data")
-default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
-default_score_dir = join(root_dir, "AutoDL_scoring_output")
 
 # Metric used to compute the score of a point on the learning curve
 def autodl_bac(solution, prediction):
@@ -281,7 +273,7 @@ def draw_learning_curve(solution_file, prediction_files,
   X.insert(0, 1) # X starts from 1 to use log
   Y.insert(0, 0)
   # Truncate X using X_max
-  X_max = TIME_BUDGET
+  X_max = time_budget
   Y_max = 1
   log_X = [np.log(x+1)/np.log(X_max+1) for x in X if x <= X_max] # log_X \in [0, 1]
   log_X_max = 1
@@ -293,7 +285,7 @@ def draw_learning_curve(solution_file, prediction_files,
   ax.plot(X, Y, marker="o", label="Test score", markersize=3)
   # ax.step(X, Y, marker="o", label="Test score", markersize=3, where='post')
   # Add a point on the final line using last prediction
-  X.append(TIME_BUDGET)
+  X.append(time_budget)
   Y.append(Y[-1])
   log_X.append(1)
   if len(log_X) >= 2:
@@ -315,6 +307,7 @@ def draw_learning_curve(solution_file, prediction_files,
   fig_name = get_fig_name(basename)
   path_to_fig = os.path.join(output_dir, fig_name)
   plt.savefig(path_to_fig)
+  plt.close()
   return alc, time_used
 
 def area_under_learning_curve(X,Y):
@@ -477,28 +470,38 @@ if __name__ == "__main__":
 
     scoring_start = time.time()
 
-    #### INPUT/OUTPUT: Get input and output directory names
-    if len(argv) == 1:  # Use the default data directories if no arguments are provided
-        solution_dir = default_solution_dir
-        prediction_dir = default_prediction_dir
-        score_dir = default_score_dir
-     # the case for indicating special input data dir
-     # this is used especially in `test_with_baseline.py`
-    elif len(argv) == 2:
-        solution_dir = argv[1]
-        prediction_dir = default_prediction_dir
-        score_dir = default_score_dir
-    elif len(argv) == 3: # The current default configuration of Codalab
-        solution_dir = os.path.join(argv[1], 'ref')
-        prediction_dir = os.path.join(argv[1], 'res')
-        score_dir = argv[2]
-    elif len(argv) == 4:
-        solution_dir = argv[1]
-        prediction_dir = os.path.join(argv[2], 'res')
-        score_dir = argv[3]
-    else:
-        swrite('\n*** WRONG NUMBER OF ARGUMENTS ***\n\n')
-        exit(1)
+    # Default I/O directories:
+    root_dir = _HERE(os.pardir)
+    default_solution_dir = join(root_dir, "AutoDL_sample_data")
+    default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
+    default_score_dir = join(root_dir, "AutoDL_scoring_output")
+    default_time_budget = 7200
+
+    # Parse directories from input arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--solution_dir', type=str,
+                        default=default_solution_dir,
+                        help="Directory storing the solution with true " +
+                             "labels, e.g. adult.solution.")
+    parser.add_argument('--prediction_dir', type=str,
+                        default=default_prediction_dir,
+                        help="Directory storing the predictions. It should" +
+                             "contain e.g. [start.txt, adult.predict_0, " +
+                             "adult.predict_1, ..., end.txt].")
+    parser.add_argument('--score_dir', type=str,
+                        default=default_score_dir,
+                        help="Directory storing the scoring output " +
+                             "e.g. `scores.txt` and `detailed_results.html`.")
+    parser.add_argument('--time_budget', type=float,
+                        default=default_time_budget,
+                        help="Time budget for running ingestion program.")
+    args = parser.parse_args()
+    logger.debug("Parsed args are: " + str(args))
+    logger.debug("-" * 50)
+    solution_dir = args.solution_dir
+    prediction_dir = args.prediction_dir
+    score_dir = args.score_dir
+    time_budget = args.time_budget
 
     # Create the output directory, if it does not already exist and open output files
     if not os.path.isdir(score_dir):
@@ -537,12 +540,12 @@ if __name__ == "__main__":
     wait_time = 30
     ingestion_info = None
     for i in range(wait_time):
-      time.sleep(1)
       ingestion_info = get_ingestion_info(prediction_dir)
       if not ingestion_info is None:
         logger.info("Detected the start of ingestion after {} ".format(i) +
                     "seconds. Start scoring.")
         break
+      time.sleep(1)
     else:
       raise IngestionError("[-] Failed: scoring didn't detected the start of " +
                            "ingestion after {} seconds.".format(wait_time))
@@ -578,7 +581,7 @@ if __name__ == "__main__":
     try:
       # Begin scoring process, along with ingestion program
       # Moniter training processes while time budget is not attained
-      while(time.time() < ingestion_start + TIME_BUDGET):
+      while(time.time() < ingestion_start + time_budget):
         time.sleep(0.5)
         # Give list of prediction files
         prediction_files = get_prediction_files(prediction_dir, basename,
@@ -595,6 +598,7 @@ if __name__ == "__main__":
                                                   scoring_function,
                                                   score_dir,
                                                   is_multiclass_task)
+          nb_preds[solution_file] = nb_preds_new
           logger.info("Current area under learning curve for {}: {:.4f}"\
                     .format(basename, score))
 
@@ -656,3 +660,5 @@ if __name__ == "__main__":
                   .format(ingestion_duration) +
                   "The score of your algorithm on the task '{}' is: {:.6f}."\
                   .format(basename, score))
+
+    logger.info("[Scoring terminated]")
