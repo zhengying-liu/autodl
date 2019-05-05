@@ -191,9 +191,6 @@ class Model(object):
           performance of the last prediction will be used to compute area under
           learning curve.
     """
-    if self.done_training:
-      return None
-
     # Count examples on test set
     if not hasattr(self, 'num_examples_test'):
       logger.info("Counting number of examples on test set.")
