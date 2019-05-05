@@ -61,6 +61,18 @@ class Model(object):
     process. So your `train` method should be able to handle repeated calls and
     hopefully improve your model performance after each call.
 
+    ****************************************************************************
+    ****************************************************************************
+    IMPORTANT: the loop of calling `train` and `test` will only run if
+        self.done_training = False
+      (the corresponding code can be found in ingestion.py, search
+      'M.done_training')
+      Otherwise, the loop will go on until the time budget is used up. Please
+      pay attention to set self.done_training = True when you think the model is
+      converged or when there is not enough time for next round of training.
+    ****************************************************************************
+    ****************************************************************************
+
     Args:
       dataset: a `tf.data.Dataset` object. Each of its examples is of the form
             (example, labels)
@@ -114,11 +126,6 @@ class Model(object):
           here `sample_count` is the number of examples in this dataset as test
           set and `output_dim` is the number of labels to be predicted. The
           values should be binary or in the interval [0,1].
-
-          IMPORTANT: if returns `None`, this means that the algorithm
-          chooses to stop training, and the whole train/test will stop. The
-          performance of the last prediction will be used to compute area under
-          learning curve.
     """
     sample_count = 0
     iterator = dataset.make_one_shot_iterator()

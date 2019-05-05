@@ -15,13 +15,13 @@
 
 """An example of code submission for the AutoDL challenge.
 
-It implements 3 compulsory methods: __init__, train, and test.
-model.py follows the template of the abstract class algorithm.py found
-in folder AutoDL_ingestion_program/.
+It implements 3 compulsory methods ('__init__', 'train' and 'test') and
+an attribute 'done_training' for indicating if the model will not proceed more
+training due to convergence or limited time budget.
 
-To create a valid submission, zip model.py together with an empty
-file called metadata (this just indicates your submission is a code submission
-and has nothing to do with the dataset metadata.
+To create a valid submission, zip model.py together with other necessary files
+such as Python modules/packages, pre-trained weights. The final zip file should
+not exceed 300MB.
 """
 
 from sklearn.linear_model import LinearRegression
@@ -87,6 +87,18 @@ class Model(object):
     This method will be called REPEATEDLY during the whole training/predicting
     process. So your `train` method should be able to handle repeated calls and
     hopefully improve your model performance after each call.
+
+    ****************************************************************************
+    ****************************************************************************
+    IMPORTANT: the loop of calling `train` and `test` will only run if
+        self.done_training = False
+      (the corresponding code can be found in ingestion.py, search
+      'M.done_training')
+      Otherwise, the loop will go on until the time budget is used up. Please
+      pay attention to set self.done_training = True when you think the model is
+      converged or when there is not enough time for next round of training.
+    ****************************************************************************
+    ****************************************************************************
 
     Args:
       dataset: a `tf.data.Dataset` object. Each of its examples is of the form
@@ -186,10 +198,6 @@ class Model(object):
           here `sample_count` is the number of examples in this dataset as test
           set and `output_dim` is the number of labels to be predicted. The
           values should be binary or in the interval [0,1].
-          IMPORTANT: if returns None, this means that the algorithm
-          chooses to stop training, and the whole train/test will stop. The
-          performance of the last prediction will be used to compute area under
-          learning curve.
     """
     # Count examples on test set
     if not hasattr(self, 'num_examples_test'):
