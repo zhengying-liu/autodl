@@ -1,10 +1,10 @@
 ################################################################################
 # Name:         Parent Scoring Program
 # Author:       Zhengying Liu, Adrien Pavao, Zhen Xu, Isabelle Guyon
-# Update time:  Apr 25 2019
-# Usage: 		    python evaluate.py input_dir output_dir
+# Update time:  5 May 2019
+# Usage: 		    python evaluate.py --input_dir=$input --output_dir=$output
 
-VERISION = "v20190426"
+VERISION = "v20190505"
 DESCRIPTION = '''This is the parent scoring program. It reads from \
 input_dir/res_i/ all partial results from children phases, and outputs \
 aggregated learning curves and scores to output_dir.'''
@@ -34,6 +34,9 @@ import logging
 # USER DEFINED CONSTANTS
 ################################################################################
 
+# Verbosity level of logging.
+# Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+verbosity_level = 'INFO'
 
 # Number of children phases/datasets (as defined in competition bundle)
 DEFAULT_NUM_DATASET = 5
@@ -49,7 +52,7 @@ print (DEFAULT_CURVE)
 # FUNCTIONS
 ################################################################################
 
-def get_logger(verbosity_level):
+def get_logger(verbosity_level, use_error_log=False):
   """Set logging format to something like:
        2019-04-25 12:52:51,924 INFO score.py: <message>
   """
@@ -61,11 +64,12 @@ def get_logger(verbosity_level):
   stdout_handler = logging.StreamHandler(sys.stdout)
   stdout_handler.setLevel(logging_level)
   stdout_handler.setFormatter(formatter)
-  stderr_handler = logging.StreamHandler(sys.stderr)
-  stderr_handler.setLevel(logging.WARNING)
-  stderr_handler.setFormatter(formatter)
   logger.addHandler(stdout_handler)
-  logger.addHandler(stderr_handler)
+  if use_error_log:
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(logging.WARNING)
+    stderr_handler.setFormatter(formatter)
+    logger.addHandler(stderr_handler)
   logger.propagate = False
   return logger
 
@@ -77,7 +81,7 @@ def validate_full_res(args):
   for i in range(DEFAULT_NUM_DATASET):
   	# Check whether res_i/ exists
     check_path = join(args.input_dir, "res_"+str(i+2))
-    logging.info("Checking " + str(check_path))
+    logger.info("Checking " + str(check_path))
     if not os.path.exists(check_path):
       # Replace both learning curve and score by default:
       logging.warning(str(check_path) +
@@ -143,6 +147,7 @@ def write_score(score_ls, args):
   output_file = join(args.output_dir, 'scores.txt')
   try:
     with open(output_file, 'w') as f:
+      f.write("score: \n")
       for i in range(DEFAULT_NUM_DATASET):
         score_name = 'set{}_score'.format(i+1)
         score = score_ls[i]
@@ -187,10 +192,10 @@ if __name__ == "__main__":
 
   try:
     # Logging version information and description
-    logging.info('#' * 80)
-    logging.info("Version: " + VERISION)
-    logging.info(DESCRIPTION)
-    logging.info('#' * 80)
+    logger.info('#' * 50)
+    logger.info("Version: " + VERISION)
+    logger.info(DESCRIPTION)
+    logger.info('#' * 50)
 
   	# Get input and output dir from input arguments
     parser = argparse.ArgumentParser()
@@ -199,8 +204,8 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', type=str, default='./test_output',
                         help='where to store aggregated outputs')
     args = parser.parse_args()
-    logging.debug("Parsed args are: " + str(args))
-    logging.debug("-" * 80)
+    logger.debug("Parsed args are: " + str(args))
+    logger.debug("-" * 50)
 
     # for DEBUG only
     print ("Copying input folder....")
@@ -212,36 +217,36 @@ if __name__ == "__main__":
     if not os.path.exists(args.output_dir):
       os.mkdir(args.output_dir)
 
-	  # List the contents of the input directory (should be a bunch of resi/ subdirectories)
+	  # List the contents of the input directory (should be a bunch of res_i/ subdirectories)
     input_ls = sorted(os.listdir(args.input_dir))
-    logging.debug("Input dir contains: " + str(input_ls))
+    logger.debug("Input dir contains: " + str(input_ls))
 
-    # Check if we have correct results in input_dir/resi/ and copy default values otherwise
+    # Check if we have correct results in input_dir/res_i/ and copy default values otherwise
     validate_full_res(args)
-    logging.info("[+] Results validation done.")
-    logging.debug("-" * 80)
-    logging.debug("Start aggregation...")
+    logger.info("[+] Results validation done.")
+    logger.debug("-" * 50)
+    logger.debug("Start aggregation...")
 
-    # Read all scores from input_dir/resi/ subdirectories
+    # Read all scores from input_dir/res_i/ subdirectories
     score_ls = read_score(args)
-    logging.info("[+] Score reading done.")
-    logging.debug("Score list: " + str(score_ls))
+    logger.info("[+] Score reading done.")
+    logger.info("Score list: " + str(score_ls))
 
     # Aggregate all scores and write to output
     write_score(score_ls, args)
-    logging.info("[+] Score writing done.")
+    logger.info("[+] Score writing done.")
 
     # Read all learning curves
     curve_ls = read_curve(args)
-    logging.info("[+] Learning curve reading done.")
-    logging.debug("Curve list: " + str(curve_ls))
+    logger.info("[+] Learning curve reading done.")
+    logger.debug("Curve list: " + str(curve_ls))
 
     # Aggregate all learning curves and write to output
     write_curve(curve_ls, args)
-    logging.info("[+] Learning curve writing done.")
+    logger.info("[+] Learning curve writing done.")
 
-    logging.info("[+] Parent scoring program finished!")
+    logger.info("[+] Parent scoring program finished!")
 
   except Exception as e:
-    logging.exception("Unexpected exception raised! Check parent scoring program!")
-    logging.exception(e)
+    logger.exception("Unexpected exception raised! Check parent scoring program!")
+    logger.exception(e)
