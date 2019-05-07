@@ -1,20 +1,21 @@
 <h2>Quick start</h2>
 <p>This is a challenge with code submission. We provide 3 baseline methods for test purposes:</p>
-<p><strong><a href="../../my/datasets/download/7b0dc24f-7b4a-4c1a-ba26-4250cd9e3d74">Baseline 0</a>: Make constant (zero) predictions</strong> (fast, run this one preferably for test purposes).</p>
-<p><strong><a href="../../my/datasets/download/4eaf69e8-a0f1-4cc6-a333-785e06dd4c7c">Baseline 1</a>: Linear classifier</strong> (can take several hours, do not run unless you have a good reason).</p>
-<p><strong><a href="../../my/datasets/download/f0331294-caca-491b-9eb1-98577293ba5e">Baseline 2</a>: a 3D Convolutional Neural Network</strong> (can take several hours, do not run unless you have a good reason).</p>
+<p><strong><a href="../../my/datasets/download/94d10596-86f3-41fa-87ed-b83bbb3104c0">Baseline 0</a>: Make constant (zero) predictions</strong></p>
+<p><strong><a href="../../my/datasets/download/0c066b28-71ca-4ea0-b079-7f999071cf9f">Baseline 1</a>: Linear classifier</strong></p>
+<p><strong><a href="../../my/datasets/download/de8523bb-3818-46e4-b8da-e4385dbbbe1b">Baseline 2</a>: a 3D Convolutional Neural Network</strong></p>
 <p>To make a test submission, download one of the baseline methods, click on the blue button "<strong>Upload a Submission</strong>" in the upper right corner of the page and re-upload it (you must click first the orange tab "All datasets" for this to work; known bug).&nbsp;To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.</p>
 <h2>Complete starting kit</h2>
 <p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and to test it on your local computer, in conditions identical to those of the Codalab platform. <strong><br /></strong></p>
 <center>
 <h3><span><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
-<p style="text-align: left;">This includes a <strong>jupyter notebook <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb" target="_blank">tutorial.ipynb</a></strong> with step-by-step instructions. The interface is simple and generic: you must supply a Python class <strong>model.py</strong> with:</p>
+<p style="text-align: left;">This includes a <strong>jupyter notebook <a href="https://nbviewer.jupyter.org/github/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb" target="_blank">tutorial.ipynb</a></strong> with step-by-step instructions. The interface is simple and generic: you must supply a Python class <strong>model.py</strong> with:</p>
 <ul style="text-align: left;">
 <li>a constructor</li>
-<li>a train method</li>
-<li>a test method</li>
+<li>a `done_training` attribute</li>
+<li>a `train` method</li>
+<li>a `test` method</li>
 </ul>
-<p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py and the metadata file</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
+<p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
 </center>
 <h2>Larger practice datasets</h2>
 <p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and<strong> put only ONE pair of data and solution</strong> (e.g. munster.data and munster.solution) in the directory AutoDL_public_data/&lt;dataset_name&gt; (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py.&nbsp;</p>
@@ -181,9 +182,9 @@
 <li>num_train/num_test: number of training/test examples</li>
 </ul>
 <ul>
-<li>sequence_size/row_count/col_count/num_channels: shape parameters of the examples (in AutoDL challenge, every example is represented by a 3D tensor with axes x, y and t (t for time)). A <em>row_count</em> or <em>col_count</em> of -1 means the value varies from one example to another.</li>
+<li>sequence_size/row_count/col_count/num_channels: shape parameters of the examples (in AutoCV challenge, every example is represented by a 4D tensor with axes t, x, y and c (t for time and c for channel)). A <em>row_count</em> or <em>col_count</em> of -1 means the value varies from one example to another.</li>
 <li>output_dim: number of classes</li>
-<li>has_locality_col (resp. has_locality_row): A flag indicating whether rows (resp. columns) in the tensor correspond to variables inter-ralated with some underlying topological structure ,reflected by the closeness of indices, like in images or videos.</li>
+<li>has_locality_col (resp. has_locality_row): A flag indicating whether rows (resp. columns) in the tensor correspond to variables&nbsp;<span>interrelated</span> with some underlying topological structure ,reflected by the closeness of indices, like in images or videos.</li>
 </ul>
 <p>These data were re-formatted from original public datasets. If you use them, please make sure to acknowledge the original data donnors (see "Source" in the data table) and check the tems of use.</p>
 <p><strong>To download all public datasets at once:</strong></p>
@@ -201,16 +202,16 @@ M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
 remaining_time budget = overall_time_budget
 start_time = time()
 # Ingestion program calls multiple times train and test:
-repeat until remaining_time_budget &lt; 0
+repeat until M.done_training or remaining_time_budget &lt; 0
 {
-<strong>M.train</strong> (training_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()
-results = <strong>M.test</strong>(test_data, remaining_time_budget)
-remaining_time_budget = start_time + overall_time_budget - time.time()<br /># Results made available to scoring program (run in separate container)
-save(results)
+<strong>  M.train</strong> (training_data, remaining_time_budget)
+  remaining_time_budget = start_time + overall_time_budget - time.time()
+  results = <strong>M.test</strong>(test_data, remaining_time_budget)
+  remaining_time_budget = start_time + overall_time_budget - time.time()<br />  # Results made available to scoring program (run in separate container)
+  save(results)
 }
 </code></pre>
-<p><span>It is the responsibility of the participants to make sure</span>&nbsp;that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
+<p><span>It is the responsibility of the participants to make sure</span>&nbsp;that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric, and the <strong>time axis is in log-scale</strong>.</p>
 <h2>Metrics</h2>
 <p><span>The participants can train in batches of pre-defined duration to incrementally improve their performance</span>, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
 <p>We treat both multi-class and multi-label problems alike. Each label/class is considered a separate binary classification problem. We measure performance with the average over all labels of</p>

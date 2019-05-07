@@ -9,9 +9,12 @@
 <h3>How do I make submissions?</h3>
 <p>Make sure first to clisch the orange button "All datasets", then click the blue button on the upper right side "Upload a Submission".&nbsp;</p>
 <h3>Do you provide tips on how to get started?</h3>
-<p>We provide a Starting Kit in Python with step-by-step instructions in a Jupyter notebook called "TUTORIAL.ipynb".&nbsp;</p>
+<p>We provide a Starting Kit in Python with step-by-step instructions in a Jupyter notebook called "tutorial.ipynb", which can be found in the github repository&nbsp;<a href="https://github.com/zhengying-liu/autodl_starting_kit_stable">https://github.com/zhengying-liu/autodl_starting_kit_stable</a>. You can also have a well rendered preview <a href="https://nbviewer.jupyter.org/github/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb">here</a>.</p>
+<h3>Are there publication opportunities?</h3>
+<p>Yes. Top ranking participants will be invited to submit papers to a&nbsp;<a href="https://drive.google.com/file/d/1_zYzXowLzLN7oJuQ-mdJ-YM-zBb60GE5/view?usp=sharing">special issue of the IEEE transaction journal PAMI on Automated Machine Learning</a>&nbsp;and will be entered in a contest for the best paper. Deadline November 30, 2019.</p>
+<p>There will be 2 best paper awards of $1000 ("best paper" and "best student paper").</p>
 <h3>Are there prizes?</h3>
-<p>Yes,&nbsp;</p>
+<p>Yes, a 4000 USD prize pool.</p>
 <table style="border-collapse: collapse;"><colgroup> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> <col style="width: 20.000000%;" /> </colgroup>
 <tbody>
 <tr>
@@ -34,13 +37,6 @@
 <div>
 <div>
 <p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">3rd place </span></p>
-</div>
-</div>
-</td>
-<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
-<div>
-<div>
-<p><span style="font-size: 10.000000pt; font-family: Arial; font-weight: bold;">Best paper </span></p>
 </div>
 </div>
 </td>
@@ -74,13 +70,6 @@
 </div>
 </div>
 </td>
-<td style="border-style: solid; border-width: 0.750630pt; border-color: rgb(0.000000%,0.000000%,0.000000%);">
-<div>
-<div>
-<p><span style="font-size: 10.000000pt; font-family: ArialMT;">1000 USD </span></p>
-</div>
-</div>
-</td>
 </tr>
 </tbody>
 </table>
@@ -91,12 +80,12 @@
 <h3>If I win, I must submit a fact sheet, do you have a template?</h3>
 <p>Yes, please download it <a href="https://forms.gle/WrpnZ1TKh9CY5AaRA">[HERE</a>].</p>
 <h3>What is your CPU/GPU computational configuration?</h3>
-<p>We are running your submissions on Google cloud&nbsp;<span>NVIDIA Tesla P100 GPUs. In non peak times we are planning to use 10 workers, each of which will have&nbsp;</span>4 CPUs and 26 GB memory, 100 GB disk, 1 GPU running&nbsp;CUDA 10 with drivers&nbsp;cuDNN 7.5.</p>
+<p>We are running your submissions on Google cloud&nbsp;<span>NVIDIA Tesla P100 GPUs. In non peak times we are planning to use 10 workers, each of which will have one&nbsp;<span>NVIDIA Tesla P100 GPU (running&nbsp;CUDA 10 with drivers&nbsp;cuDNN 7.5) and&nbsp;</span><span>8 vCPUs, with 30 GB of memory</span></span>, 100 GB disk.</p>
 <p>The PARTICIPANTS will be informed if the computational resources increase. They will NOT decrease.</p>
 <h3>Can I pre-train a model on my local machine and submit it?</h3>
 <p>This is not explicitly forbidden, but it is discouraged. We prefer if all calculations are performed on the server. If you submit a pre-trained model, you will have to disclose it in the fact sheets.&nbsp;</p>
 <h3>Will there be a final test round on separate datasets?</h3>
-<p>No. This challenge has a single phase/round with 5 datasets on which you are evaluated simultaneously.</p>
+<p>No. The ranking of participants will be made from the "All datasets" leaderboard, using the performances on all five datasets available on the platform. There will be no other testing on separate datasets.</p>
 <h3>What is my time budget?</h3>
 <p>Your execution must run in less than 2 hours (7200 seconds).</p>
 <h3>Does the time budget correspond to wall time or CPU/GPU time?</h3>
@@ -104,7 +93,7 @@
 <h3>My submission seems stuck, how long will it run?</h3>
 <p>In principle no more than its time budget. We kill the process if the time budget is exceeded. Submissions are queued and run on a first time first serve basis. We are using several identical servers. Contact us if your submission is stuck more than 24 hours. Check on the leaderboard the execution time.</p>
 <h3>How many submissions can I make?</h3>
-<p>Five per day (and up to a total of 100). Please respect other users. It is forbidden to register under multiple user IDs to gain an advantage and make more submissions. Violators will be DISQUALIFIED FROM THE CONTEST.</p>
+<p>Two per day (and up to a total of 100). This may be subjet to change, according to the number of participants. Please respect other users. It is forbidden to register under multiple user IDs to gain an advantage and make more submissions. Violators will be DISQUALIFIED FROM THE CONTEST.</p>
 <h3>Do my failed submissions count towards my number of submissions per day?</h3>
 <p>No. Please contact us if you think the failure is due to the platform rather than to your code and we will try to resolve the problem promptly.</p>
 <h3>What happens if I exceed my time budget?</h3>
@@ -123,8 +112,6 @@
 <p><strong>evariste/autodl:gpu</strong>, see the dockerfile and some instructions on <a href="https://hub.docker.com/r/evariste/autodl">dockerhub</a>.</p>
 <h3>How do I test my code in the same environment that you are using before submitting?</h3>
 <p>When you submit code to Codalab, your code is executed inside a docker container. This environment can be exactly reproduced on your local machine by downloading the corresponding docker image. The docker environment of the challenge contains Anaconda libraries, Tensorflow, and Pytorch (among other things).&nbsp;<br /> Non GPU users, if you are new to docker, <a href="https://www.docker.com/get-started">follow these instructions to install docker.</a>&nbsp;You may then use the docker <strong>evariste/autodl:cpu. See details in the Starting Kit that can be downloaded from the Instructions page.&nbsp;</strong>GPU users, follow these <a href="https://github.com/NVIDIA/nvidia-docker/wiki">more detailed instructions</a>.</p>
-<h3>Are there publication opportunities?</h3>
-<p>Yes. Top ranking participants will be invited to submit papers to a special issue of the IEEE transaction journal PAMI on Automted Machine Learning and will be entered in a contest for the best paper award.</p>
 <h3>What is meant by "Leaderboard modifying disallowed"?</h3>
 <p>Your last submission is shown automatically on the leaderboard. You cannot choose which submission to select. If you want another submission than the last one you submitted to "count" and be displayed on the leaderboard, you need to re-submit it.</p>
 <h3>Can I register multiple times?</h3>
