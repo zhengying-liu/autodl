@@ -277,7 +277,7 @@ def plot_learning_curve(timestamps, scores,
                         start_time=0, time_budget=7200, method='step',
                         transform=None, task_name=None, curve_color=None,
                         area_color='cyan', fill_area=True, model_name='',
-                        clear_figure=True, t0=300):
+                        clear_figure=True):
   """Plot learning curve using scores and corresponding timestamps.
 
   Args:
@@ -322,10 +322,15 @@ def plot_learning_curve(timestamps, scores,
       raise ValueError("The timestamp {} at index {}".format(timestamps[i], i) +
                        " exceeds time budget!")
   if transform is None:
-    # T = 7200 ==> t0 = 300
-    T = time_budget
-    transform = lambda t: transform_time(t, T, t0=t0)
-    inverse_transform = lambda t: t0 * (1 - (1 + T / t0) ** t)
+    t0 = 300
+    # default transformation
+    transform = lambda t: transform_time(t, time_budget, t0=t0)
+    xlabel = "Transformed time: " +\
+             r'$\tilde{t} = \frac{\log (1 + t / t_0)}{ \log (1 + T / t_0)}$ ' +\
+             ' ($T = ' + str(int(time_budget)) + '$, ' +\
+             ' $t_0 = ' + str(int(t0)) + '$)'
+  else:
+    xlabel = "Transformed time: " + r'$\tilde{t}$'
   relative_timestamps = [t - start_time for t in timestamps]
   # Transform X
   X = [transform(t) for t in relative_timestamps]
@@ -365,21 +370,17 @@ def plot_learning_curve(timestamps, scores,
   ax.text(X[-1], Y[-1], "{:.4f}".format(Y[-1]))
   # Draw a dotted line from last prediction
   ax.plot(X[-2:], Y[-2:], '--')
-  plt.title("Learning curve for task: {}".format(task_name))
-  ax.set_xlabel("Transformed time: " +\
-             r'$\tilde{t} = \frac{\log (1 + t / t_0)}{ \log (1 + T / t_0)}$ ' +\
-             ' ($T = ' + str(int(time_budget)) + '$, ' +\
-             ' $t_0 = ' + str(int(t0)) + '$)')
+  plt.title("Learning curve for task: {}".format(task_name), y=1.06)
+  ax.set_xlabel(xlabel)
   ax.set_xlim(left=0, right=1)
   ax.set_ylabel('score (2 * AUC - 1)')
   ax.set_ylim(bottom=-0.01, top=1)
   ax.grid(True, zorder=5)
-  if t0:
-    ax2 = ax.twiny() # For real time in seconds
-    ax2.set_xlabel('time/second')
-    ticks = [10, 60, 300, 600, 1200, 1800, 3600, 5400, 7200]
-    ax2.set_xticks([transform(t) for t in ticks])
-    ax2.set_xticklabels(ticks)
+  # Show real time in seconds in a second x-axis
+  ax2 = ax.twiny()
+  ticks = [10, 60, 300, 600, 1200, 1800, 3600, 5400, 7200]
+  ax2.set_xticks([transform(t) for t in ticks])
+  ax2.set_xticklabels(ticks)
   ax.legend()
   return alc, ax
 
