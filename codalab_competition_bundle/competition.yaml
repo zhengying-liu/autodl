@@ -49,6 +49,7 @@ phases:
         start_date: 2019-04-14
         max_submissions: 100
         max_submissions_per_day: 5
+        auto_migration: False
         is_parallel_parent: True
         is_scoring_only: True
         scoring_program: AutoDL_parent_scoring_program.zip
@@ -65,7 +66,7 @@ phases:
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: True        # first submission = last one of previous phase
+        auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
         input_data: AutoDL_input_data_1.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
         ingestion_program: AutoDL_ingestion_program.zip
@@ -85,7 +86,7 @@ phases:
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: True        # first submission = last one of previous phase
+        auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
         input_data: AutoDL_input_data_1.zip # 37a6461e-7c1f-468a-bc4a-fa66c6847d95
         ingestion_program: AutoDL_ingestion_program.zip
@@ -105,7 +106,7 @@ phases:
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: True        # first submission = last one of previous phase
+        auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
         input_data: AutoDL_input_data_1.zip # b1ad71fe-b597-4f8d-8b56-afff66002c62
         ingestion_program: AutoDL_ingestion_program.zip
@@ -125,7 +126,7 @@ phases:
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: True        # first submission = last one of previous phase
+        auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
         input_data: AutoDL_input_data_1.zip # 8f0c139f-c6c8-4433-bf38-51e7d0486bea
         ingestion_program: AutoDL_ingestion_program.zip
@@ -145,7 +146,7 @@ phases:
         execution_time_limit: 7200  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: True        # first submission = last one of previous phase
+        auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
         input_data:  AutoDL_input_data_1.zip # ce683464-561e-472f-886d-4d04039f6c39
         ingestion_program: AutoDL_ingestion_program.zip
