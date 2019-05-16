@@ -7,12 +7,13 @@
 #           prediction_dir should contain e.g. start.txt, adult.predict_0, adult.predict_1,..., end.txt.
 #           score_dir should contain scores.txt, detailed_results.html
 
-VERSION = 'v20190508'
+VERSION = 'v20190516'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190516: [ZY] Change time budget to 20 minutes.
 20190508: [ZY] Decompose drawing learning curve functions;
                Remove redirect output feature;
                Use AUC instead of BAC;
@@ -322,7 +323,7 @@ def plot_learning_curve(timestamps, scores,
       raise ValueError("The timestamp {} at index {}".format(timestamps[i], i) +
                        " exceeds time budget!")
   if transform is None:
-    t0 = 300
+    t0 = 60
     # default transformation
     transform = lambda t: transform_time(t, time_budget, t0=t0)
     xlabel = "Transformed time: " +\
@@ -378,7 +379,8 @@ def plot_learning_curve(timestamps, scores,
   ax.grid(True, zorder=5)
   # Show real time in seconds in a second x-axis
   ax2 = ax.twiny()
-  ticks = [10, 60, 300, 600, 1200, 1800, 3600, 5400, 7200]
+  ticks = [10, 60, 300, 600, 1200] +\
+          list(range(1800, int(time_budget) + 1, 1800))
   ax2.set_xticks([transform(t) for t in ticks])
   ax2.set_xticklabels(ticks)
   ax.legend()
@@ -605,7 +607,7 @@ if __name__ == "__main__":
     default_solution_dir = join(root_dir, "AutoDL_sample_data")
     default_prediction_dir = join(root_dir, "AutoDL_sample_result_submission")
     default_score_dir = join(root_dir, "AutoDL_scoring_output")
-    default_time_budget = 7200
+    default_time_budget = 1200
     # Parse directories from input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--solution_dir', type=str,
