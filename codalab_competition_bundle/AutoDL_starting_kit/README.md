@@ -121,6 +121,21 @@ this script actually provides a way to easily see what their
 code receives as examples (and labels), especially for the participants who
 are not familiar with this format.
 
+## Understand how a submission is evaluated
+
+You may wonder how a submission is handled and evaluated on CodaLab, or
+what ingestion program and scoring program do.
+
+To answer these questions, you
+can find a flow chart (`evaluation-flow-chart.png`) in the repo:
+
+![Evaluation Flow Chart](evaluation-flow-chart.png "Evaluation process of the challenge")
+
+If you still want more details, you can refer to the source code at
+- Ingestion Program: `AutoDL_ingestion_program/ingestion.py`
+- Scoring Program: `AutoDL_scoring_program/score.py`
+
+
 ## How to prepare a ZIP file for submission on CodaLab
 Zip the contents of `AutoDL_sample_code_submission`(or any folder containing
 your `model.py` file) without the directory structure:
