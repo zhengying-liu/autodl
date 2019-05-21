@@ -7,15 +7,34 @@ OR CODE AUTHORS DISCLAIM ANY EXPRESSED OR IMPLIED WARRANTIES.
 
 ## Download this starting kit
 
- You can download this starting kit by clicking on the green button "Clone or download" on top of [this GitHub repo](https://github.com/zhengying-liu/autodl_starting_kit_stable), then "Download ZIP". You'll have this whole starting kit by unzipping the downloaded file.
+You can download this starting kit by clicking on the green button
+"Clone or download" on top of
+[this GitHub repo](https://github.com/zhengying-liu/autodl_starting_kit_stable),
+then "Download ZIP". You'll have this whole starting kit by unzipping the
+downloaded file.
 
- Another convenient way is to use **git clone**:
- ```
- cd <path_to_your_directory>
- git clone https://github.com/zhengying-liu/autodl_starting_kit_stable.git
- ```
+Another convenient way is to use **git clone**:
+```
+cd <path_to_your_directory>
+git clone https://github.com/zhengying-liu/autodl_starting_kit_stable.git
+```
+(If you are an experienced user of GitHub, feel free to
+[fork this repo](https://help.github.com/en/articles/fork-a-repo) and
+clone your own repo instead)
 
-Then you can begin participating to the AutoCV/AutoDL challenge by carefully reading this README.md file.
+Then you can begin participating to the AutoCV/AutoDL challenge by carefully
+reading this README.md file.
+
+## Update this starting kit
+
+As new features and possible bug fixes will be constantly added to this starting
+kit, you are invited to get latest updates **before each usage** by running
+```
+cd path/to/autodl_starting_kit_stable/
+git pull
+```
+(or by [syncing your fork](https://help.github.com/en/articles/syncing-a-fork)
+if you forked this repo)
 
 ## Local development and testing
 To make your own submission to AutoCV/AutoDL challenge, you need to modify the
@@ -29,7 +48,7 @@ see the [Dockerfile](https://github.com/zhengying-liu/autodl/blob/master/docker/
 If you are new to docker, install docker from https://docs.docker.com/get-started/.
 Then, at the shell, run:
 ```
-cd path_to/autodl_starting_kit_stable/
+cd path/to/autodl_starting_kit_stable/
 docker run -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:cpu
 ```
 The tag `cpu` indicates that this image only supports usage of CPU (instead of
@@ -123,8 +142,9 @@ are not familiar with this format.
 
 ## Understand how a submission is evaluated
 
-You may wonder how a submission is handled and evaluated on CodaLab, or
-what ingestion program and scoring program do.
+You may have following questions:
+- How is a submission handled and evaluated on CodaLab? How is it implemented?
+- What are ingestion program and scoring program? What do they do?
 
 To answer these questions, you
 can find a flow chart (`evaluation-flow-chart.png`) in the repo:
@@ -136,7 +156,7 @@ If you still want more details, you can refer to the source code at
 - Scoring Program: `AutoDL_scoring_program/score.py`
 
 
-## How to prepare a ZIP file for submission on CodaLab
+## Prepare a ZIP file for submission on CodaLab
 Zip the contents of `AutoDL_sample_code_submission`(or any folder containing
 your `model.py` file) without the directory structure:
 ```
@@ -151,6 +171,14 @@ can do
 ```
 unzip -l mysubmission.zip
 ```
+
+## Report bugs and create issues
+
+If you run into bugs or issues when using this starting kit, please create
+issues on the
+[*Issues* page](https://github.com/zhengying-liu/autodl_starting_kit_stable/issues)
+of this repo. Two templates will be given when you click the **New issue**
+button.
 
 ## Contact us
 If you have any questions, please contact us via:
