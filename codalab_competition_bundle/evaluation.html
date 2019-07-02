@@ -1,24 +1,31 @@
 <h2>Quick start</h2>
-<p>This is a challenge with code submission. We provide 3 baseline methods for test purposes:</p>
-<p><strong><a href="../../my/datasets/download/94d10596-86f3-41fa-87ed-b83bbb3104c0">Baseline 0</a>: Make constant (zero) predictions</strong></p>
-<p><strong><a href="../../my/datasets/download/0c066b28-71ca-4ea0-b079-7f999071cf9f">Baseline 1</a>: Linear classifier</strong></p>
-<p><strong><a href="../../my/datasets/download/de8523bb-3818-46e4-b8da-e4385dbbbe1b">Baseline 2</a>: a 3D Convolutional Neural Network</strong></p>
-<p>To make a test submission, download one of the baseline methods, click on the blue button "<strong>Upload a Submission</strong>" in the upper right corner of the page and re-upload it (you must click first the orange tab "All datasets" for this to work; known bug).&nbsp;To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.</p>
+<p>This is a challenge with code submission. We provide 3 baseline methods for test purposes (Note: to avoid that tests take too long, we set in model.py self.num_epochs_we_want_to_train = 1; you may change that):</p>
+<p><strong><a href="../../my/datasets/download/94d10596-86f3-41fa-87ed-b83bbb3104c0">Baseline 0</a>: Constant (zero) predictions</strong></p>
+<p><strong><a href="../../my/datasets/download/5b8f6df1-37e6-44f4-a1a7-6b568496955d">Baseline 1</a>: Linear classifier</strong></p>
+<p><strong><a href="../../my/datasets/download/7d6e8f80-4490-42da-a102-831be8fe31be">Baseline 2</a>: 3D Convolutional Neural Network</strong></p>
+<p>To make a test submission, download one of the baseline methods, click on the blue button "<strong>Upload a Submission</strong>" in the upper right corner of the page and re-upload it. You must click first the orange tab <strong>"All datasets"</strong> if you want to make a submission simultaneously on all datasets and get ranked in the challenge. You may also submit on a single dataset at a time (for debug purposes). To check progress on your submissions go to the "<strong>My Submissions</strong>" tab. Your best submission is shown on the leaderboard visible under the "<strong>Results</strong>" tab.&nbsp;</p>
 <h2>Complete starting kit</h2>
-<p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and to test it on your local computer, in conditions identical to those of the Codalab platform. <strong><br /></strong></p>
+<p>The starting kit contains everything you need to create <strong>your own code submission</strong>&nbsp;(just by modifying the file model.py) and to test it on your local computer, with the same handling programs and Docker image as those of the Codalab platform (but the hardware environment is in general different). <strong><br /></strong></p>
 <center>
 <h3><span><a href="https://github.com/zhengying-liu/autodl_starting_kit_stable" target="_blank">Download the Starting Kit</a></span></h3>
 <p style="text-align: left;">This includes a <strong>jupyter notebook <a href="https://nbviewer.jupyter.org/github/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb" target="_blank">tutorial.ipynb</a></strong> with step-by-step instructions. The interface is simple and generic: you must supply a Python class <strong>model.py</strong> with:</p>
 <ul style="text-align: left;">
 <li>a constructor</li>
-<li>a `done_training` attribute</li>
 <li>a `train` method</li>
 <li>a `test` method</li>
+<li>a `done_training` attribute</li>
 </ul>
-<p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
+<p style="text-align: left;">To make submissions,&nbsp;<strong>zip model.py (without the directory)</strong>, then use the "<strong>Upload a Submission</strong>" button. That's it!</p>
 </center>
+<h2>Computational limitations</h2>
+<ul>
+<li>A submission on one dataset is limited to a maximum of two hours.</li>
+<li>We currently limit participants to 20 hours of compute time per day (subject to change, depending on the number of participants).</li>
+<li>Participants are limited to 5 submissions per day per dataset.</li>
+</ul>
+<p>Since for one dataset a submission may take up to two hours and there are 5 datasets, if you do not stop your model early, you will only be able to make 2 full submissions (on all datasets) per day: 2 times x 5 datasets x 2 h/dataset = 20h. However, you may manage your time in a more effective way by stopping your models early. This is done by setting the "done_training" attribute to "True" once you are done training, e.g. after a certain number of epochs.</p>
 <h2>Larger practice datasets</h2>
-<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. Download and<strong> put only ONE pair of data and solution</strong> (e.g. munster.data and munster.solution) in the directory AutoDL_public_data/&lt;dataset_name&gt; (after unzipping). You can also put them in a directory of your choice and specify the path when calling run_local_test.py.&nbsp;</p>
+<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. We provide 5 public datasets for this purpose. You will have access to the data (training set and test set) AND the true labels for these datasets.</p>
 <table border="1" cellspacing="1" cellpadding="1" align="left">
 <tbody>
 <tr>
@@ -192,9 +199,9 @@
 <h2>Format and use your own datasets</h2>
 <p>Raw data are preserved, but formatted in a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by&nbsp;<a href="https://www.tensorflow.org/">TensorFlow</a>. However, this will not impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
 <h2>Competition protocol</h2>
-<p>This challenge has <strong>1 single phase</strong>. Your code is blind tested on five datasets. And the score you obtain (with your last submission) will be used for final evaluation. There is no hidden leaderboard.</p>
-<p>Code submitted is trained and tested automatically, without any human intervention. Code submitted is run on all five datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
-<p>The identities of the datasets used for blind testing on the platform are concealed.&nbsp;The data are provided in a&nbsp;<strong>raw form</strong>&nbsp;(no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by a&nbsp;<strong>time budget</strong>.&nbsp;</p>
+<p>This challenge has <strong>1 single phase</strong>. Your code is blind tested on five datasets. And the score you obtain (<strong>with your last submission on "All datasets"</strong>) will be used for final evaluation. There is no hidden/private leaderboard.</p>
+<p>Code submitted is trained and tested automatically, without any human intervention. Code submitted on "All datasets" is run on all five datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
+<p>The identities of the datasets used for blind testing on the platform are concealed.&nbsp;The data are provided in a&nbsp;<strong>raw form</strong>&nbsp;(no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by the&nbsp;<strong>time budget (2h/dataset)</strong>.&nbsp;</p>
 <p>Here is some pseudo-code of the evaluation protocol:</p>
 <pre><code># For each dataset, our evaluation program calls the model constructor:
 M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
@@ -211,11 +218,19 @@ repeat until M.done_training or remaining_time_budget &lt; 0
   save(results)
 }
 </code></pre>
-<p><span>It is the responsibility of the participants to make sure</span>&nbsp;that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric, and the <strong>time axis is in log-scale</strong>.</p>
+<p><span>It is the responsibility of the participants to make sure</span>&nbsp;that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
 <h2>Metrics</h2>
-<p><span>The participants can train in batches of pre-defined duration to incrementally improve their performance</span>, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their time stamp.</p>
-<p>We treat both multi-class and multi-label problems alike. Each label/class is considered a separate binary classification problem. We measure performance with the average over all labels of</p>
-<p><strong>balanced_accuracy = (1/2) (TPR + TNR).</strong></p>
-<p>For each dataset, we compute the&nbsp;<strong>area under the learning curve</strong>&nbsp;(by the trapeze method), i.e. the area of mean_balanced_accuracy as a function of log(1+time), where "time" is the cumulative time in seconds of training and testing. The&nbsp;<strong>overall ranking</strong>&nbsp;is made by averaging the ranks obtained on the 5 datasets.&nbsp;</p>
-<p>Examples of learning curves:&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex1-tweet.png" alt="" />&nbsp;<img class="img-responsive" src="{{ ASSET_BASE_URL }}/learning-curve-ex2-tsunami.png" alt="" />&nbsp;</p>
-<p>&nbsp;</p>
+<p><span>The participants can train in batches of pre-defined duration to incrementally improve their performance</span>, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their timestamp.</p>
+<p>We treat both multi-class and multi-label problems alike. Each label/class is considered a separate binary classification problem, and we compute the normalized AUC (or Gini coefficient)</p>
+<p>&nbsp; &nbsp; 2 * AUC - 1</p>
+<p>as score for each prediction, here AUC is the usual <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">area under ROC curve</a> (ROC AUC).</p>
+<p>For each dataset, we compute the&nbsp;<strong>Area under Learning Curve (ALC)</strong>. The learning curve is drawn as follows:</p>
+<ul>
+<li>at each timestamp t, we compute s(t), the normalized AUC (see above) of the <strong>most recent</strong> prediction. In this way, s(t) is a <strong>step function</strong> w.r.t time t;</li>
+<li>in order to normalize time to the [0, 1] interval, we perform a time transformation by<br /><img style="vertical-align: middle;" src="http://drive.google.com/uc?export=view&amp;id=1_CLXY-QGqR1X7sWcA9OTjFUlu4R9zSil" alt="" width="164.7" height="53.7" /><br />where T is the time budget (of default value 1200 seconds = 20 minutes) and t0 is a reference time amount (of default value 60 seconds).</li>
+<li>then compute the area under learning curve using the formula<br /><img style="vertical-align: middle;" src="http://drive.google.com/uc?export=view&amp;id=19iHGsesbF9YnvwoYSQURa7_DegmcoQzp" alt="" width="285" height="165" /><br />we see that s(t) is weighted by 1/(t + t0)), giving a stronger importance to predictions made at the beginning of th learning curve.</li>
+</ul>
+<p>After we compute the ALC for all 5 datasets, the&nbsp;<strong>overall ranking</strong>&nbsp;is used as the final score for evaluation and will be used in the learderboard. It is computed by averaging the ranks (among all participants) of ALC obtained on the 5 datasets.</p>
+<p>Examples of learning curves:</p>
+<p><img style="vertical-align: middle;" src="http://drive.google.com/uc?export=view&amp;id=1RBfs5yYrKHmQa2iBKN9COkg5iov8Znxl" alt="" width="500" height="505" /></p>
+<p><img src="http://drive.google.com/uc?export=view&amp;id=17rsJ68BimMAlKGZkcstVW277iMxO4qEc" alt="" width="500" height="505" /></p>
