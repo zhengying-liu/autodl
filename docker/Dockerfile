@@ -16,11 +16,12 @@ RUN pip install matplotlib
 RUN pip install scikit-learn
 RUN pip install pyyaml
 RUN pip install psutil
+RUN pip install opencv-python
 RUN pip install h5py
 RUN pip install keras
 # CUDA 10 support for PyTorch
-RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp35-cp35m-linux_x86_64.whl
-RUN pip install torchvision
+RUN pip install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp35-cp35m-linux_x86_64.whl
+RUN pip install https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp35-cp35m-linux_x86_64.whl
 
 # Additional packages demanded by participants
 RUN pip install tensorflow_hub
