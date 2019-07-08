@@ -93,8 +93,8 @@ def run_baseline(dataset_dir, code_dir, time_budget=7200):
     "python {} --dataset_dir={} --code_dir={} --time_budget={}"\
     .format(path_ingestion, dataset_dir, code_dir, time_budget)
   command_scoring =\
-    'python {} --solution_dir={} --time_budget={}'\
-    .format(path_scoring, dataset_dir, time_budget)
+    'python {} --solution_dir={}'\
+    .format(path_scoring, dataset_dir)
   def run_ingestion():
     os.system(command_ingestion)
   def run_scoring():
