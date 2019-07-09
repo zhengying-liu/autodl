@@ -909,7 +909,6 @@ if __name__ == "__main__":
                   "Ingestion duration: {:.2f} sec. "\
                   .format(ingestion_duration) +
                   "The score of your algorithm on the task '{}' is: {:.6f}."\
-                  .format(evaluator.task_name,
-                          evaluator.learning_curve.get_alc()))
+                  .format(evaluator.task_name, score))
 
     logger.info("[Scoring terminated]")
