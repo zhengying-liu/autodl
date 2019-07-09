@@ -96,9 +96,11 @@ def run_baseline(dataset_dir, code_dir, time_budget=7200):
     'python {} --solution_dir={}'\
     .format(path_scoring, dataset_dir)
   def run_ingestion():
-    os.system(command_ingestion)
+    exit_code = os.system(command_ingestion)
+    assert exit_code == 0
   def run_scoring():
-    os.system(command_scoring)
+    exit_code = os.system(command_scoring)
+    assert exit_code == 0
   ingestion_process = Process(name='ingestion', target=run_ingestion)
   scoring_process = Process(name='scoring', target=run_scoring)
   ingestion_output_dir = os.path.join(starting_kit_dir,
@@ -122,6 +124,12 @@ def run_baseline(dataset_dir, code_dir, time_budget=7200):
       break
       time.sleep(1)
 
+  ingestion_process.join()
+  scoring_process.join()
+  if not ingestion_process.exitcode == 0:
+    raise Exception("Some error occurred in ingestion program.")
+  if not scoring_process.exitcode == 0:
+    raise Exception("Some error occurred in scoring program.")
 
 if __name__ == '__main__':
   default_starting_kit_dir = _HERE()
