@@ -13,6 +13,7 @@ DESCRIPTION =\
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190708: [ZY] Write the class Evaluator
 20190519: [ZY] Use the correct function for computing AUC of step functions
 20190516: [ZY] Change time budget to 20 minutes.
 20190508: [ZY] Decompose drawing learning curve functions;
@@ -72,20 +73,14 @@ Previous updates:
 # Can be: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 verbosity_level = 'INFO'
 
-# Constant used for a missing score
-missing_score = -0.999999
-
-from functools import partial
-from libscores import read_array, sp, ls, mvmean, tiedrank
-from os import getcwd as pwd
+from libscores import read_array, sp, ls, mvmean, tiedrank, _HERE, get_logger
 from os.path import join
 from sys import argv
 from sklearn.metrics import auc
 import argparse
 import base64
 import datetime
-import logging
-import matplotlib; matplotlib.use('Agg') # Solve the Tkinter display issue of matplotlib.pyplot
+import matplotlib; matplotlib.use('Agg') # Solve the Tkinter display issue
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -94,37 +89,11 @@ import sys
 import time
 import yaml
 
-def get_logger(verbosity_level, use_error_log=False):
-  """Set logging format to something like:
-       2019-04-25 12:52:51,924 INFO score.py: <message>
-  """
-  logger = logging.getLogger(__file__)
-  logging_level = getattr(logging, verbosity_level)
-  logger.setLevel(logging_level)
-  formatter = logging.Formatter(
-    fmt='%(asctime)s %(levelname)s %(filename)s: %(message)s')
-  stdout_handler = logging.StreamHandler(sys.stdout)
-  stdout_handler.setLevel(logging_level)
-  stdout_handler.setFormatter(formatter)
-  logger.addHandler(stdout_handler)
-  if use_error_log:
-    stderr_handler = logging.StreamHandler(sys.stderr)
-    stderr_handler.setLevel(logging.WARNING)
-    stderr_handler.setFormatter(formatter)
-    logger.addHandler(stderr_handler)
-  logger.propagate = False
-  return logger
-
 logger = get_logger(verbosity_level)
 
 ################################################################################
 # Functions
 ################################################################################
-
-def _HERE(*args):
-    """Helper function for getting the current directory of the script."""
-    h = os.path.dirname(os.path.realpath(__file__))
-    return os.path.abspath(os.path.join(h, *args))
 
 # Metric used to compute the score of a point on the learning curve
 def autodl_auc(solution, prediction, valid_columns_only=True):
@@ -362,8 +331,11 @@ def plot_learning_curve(timestamps, scores,
   else:
     label = "ALC={:.4f}".format(alc)
   # Plot the major part of the figure: the curve
-  ax.plot(X[:-1], Y[:-1], drawstyle=drawstyle, marker="o",
-          label=label, markersize=3, **kwargs)
+  if 'marker' not in kwargs:
+    kwargs['marker'] = 'o'
+  if 'markersize' not in kwargs:
+    kwargs['markersize'] = 3
+  ax.plot(X[:-1], Y[:-1], drawstyle=drawstyle, label=label, **kwargs)
   # Fill area under the curve
   if fill_area:
     ax.fill_between(X, Y, color='cyan', step=step)
@@ -371,7 +343,10 @@ def plot_learning_curve(timestamps, scores,
   if show_final_score:
     ax.text(X[-1], Y[-1], "{:.4f}".format(Y[-1]))
   # Draw a dotted line from last prediction
-  ax.plot(X[-2:], Y[-2:], '--')
+  kwargs['linestyle'] = '--'
+  kwargs['linewidth'] = 1
+  kwargs['marker'] = None
+  ax.plot(X[-2:], Y[-2:], **kwargs)
   ax.legend()
   return alc, fig
 
@@ -446,6 +421,7 @@ def end_file_generated(prediction_dir):
   return os.path.isfile(end_filepath)
 
 def is_process_alive(pid):
+  """Check if a process is alive according to its PID."""
   try:
     os.kill(pid, 0)
   except OSError:
@@ -454,6 +430,7 @@ def is_process_alive(pid):
     return True
 
 def terminate_process(pid):
+  """Kill a process according to its PID."""
   process = psutil.Process(pid)
   process.terminate()
   logger.debug("Terminated process with pid={} in scoring.".format(pid))
@@ -478,7 +455,7 @@ class LearningCurve(object):
     self.algorithm_name = algorithm_name
 
   def plot(self, method='step', transform=None,
-           area_color='cyan', fill_area=True, model_name='',
+           area_color='cyan', fill_area=True, model_name=None,
            fig=None, show_final_score=True, **kwargs):
     timestamps = self.timestamps
     scores = self.scores
@@ -691,8 +668,6 @@ class Evaluator(object):
       f.write('timestamps: {}\n'.format(self.relative_timestamps))
       f.write('nauc_scores: {}\n'.format(self.scores_so_far['nauc']))
       f.write('accuracy: {}\n'.format(self.scores_so_far['accuracy']))
-      # yaml.dump(score_info_dict, stream=f,
-      #           allow_unicode=True, default_flow_style=False)
     logger.debug("Wrote to score_filename={} with score={}, duration={}"\
                   .format(score_filename, score, duration))
     return score_info_dict
