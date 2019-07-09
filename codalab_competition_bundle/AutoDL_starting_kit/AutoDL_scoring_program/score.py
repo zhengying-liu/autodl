@@ -13,8 +13,8 @@ DESCRIPTION =\
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
-20190709: [ZY] Resolve all issues; Rearrange some logging messages;
-               Simplify main function.
+20190709: [ZY] Resolve all issues; rearrange some logging messages;
+               simplify main function; fix exit_code of run_local_test.py;
 20190708: [ZY] Write the class Evaluator for object-oriented scoring program
 20190519: [ZY] Use the correct function for computing AUC of step functions
 20190516: [ZY] Change time budget to 20 minutes.

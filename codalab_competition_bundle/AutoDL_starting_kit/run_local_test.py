@@ -127,7 +127,7 @@ def run_baseline(dataset_dir, code_dir, time_budget=7200):
   ingestion_process.join()
   scoring_process.join()
   if not ingestion_process.exitcode == 0:
-    raise Exception("Some error occurred in ingestion program.")
+    logging.info("Some error occurred in ingestion program.")
   if not scoring_process.exitcode == 0:
     raise Exception("Some error occurred in scoring program.")
 
