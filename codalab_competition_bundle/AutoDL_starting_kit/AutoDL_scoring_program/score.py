@@ -888,10 +888,10 @@ if __name__ == "__main__":
     evaluator.write_scores_html(auto_refresh=False)
 
     # Compute scoring error bars of last prediction
-    n = 12
+    n = 100
     logger.info("Computing error bars with {} scorings...".format(n))
     mean, std, var = evaluator.compute_error_bars(n=n)
-    logger.info("Latest prediction NBAC:\nMean: {}\nStandard deviation: {}\nVariance: {}".format(mean, std, var))
+    logger.info("\nLatest prediction NBAC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
 
     scoring_start = evaluator.start_time
     # Use 'end.txt' file to detect if ingestion program ends
