@@ -660,15 +660,17 @@ class Evaluator(object):
     score_info_dict = {'score': score,
                        'Duration': duration,
                        'timestamps': self.relative_timestamps,
-                       'nauc_scores': self.scores_so_far['nauc'],
-                       'accuracy': self.scores_so_far['accuracy']
+                       'nauc_scores': self.scores_so_far['nauc']
                       }
+    if self.is_multiclass_task:
+      score_info_dict['accuracy'] = self.scores_so_far['accuracy']
     with open(score_filename, 'w') as f:
       f.write('score: ' + str(score) + '\n')
       f.write('Duration: ' + str(duration) + '\n')
       f.write('timestamps: {}\n'.format(self.relative_timestamps))
       f.write('nauc_scores: {}\n'.format(self.scores_so_far['nauc']))
-      f.write('accuracy: {}\n'.format(self.scores_so_far['accuracy']))
+      if self.is_multiclass_task:
+        f.write('accuracy: {}\n'.format(self.scores_so_far['accuracy']))
     logger.debug("Wrote to score_filename={} with score={}, duration={}"\
                   .format(score_filename, score, duration))
     return score_info_dict
@@ -862,11 +864,11 @@ if __name__ == "__main__":
     # Write one last time the detailed results page without auto-refreshing
     evaluator.write_scores_html(auto_refresh=False)
 
-    # Compute scoring error bars of last prediction
-    n = 100
-    logger.info("Computing error bars with {} scorings...".format(n))
-    mean, std, var = evaluator.compute_error_bars(n=n)
-    logger.info("\nLatest prediction NBAC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
+    # # Compute scoring error bars of last prediction
+    # n = 100
+    # logger.info("Computing error bars with {} scorings...".format(n))
+    # mean, std, var = evaluator.compute_error_bars(n=n)
+    # logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
 
     scoring_start = evaluator.start_time
     # Use 'end.txt' file to detect if ingestion program ends
