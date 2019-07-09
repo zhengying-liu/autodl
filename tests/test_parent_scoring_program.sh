@@ -4,6 +4,8 @@
 # AutoDL_parent_scoring_program using test_input/ as input. This folder
 # test_input/ contains real outputs scratched from CodaLab platform.
 
+set -e
+
 # Parent directory of the directory containing this script
 REPO_DIR=$(dirname $(dirname $(realpath $0)))
 BUNDLE_DIR=$REPO_DIR'/codalab_competition_bundle/'

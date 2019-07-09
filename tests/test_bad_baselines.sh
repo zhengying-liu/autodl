@@ -10,6 +10,8 @@
 #     `no_train_or_test`
 #   The 2 datasets are `Monkeys` and `miniciao`. This will make 5*2=10 tests.
 
+set -e
+
 # Parent directory of the directory containing this script
 REPO_DIR=$(dirname $(dirname $(realpath $0)))
 STARTING_KIT_DIR=$REPO_DIR'/codalab_competition_bundle/AutoDL_starting_kit/'
