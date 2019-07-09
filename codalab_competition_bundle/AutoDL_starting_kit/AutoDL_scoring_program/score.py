@@ -88,6 +88,7 @@ import psutil
 import sys
 import time
 import yaml
+from random import randrange
 
 logger = get_logger(verbosity_level)
 
@@ -746,6 +747,37 @@ class Evaluator(object):
     score = self.write_score()['score']
     return score
 
+  def compute_error_bars(self, n=10):
+    """Compute error bars on evaluation with boostrap.
+
+    Args:
+    scoring_function: callable with signature
+      scoring_function(solution, prediction)
+    solution: Numpy array, the solution (true labels).
+    predictions: Numpy array, predicted labels.
+    n: number of times to compute the score (more means more precision)
+    Returns:
+    a list of float, scores
+    """
+    scoring_function = self.scoring_functions['nauc']
+    solution = self.solution
+    last_prediction = read_array(self.prediction_files_so_far[-1])
+    assert(len(solution) == len(last_prediction))
+    l = len(solution)
+    scores = []
+    for _ in range(n): # number of scoring
+      new_solution = []
+      new_predictions = []
+      for _ in range(l): # boostrap
+          i = randrange(l)
+          new_solution.append(solution[i])
+          new_predictions.append(last_prediction[i])
+      scores.append(scoring_function(np.array(new_solution), np.array(new_predictions)))
+    mean = np.mean(scores)
+    std = np.std(scores)
+    var = np.var(scores)
+    return mean, std, var
+
 # =============================== MAIN ========================================
 
 if __name__ == "__main__":
@@ -829,6 +861,12 @@ if __name__ == "__main__":
 
     # Write one last time the detailed results page without auto-refreshing
     evaluator.write_scores_html(auto_refresh=False)
+
+    # Compute scoring error bars of last prediction
+    n = 100
+    logger.info("Computing error bars with {} scorings...".format(n))
+    mean, std, var = evaluator.compute_error_bars(n=n)
+    logger.info("\nLatest prediction NBAC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
 
     scoring_start = evaluator.start_time
     # Use 'end.txt' file to detect if ingestion program ends
