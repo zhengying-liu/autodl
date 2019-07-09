@@ -13,7 +13,9 @@ DESCRIPTION =\
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
-20190708: [ZY] Write the class Evaluator
+20190709: [ZY] Resolve all issues; Rearrange some logging messages;
+               Simplify main function.
+20190708: [ZY] Write the class Evaluator for object-oriented scoring program
 20190519: [ZY] Use the correct function for computing AUC of step functions
 20190516: [ZY] Change time budget to 20 minutes.
 20190508: [ZY] Decompose drawing learning curve functions;
@@ -722,14 +724,10 @@ class Evaluator(object):
     if len(timestamps) > 0:
       time_used = sorted_pairs[-1][0] - start
       latest_score = sorted_pairs[-1][1]
-      logger.info("(2 * AUC - 1) of the latest prediction is {:.4f}."\
-                .format(latest_score))
       if is_multiclass_task:
         accuracy_scores = self.scores_so_far['accuracy']
         sorted_pairs_acc = sorted(zip(timestamps, accuracy_scores))
         latest_acc = sorted_pairs_acc[-1][1]
-        logger.info("Accuracy of the latest prediction is {:.4f}."\
-                  .format(latest_acc))
     X = [t for t, _ in sorted_pairs]
     Y = [s for _, s in sorted_pairs]
     alc, fig = plot_learning_curve(X, Y, time_budget=self.time_budget,
@@ -778,6 +776,21 @@ class Evaluator(object):
     std = np.std(scores)
     var = np.var(scores)
     return mean, std, var
+
+  def score_new_predictions(self):
+    new_prediction_files = evaluator.get_new_prediction_files()
+    if len(new_prediction_files) > 0:
+      score = evaluator.update_score_and_learning_curve()
+      logger.info("[+] New prediction found. Now number of predictions " +
+                   "made = {}"\
+                   .format(len(evaluator.prediction_files_so_far)))
+      logger.info("Current area under learning curve for {}: {:.4f}"\
+                .format(evaluator.task_name, score))
+      logger.info("(2 * AUC - 1) of the latest prediction is {:.4f}."\
+                .format(evaluator.scores_so_far['nauc'][-1]))
+      if evaluator.is_multiclass_task:
+        logger.info("Accuracy of the latest prediction is {:.4f}."\
+                  .format(evaluator.scores_so_far['accuracy'][-1]))
 
 # =============================== MAIN ========================================
 
@@ -834,14 +847,11 @@ if __name__ == "__main__":
           evaluator.scoring_success = True
           break
         time.sleep(1)
-        new_prediction_files = evaluator.get_new_prediction_files()
-        if len(new_prediction_files) > 0:
-          score = evaluator.update_score_and_learning_curve()
-          logger.info("[+] New prediction found. Now number of predictions " +
-                       "made = {}"\
-                       .format(len(evaluator.prediction_files_so_far)))
-          logger.info("Current area under learning curve for {}: {:.4f}"\
-                    .format(evaluator.task_name, score))
+
+        ### Fetch new predictions, compute their scores and update variables ###
+        evaluator.score_new_predictions()
+        ########################################################################
+
         logger.debug("Prediction files so far: {}"\
                      .format(evaluator.prediction_files_so_far))
       else: # When time budget is used up, kill ingestion
@@ -855,16 +865,16 @@ if __name__ == "__main__":
       logger.error("[-] Error occurred in scoring:\n" + str(e),
                     exc_info=True)
 
-    evaluator.get_new_prediction_files()
-    score = evaluator.update_score_and_learning_curve()
+    evaluator.score_new_predictions()
+
     logger.info("Final area under learning curve for {}: {:.4f}"\
-              .format(evaluator.task_name, score))
+              .format(evaluator.task_name, evaluator.learning_curve.get_alc()))
 
     # Write one last time the detailed results page without auto-refreshing
     evaluator.write_scores_html(auto_refresh=False)
 
     # # Compute scoring error bars of last prediction
-    # n = 100
+    # n = 10
     # logger.info("Computing error bars with {} scorings...".format(n))
     # mean, std, var = evaluator.compute_error_bars(n=n)
     # logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
