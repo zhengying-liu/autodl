@@ -514,9 +514,8 @@ class Evaluator(object):
     self.time_limit_exceeded = None
     self.prediction_files_so_far = []
     self.new_prediction_files = []
-    self.scores_so_far = {}
+    self.scores_so_far = {'nauc':[]}
     self.relative_timestamps = []
-    self.learning_curve = None
 
     # Resolve info from directories
     self.solution = self.get_solution()
@@ -524,8 +523,8 @@ class Evaluator(object):
     self.is_multiclass_task = is_multiclass(self.solution)
 
     self.initialize_learning_curve_page()
-
     self.fetch_ingestion_info()
+    self.learning_curve = self.get_learning_curve()
 
   def get_solution(self):
     """Get solution as NumPy array from `self.solution_dir`."""
