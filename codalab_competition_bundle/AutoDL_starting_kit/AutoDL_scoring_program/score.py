@@ -445,10 +445,24 @@ class ScoringError(Exception):
   pass
 
 class LearningCurve(object):
+  """Learning curve object for AutoDL challenges. Contains at least an
+  increasing list of float as timestamps and another list of the same length
+  of the corresponding score at each timestamp.
+  """
 
   def __init__(self, timestamps=None, scores=None, time_budget=1200,
                score_name=None, task_name=None,
                participant_name=None, algorithm_name=None, subset='test'):
+    """
+    Args:
+      timestamps: list of float, should be increasing
+      scores: list of float, should have the same length as `timestamps`
+      time_budget: float, the time budget (for ingestion) of the task
+      score_name: string, can be 'nauc' or 'accuracy' (if is multiclass task)
+      task_name: string, name of the task, optional
+      participant_name: string, name of the participant, optional
+      algorithm_name: string, name of the algorithm, optional
+    """
     self.timestamps = timestamps or [] # relative timestamps
     self.scores = scores or []
     self.time_budget = time_budget
@@ -460,6 +474,23 @@ class LearningCurve(object):
   def plot(self, method='step', transform=None,
            area_color='cyan', fill_area=True, model_name=None,
            fig=None, show_final_score=True, **kwargs):
+    """Plot the learning curve using `matplotlib.pyplot`.
+
+    method: string, can be 'step' or 'trapez'. Decides which drawstyle to use.
+        Also effects ALC (Area under Learning Curve)
+    transform: callable, for transforming time axis to [0,1] interval, mostly
+        optional
+    area_color: string or color code, decides the color of the area under curve,
+        optional
+    fill_area: boolean, whether fill the area under curve with color or not
+    model_name: string, if not `None`, will be shown on the legend
+    fig: matplotlib.figure.Figure, the figure to plot on. If `None` create a new
+        one
+    show_final_score: boolean, whether show final score on the figure. Useful
+        when overlapping curves
+    kwargs: Line2D properties, will be passed for plotting the curve
+        see https://matplotlib.org/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D
+    """
     timestamps = self.timestamps
     scores = self.scores
     time_budget = self.time_budget
@@ -473,8 +504,15 @@ class LearningCurve(object):
                   show_final_score=show_final_score, **kwargs)
     return alc, fig
 
-  def get_alc(self):
-    alc, ax = self.plot()
+  def get_alc(self, t0=60):
+    X = [transform_time(t, T=self.time_budget, t0=t0)
+         for t in self.timestamps]
+    Y = list(self.scores.copy())
+    X.insert(0, 0)
+    Y.insert(0, 0)
+    X.append(1)
+    Y.append(Y[-1])
+    alc = auc(X, Y)
     return alc
 
   def get_time_used(self):
@@ -660,6 +698,7 @@ class Evaluator(object):
     score_filename = os.path.join(score_dir, 'scores.txt')
     score_info_dict = {'score': score,
                        'Duration': duration,
+                       'task_name': self.task_name,
                        'timestamps': self.relative_timestamps,
                        'nauc_scores': self.scores_so_far['nauc']
                       }
