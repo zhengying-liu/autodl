@@ -797,7 +797,7 @@ class Evaluator(object):
     Returns:
     a list of float, scores
     """
-    if len(self.prediction_files_so_far) > 0:
+    try:
         scoring_function = self.scoring_functions['nauc']
         solution = self.solution
         last_prediction = read_array(self.prediction_files_so_far[-1])
@@ -816,7 +816,7 @@ class Evaluator(object):
         std = np.std(scores)
         var = np.var(scores)
         return mean, std, var
-    else: # not able to compute error bars
+    except: # not able to compute error bars
         return -1, -1, -1
 
   def score_new_predictions(self):
