@@ -797,24 +797,27 @@ class Evaluator(object):
     Returns:
     a list of float, scores
     """
-    scoring_function = self.scoring_functions['nauc']
-    solution = self.solution
-    last_prediction = read_array(self.prediction_files_so_far[-1])
-    assert(len(solution) == len(last_prediction))
-    l = len(solution)
-    scores = []
-    for _ in range(n): # number of scoring
-      new_solution = []
-      new_predictions = []
-      for _ in range(l): # boostrap
-          i = randrange(l)
-          new_solution.append(solution[i])
-          new_predictions.append(last_prediction[i])
-      scores.append(scoring_function(np.array(new_solution), np.array(new_predictions)))
-    mean = np.mean(scores)
-    std = np.std(scores)
-    var = np.var(scores)
-    return mean, std, var
+    if len(self.prediction_files_so_far) > 0:
+        scoring_function = self.scoring_functions['nauc']
+        solution = self.solution
+        last_prediction = read_array(self.prediction_files_so_far[-1])
+        assert(len(solution) == len(last_prediction))
+        l = len(solution)
+        scores = []
+        for _ in range(n): # number of scoring
+          new_solution = []
+          new_predictions = []
+          for _ in range(l): # boostrap
+              i = randrange(l)
+              new_solution.append(solution[i])
+              new_predictions.append(last_prediction[i])
+          scores.append(scoring_function(np.array(new_solution), np.array(new_predictions)))
+        mean = np.mean(scores)
+        std = np.std(scores)
+        var = np.var(scores)
+        return mean, std, var
+    else: # not able to compute error bars
+        return -1, -1, -1
 
   def score_new_predictions(self):
     new_prediction_files = evaluator.get_new_prediction_files()
@@ -912,11 +915,11 @@ if __name__ == "__main__":
     # Write one last time the detailed results page without auto-refreshing
     evaluator.write_scores_html(auto_refresh=False)
 
-    # # Compute scoring error bars of last prediction
-    # n = 10
-    # logger.info("Computing error bars with {} scorings...".format(n))
-    # mean, std, var = evaluator.compute_error_bars(n=n)
-    # logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
+    # Compute scoring error bars of last prediction
+    n = 10
+    logger.info("Computing error bars with {} scorings...".format(n))
+    mean, std, var = evaluator.compute_error_bars(n=n)
+    logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
 
     scoring_start = evaluator.start_time
     # Use 'end.txt' file to detect if ingestion program ends
