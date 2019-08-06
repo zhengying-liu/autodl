@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # Author: Liu Zhengying
 # Date: 10 Apr 2019
-# Description: This script downloads the 5 datasets used in AutoCV challenge and
+# Description: This script downloads the public datasets used in AutoDL challenges and
 #   put them under the folder AutoDL_public_data/. This script supports
 #   breakpoint resume, which means that you can recover downloading from where
 #   your network broke down.
+# Usage:
+#   python download_public_datasets.py
 
 import os
 import sys
@@ -20,7 +22,7 @@ def main(*argv):
       'Hammer':'https://autodl.lri.fr/my/datasets/download/3507841e-59fe-4598-a27e-a9e170b26e44',
       'Kraut':'https://autodl.lri.fr/my/datasets/download/a1d9f706-cf8d-4a63-a544-552d6b85d6c4',
       'Katze':'https://autodl.lri.fr/my/datasets/download/611a42fa-da42-4a30-8c7a-69230d9eeb92',
-      'Kreatur':'https://autodl.lri.fr/my/datasets/download/c240df57-b144-41df-a059-05bc859d2621'      
+      'Kreatur':'https://autodl.lri.fr/my/datasets/download/c240df57-b144-41df-a059-05bc859d2621'
   }
   solution_urls = {
       'Munster':'https://autodl.lri.fr/my/datasets/download/5a24d8f3-dfb6-4935-b798-14baccda695f',
