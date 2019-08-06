@@ -17,6 +17,7 @@ DATASET_DIR_2=$SAMPLE_DATA_DIR'Monkeys'
 CODE_DIR_1=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/all_zero/'
 CODE_DIR_2=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/linear/'
 CODE_DIR_3=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/3dcnn/'
+CODE_DIR_4=$STARTING_KIT_DIR'AutoDL_simple_baseline_models/3dcnn_pytorch/'
 
 python $SCRIPT -dataset_dir=$DATASET_DIR_1 -code_dir=$CODE_DIR_1
 python $SCRIPT -dataset_dir=$DATASET_DIR_2 -code_dir=$CODE_DIR_1
@@ -24,3 +25,5 @@ python $SCRIPT -dataset_dir=$DATASET_DIR_1 -code_dir=$CODE_DIR_2
 python $SCRIPT -dataset_dir=$DATASET_DIR_2 -code_dir=$CODE_DIR_2
 python $SCRIPT -dataset_dir=$DATASET_DIR_1 -code_dir=$CODE_DIR_3
 python $SCRIPT -dataset_dir=$DATASET_DIR_2 -code_dir=$CODE_DIR_3
+python $SCRIPT -dataset_dir=$DATASET_DIR_1 -code_dir=$CODE_DIR_4
+python $SCRIPT -dataset_dir=$DATASET_DIR_2 -code_dir=$CODE_DIR_4
