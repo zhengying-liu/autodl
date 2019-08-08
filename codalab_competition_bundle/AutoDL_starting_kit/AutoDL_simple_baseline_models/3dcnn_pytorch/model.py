@@ -30,18 +30,16 @@ class torchModel(nn.Module):
       self.conv.add_module('cnn1',nn.Conv3d(input_shape[0], cnn_ch, (1,3,3)))
     else:
       self.conv.add_module('cnn1',nn.Conv3d(input_shape[0], cnn_ch, 3))
-    self.conv.add_module('bn1', nn.BatchNorm3d(cnn_ch))
     self.conv.add_module('pool1', nn.MaxPool3d(2,2))
     i=2
 
     while True:
-        self.conv.add_module('cnn{}'.format(i),nn.Conv3d(cnn_ch * (i-1), cnn_ch * i, (1,3,3)))
-        self.conv.add_module('dropout{}'.format(i), nn.Dropout(0.05))
-        self.conv.add_module('bn{}'.format(i), nn.BatchNorm3d(cnn_ch * i))
+        self.conv.add_module('cnn{}'.format(i),
+                             nn.Conv3d(cnn_ch * (i-1), cnn_ch * i, (1,3,3)))
         self.conv.add_module('pool{}'.format(i), nn.MaxPool3d(2,2))
         i += 1
         n_size, out_len = self.get_fc_size(input_shape)
-        if  n_size< 2000 or out_len[3]<3 or out_len[3]<3:
+        if  n_size < 1000 or out_len[3] < 3 or out_len[3] < 3:
             break
 
     fc_size, _ = self.get_fc_size(input_shape)
@@ -129,13 +127,11 @@ class Model(algorithm.Algorithm):
     self.pytorchmodel = torchModel(self.input_shape, self.output_dim)
     print('\nPyModel Defined\n')
     print(self.pytorchmodel)
-    self.pytorchmodel.cuda().to(self.device)
+    self.pytorchmodel.to(self.device)
 
     self.criterion = nn.BCEWithLogitsLoss()
     self.optimizer = torch.optim.Adam(self.pytorchmodel.parameters(), lr=1e-2)
     # self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', verbose=True, factor=0.5, patience=20)
-
-
 
      # Attributes for managing time budget
     # Cumulated number of training steps
