@@ -1,46 +1,37 @@
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.autograd import Variable
+import datetime
+import numpy as np
+import os
+import time
 import torch.utils.data as data_utils
 import torch
+import torch.nn as nn
+import torchvision
 import tensorflow as tf
-import os
-import numpy as np
 
-# Import the challenge algorithm (model) API from algorithm.py
-import algorithm
-
-# Other useful modules
-import datetime
-import time
 np.random.seed(42)
 torch.manual_seed(1)
-np.random.seed(1)
-tf.logging.set_verbosity(tf.logging.ERROR)
 
-import torch.nn as nn
-from torch.autograd import Variable
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-import torchvision
-
-class torchModel(nn.Module):
+class TorchModel(nn.Module):
   def __init__(self, input_shape, output_dim):
-    super(torchModel, self).__init__()
+    super(TorchModel, self).__init__()
     self.conv = torch.nn.Sequential()
     cnn_ch = 16
-    if input_shape[1] == 1:
-      self.conv.add_module('cnn1',nn.Conv3d(input_shape[0], cnn_ch, (1,3,3)))
+    if input_shape[1] == 1: # if num_channels = 1
+      self.conv.add_module('cnn1', nn.Conv3d(input_shape[0], cnn_ch, (1,3,3)))
     else:
-      self.conv.add_module('cnn1',nn.Conv3d(input_shape[0], cnn_ch, 3))
+      self.conv.add_module('cnn1', nn.Conv3d(input_shape[0], cnn_ch, 3))
     self.conv.add_module('pool1', nn.MaxPool3d(2,2))
-    i=2
-
+    i = 2
     while True:
-        self.conv.add_module('cnn{}'.format(i),
-                             nn.Conv3d(cnn_ch * (i-1), cnn_ch * i, (1,3,3)))
-        self.conv.add_module('pool{}'.format(i), nn.MaxPool3d(2,2))
-        i += 1
-        n_size, out_len = self.get_fc_size(input_shape)
-        if  n_size < 1000 or out_len[3] < 3 or out_len[3] < 3:
-            break
+      self.conv.add_module('cnn{}'.format(i),
+                           nn.Conv3d(cnn_ch * (i-1), cnn_ch * i, (1,3,3)))
+      self.conv.add_module('pool{}'.format(i), nn.MaxPool3d(2,2))
+      i += 1
+      n_size, out_len = self.get_fc_size(input_shape)
+      if  n_size < 1000 or out_len[3] < 3 or out_len[3] < 3:
+        break
 
     fc_size, _ = self.get_fc_size(input_shape)
     self.fc = nn.Linear(fc_size, output_dim)
@@ -62,40 +53,40 @@ class torchModel(nn.Module):
     x = self.fc(x)
     return x
 
+
 class TFDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset, session, num_samples):
-        super(TFDataset, self).__init__()
-        self.dataset = dataset
-        self.session = session
-        self.num_samples = num_samples
-        self.next_element = None
-        self.reset()
+  def __init__(self, dataset, session, num_samples):
+    super(TFDataset, self).__init__()
+    self.dataset = dataset
+    self.session = session
+    self.num_samples = num_samples
+    self.next_element = None
+    self.reset()
 
-    def reset(self):
-        dataset = self.dataset
-        iterator = dataset.make_one_shot_iterator()
-        self.next_element = iterator.get_next()
-        return self
+  def reset(self):
+    dataset = self.dataset
+    iterator = dataset.make_one_shot_iterator()
+    self.next_element = iterator.get_next()
+    return self
 
-    def __len__(self):
-        return self.num_samples
+  def __len__(self):
+    return self.num_samples
 
-    def __getitem__(self, index):
-        session = self.session if self.session is not None else tf.Session()
-        try:
-            example, label = session.run(self.next_element)
-        except tf.errors.OutOfRangeError:
-            self.reset()
-            example, label = session.run(self.next_element)
-            # raise StopIteration
-        return example.transpose(3,0,1,2), label
+  def __getitem__(self, index):
+    session = self.session if self.session is not None else tf.Session()
+    try:
+      example, label = session.run(self.next_element)
+    except tf.errors.OutOfRangeError:
+      self.reset()
+      example, label = session.run(self.next_element)
+    return example.transpose(3,0,1,2), label
 
-
-class Model(algorithm.Algorithm):
-
+class Model():
   def __init__(self, metadata):
-    super(Model, self).__init__(metadata)
-    self.no_more_training = False
+    # Attribute necessary for ingestion program to stop evaluation process
+    self.done_training = False
+    self.metadata_ = metadata
+
     self.output_dim = self.metadata_.get_output_size()
     self.num_examples_train = self.metadata_.size()
     row_count, col_count = self.metadata_.get_matrix_size(0)
@@ -103,17 +94,20 @@ class Model(algorithm.Algorithm):
     sequence_size = self.metadata_.get_sequence_size()
 
     self.num_train = self.metadata_.size()
-    test_metadata_filename = self.metadata_.get_dataset_name().replace('train', 'test') + '/metadata.textproto'
-    self.num_test = [int(line.split(':')[1]) for line in open(test_metadata_filename, 'r').readlines() if 'sample_count' in line][0]
+    test_metadata_filename = self.metadata_.get_dataset_name()\
+                             .replace('train', 'test') + '/metadata.textproto'
+    self.num_test = [int(line.split(':')[1]) for line
+                     in open(test_metadata_filename, 'r').readlines()
+                     if 'sample_count' in line][0]
 
     self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print('Device Found = ', self.device,'\nMoving Model and Data into the device...')
+    print('Device Found = ', self.device,
+          '\nMoving Model and Data into the device...')
 
     # Attributes for preprocessing
     self.default_image_size = (112,112)
     self.default_num_frames = 15
     self.default_shuffle_buffer = 100
-
 
     if row_count == -1 or col_count == -1 :
       row_count = self.default_image_size[0]
@@ -124,14 +118,13 @@ class Model(algorithm.Algorithm):
 
     # getting an object for the PyTorch Model class for Model Class
     # use CUDA if available
-    self.pytorchmodel = torchModel(self.input_shape, self.output_dim)
+    self.pytorchmodel = TorchModel(self.input_shape, self.output_dim)
     print('\nPyModel Defined\n')
     print(self.pytorchmodel)
     self.pytorchmodel.to(self.device)
 
     self.criterion = nn.BCEWithLogitsLoss()
     self.optimizer = torch.optim.Adam(self.pytorchmodel.parameters(), lr=1e-2)
-    # self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', verbose=True, factor=0.5, patience=20)
 
      # Attributes for managing time budget
     # Cumulated number of training steps
@@ -143,7 +136,6 @@ class Model(algorithm.Algorithm):
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
     self.trained = False
-    self.done_training = False
 
     # PYTORCH
     # Critical number for early stopping
@@ -156,7 +148,82 @@ class Model(algorithm.Algorithm):
     self.train_session = tf.Session()
     self.test_session = tf.Session()
 
+  def train(self, dataset, remaining_time_budget=None):
+    steps_to_train = self.get_steps_to_train(remaining_time_budget)
+    if steps_to_train <= 0:
+      print_log("Not enough time remaining for training. " +
+            "Estimated time for training per step: {:.2f}, "\
+            .format(self.estimated_time_per_step) +
+            "but remaining time budget is: {:.2f}. "\
+            .format(remaining_time_budget) +
+            "Skipping...")
+      self.done_training = True
+    else:
+      msg_est = ""
+      if self.estimated_time_per_step:
+        msg_est = "estimated time for this: " +\
+                  "{:.2f} sec.".format(steps_to_train * self.estimated_time_per_step)
+      print_log("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
 
+      if not hasattr(self, 'trainloader'):
+        self.trainloader = self.get_dataloader(dataset, self.num_train, batch_size=self.train_batch_size)
+      train_start = time.time()
+
+      #Training loop inside
+      self.trainloop(self.criterion, self.optimizer, steps=steps_to_train)
+      train_end = time.time()
+
+      # Update for time budget managing
+      train_duration = train_end - train_start
+      self.total_train_time += train_duration
+      self.cumulated_num_steps += steps_to_train
+      self.estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
+      print_log("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
+            "Now total steps trained: {}. ".format(self.cumulated_num_steps) +\
+            "Total time used for training: {:.2f} sec. ".format(self.total_train_time) +\
+            "Current estimated time per step: {:.2e} sec.".format(self.estimated_time_per_step))
+
+  def test(self, dataset, remaining_time_budget=None):
+    if self.done_training:
+      return None
+
+    if self.choose_to_stop_early():
+      print_log("Oops! Choose to stop early for next call!")
+      self.done_training = True
+    test_begin = time.time()
+    if remaining_time_budget and self.estimated_time_test and\
+        self.estimated_time_test > remaining_time_budget:
+      print_log("Not enough time for test. " +\
+            "Estimated time for test: {:.2e}, ".format(self.estimated_time_test) +\
+            "But remaining time budget is: {:.2f}. ".format(remaining_time_budget) +\
+            "Stop train/predict process by returning None.")
+      return None
+
+    msg_est = ""
+    if self.estimated_time_test:
+      msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
+    print_log("Begin testing...", msg_est)
+
+    # PYTORCH
+    if not hasattr(self, 'testloader'):
+        self.testloader = self.get_dataloader_test(dataset, self.num_test,
+                                                   self.test_batch_size)
+    predictions = self.testloop(self.testloader)
+
+    test_end = time.time()
+    # Update some variables for time management
+    test_duration = test_end - test_begin
+    self.total_test_time += test_duration
+    self.cumulated_num_tests += 1
+    self.estimated_time_test = self.total_test_time / self.cumulated_num_tests
+    print_log("[+] Successfully made one prediction. {:.2f} sec used. ".format(test_duration) +\
+          "Total time used for testing: {:.2f} sec. ".format(self.total_test_time) +\
+          "Current estimated time for test: {:.2e} sec.".format(self.estimated_time_test))
+    return predictions
+
+  ##############################################################################
+  #### Above 3 methods (__init__, train, test) should always be implemented ####
+  ##############################################################################
 
   def preprocess_tensor_4d(self, tensor_4d):
     """Preprocess a 4-D tensor (only when some dimensions are `None`, i.e.
@@ -199,7 +266,6 @@ class Model(algorithm.Algorithm):
     print_log("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
     return tensor_4d
 
-
   def get_dataloader(self, tf_dataset, num_images, batch_size):
     tf_dataset = tf_dataset.map(lambda *x: (self.preprocess_tensor_4d(x[0]), x[1]))
     train_dataset = TFDataset(tf_dataset, self.train_session, num_images)
@@ -209,15 +275,13 @@ class Model(algorithm.Algorithm):
             shuffle=True,
             drop_last=True
         )
-
     return dataloader
 
   def get_dataloader_test(self, tf_dataset, num_images, batch_size):
     tf_dataset = tf_dataset.map(lambda *x: (self.preprocess_tensor_4d(x[0]), x[1]))
     dataset = TFDataset(tf_dataset, self.test_session, num_images)
-    dataloader = torch.utils.data.DataLoader(dataset,batch_size=batch_size)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
     return dataloader
-
 
   def trainloop(self, criterion, optimizer, steps):
     self.pytorchmodel.train()
@@ -240,46 +304,6 @@ class Model(algorithm.Algorithm):
     #   print('Train Loss = ',loss.item())
       loss.backward()
       optimizer.step()
-
-
-
-  def train(self, dataset, remaining_time_budget=None):
-    steps_to_train = self.get_steps_to_train(remaining_time_budget)
-    if steps_to_train <= 0:
-      print_log("Not enough time remaining for training. " +
-            "Estimated time for training per step: {:.2f}, "\
-            .format(self.estimated_time_per_step) +
-            "but remaining time budget is: {:.2f}. "\
-            .format(remaining_time_budget) +
-            "Skipping...")
-      self.done_training = True
-    else:
-      msg_est = ""
-      if self.estimated_time_per_step:
-        msg_est = "estimated time for this: " +\
-                  "{:.2f} sec.".format(steps_to_train * self.estimated_time_per_step)
-      print_log("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
-
-      if not hasattr(self, 'trainloader'):
-        self.trainloader = self.get_dataloader(dataset, self.num_train, batch_size=self.train_batch_size)
-      train_start = time.time()
-
-      #Training loop inside
-
-      self.trainloop(self.criterion, self.optimizer, steps=steps_to_train)
-      train_end = time.time()
-
-      # Update for time budget managing
-      train_duration = train_end - train_start
-      self.total_train_time += train_duration
-      self.cumulated_num_steps += steps_to_train
-      self.estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
-      print_log("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
-            "Now total steps trained: {}. ".format(self.cumulated_num_steps) +\
-            "Total time used for training: {:.2f} sec. ".format(self.total_train_time) +\
-            "Current estimated time per step: {:.2e} sec.".format(self.estimated_time_per_step))
-
-
 
   def get_steps_to_train(self, remaining_time_budget):
     """Get number of steps for training according to `remaining_time_budget`.
@@ -325,7 +349,6 @@ class Model(algorithm.Algorithm):
     preds = np.vstack(preds)
     return preds
 
-
   def choose_to_stop_early(self):
     """The criterion to stop further training (thus finish train/predict
     process).
@@ -339,73 +362,12 @@ class Model(algorithm.Algorithm):
     return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
 
 
-
-  def test(self, dataset, remaining_time_budget=None):
-    if self.done_training:
-      return None
-
-    if self.choose_to_stop_early():
-      print_log("Oops! Choose to stop early for next call!")
-      self.done_training = True
-    test_begin = time.time()
-    if remaining_time_budget and self.estimated_time_test and\
-        self.estimated_time_test > remaining_time_budget:
-      print_log("Not enough time for test. " +\
-            "Estimated time for test: {:.2e}, ".format(self.estimated_time_test) +\
-            "But remaining time budget is: {:.2f}. ".format(remaining_time_budget) +\
-            "Stop train/predict process by returning None.")
-      return None
-
-    msg_est = ""
-    if self.estimated_time_test:
-      msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
-    print_log("Begin testing...", msg_est)
-
-    # PYTORCH
-    if not hasattr(self, 'testloader'):
-        self.testloader = self.get_dataloader_test(dataset, self.num_test, self.test_batch_size)
-    predictions = self.testloop(self.testloader)
-
-    test_end = time.time()
-    # Update some variables for time management
-    test_duration = test_end - test_begin
-    self.total_test_time += test_duration
-    self.cumulated_num_tests += 1
-    self.estimated_time_test = self.total_test_time / self.cumulated_num_tests
-    print_log("[+] Successfully made one prediction. {:.2f} sec used. ".format(test_duration) +\
-          "Total time used for testing: {:.2f} sec. ".format(self.total_test_time) +\
-          "Current estimated time for test: {:.2e} sec.".format(self.estimated_time_test))
-    return predictions
-
-
-
-  ##############################################################################
-  #### Above 3 methods (__init__, train, test) should always be implemented ####
-  ##############################################################################
-
-#### Can contain other functions too
+#### Other helper functions
 def print_log(*content):
   """Logging function. (could've also used `import logging`.)"""
   now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
   print("MODEL INFO: " + str(now)+ " ", end='')
   print(*content)
-
-def get_num_entries(tensor):
-  """Return number of entries for a TensorFlow tensor.
-  Args:
-    tensor: a tf.Tensor or tf.SparseTensor object of shape
-        (batch_size, sequence_size, row_count, col_count[, num_channels])
-  Returns:
-    num_entries: number of entries of each example, which is equal to
-        sequence_size * row_count * col_count [* num_channels]
-  """
-  tensor_shape = tensor.shape
-  assert(len(tensor_shape) > 1)
-  num_entries  = 1
-  for i in tensor_shape[1:]:
-    num_entries *= int(i)
-  return num_entries
-
 
 def crop_time_axis(tensor_4d, num_frames, begin_index=None):
   """Given a 4-D tensor, take a slice of length `num_frames` on its time axis.
@@ -421,24 +383,18 @@ def crop_time_axis(tensor_4d, num_frames, begin_index=None):
   # pad sequence if not long enough
   pad_size = tf.maximum(num_frames - tf.shape(tensor_4d)[0], 0)
   padded_tensor = tf.pad(tensor_4d, ((0, pad_size), (0, 0), (0, 0), (0, 0)))
-
   # If not given, randomly choose the beginning index of frames
   if not begin_index:
-
     maxval = tf.shape(padded_tensor)[0] - num_frames + 1
     begin_index = tf.random.uniform([1],
                                     minval=0,
                                     maxval=maxval,
                                     dtype=tf.int32)
     begin_index = tf.stack([begin_index[0], 0, 0, 0], name='begin_index')
-
   sliced_tensor = tf.slice(padded_tensor,
                            begin=begin_index,
                            size=[num_frames, -1, -1, -1])
-
   return sliced_tensor
-
-
 
 def resize_space_axes(tensor_4d, new_row_count, new_col_count):
   """Given a 4-D tensor, resize space axes to have target size.
@@ -453,9 +409,3 @@ def resize_space_axes(tensor_4d, new_row_count, new_col_count):
   resized_images = tf.image.resize_images(tensor_4d,
                                           size=(new_row_count, new_col_count))
   return resized_images
-
-def print_log(*content):
-  """Logging function. (could've also used `import logging`.)"""
-  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-  print("MODEL INFO: " + str(now)+ " ", end='')
-  print(*content)
