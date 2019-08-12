@@ -22,7 +22,11 @@ RUN pip install keras
 RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp35-cp35m-linux_x86_64.whl
 RUN pip install torchvision
 
-# Additional packages demanded by participants
+# Packages to be activated: Following packages are demanded by one of the
+# participants. If another participant asks to install one of these packages,
+# we'll uncomment corresponding line and rebuild this image.
 RUN pip install tensorflow_hub
+# RUN pip install fastai
+# RUN pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/cuda/10.0 nvidia-dali
 
 WORKDIR /app/codalab
