@@ -68,10 +68,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data_1.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
+        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data_1.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
+        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
@@ -88,10 +88,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data_1.zip # 37a6461e-7c1f-468a-bc4a-fa66c6847d95
+        input_data: AutoDL_input_data.zip # 37a6461e-7c1f-468a-bc4a-fa66c6847d95
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data_1.zip # 8b92f40f-f193-4026-9ef8-a06d8bc82934
+        reference_data: AutoDL_reference_data.zip # 8b92f40f-f193-4026-9ef8-a06d8bc82934
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
@@ -108,10 +108,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data_1.zip # b1ad71fe-b597-4f8d-8b56-afff66002c62
+        input_data: AutoDL_input_data.zip # b1ad71fe-b597-4f8d-8b56-afff66002c62
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data_1.zip # 8436224e-e958-457e-bd8d-7c18ac43a6c0
+        reference_data: AutoDL_reference_data.zip # 8436224e-e958-457e-bd8d-7c18ac43a6c0
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
@@ -128,10 +128,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data_1.zip # 8f0c139f-c6c8-4433-bf38-51e7d0486bea
+        input_data: AutoDL_input_data.zip # 8f0c139f-c6c8-4433-bf38-51e7d0486bea
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data_1.zip # 8528974d-b0f2-45bd-bd9c-2c859acb8ebc
+        reference_data: AutoDL_reference_data.zip # 8528974d-b0f2-45bd-bd9c-2c859acb8ebc
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
@@ -148,10 +148,10 @@ phases:
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
         ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data:  AutoDL_input_data_1.zip # ce683464-561e-472f-886d-4d04039f6c39
+        input_data:  AutoDL_input_data.zip # ce683464-561e-472f-886d-4d04039f6c39
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
-        reference_data:  AutoDL_reference_data_1.zip # 65acfcae-9b8f-4cb5-ad8c-1032ad038856
+        reference_data:  AutoDL_reference_data.zip # 65acfcae-9b8f-4cb5-ad8c-1032ad038856
         hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, ave_score"
 
 
