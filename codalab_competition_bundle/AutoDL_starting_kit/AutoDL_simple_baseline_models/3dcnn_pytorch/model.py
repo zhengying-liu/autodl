@@ -1,8 +1,10 @@
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.autograd import Variable
 import datetime
+import logging
 import numpy as np
 import os
+import sys
 import time
 import torch.utils.data as data_utils
 import torch
@@ -151,7 +153,7 @@ class Model():
   def train(self, dataset, remaining_time_budget=None):
     steps_to_train = self.get_steps_to_train(remaining_time_budget)
     if steps_to_train <= 0:
-      print_log("Not enough time remaining for training. " +
+      logger.info("Not enough time remaining for training. " +
             "Estimated time for training per step: {:.2f}, "\
             .format(self.estimated_time_per_step) +
             "but remaining time budget is: {:.2f}. "\
@@ -163,7 +165,7 @@ class Model():
       if self.estimated_time_per_step:
         msg_est = "estimated time for this: " +\
                   "{:.2f} sec.".format(steps_to_train * self.estimated_time_per_step)
-      print_log("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
+      logger.info("Begin training for another {} steps...{}".format(steps_to_train, msg_est))
 
       if not hasattr(self, 'trainloader'):
         self.trainloader = self.get_dataloader(dataset, self.num_train, batch_size=self.train_batch_size)
@@ -178,7 +180,7 @@ class Model():
       self.total_train_time += train_duration
       self.cumulated_num_steps += steps_to_train
       self.estimated_time_per_step = self.total_train_time / self.cumulated_num_steps
-      print_log("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
+      logger.info("{} steps trained. {:.2f} sec used. ".format(steps_to_train, train_duration) +\
             "Now total steps trained: {}. ".format(self.cumulated_num_steps) +\
             "Total time used for training: {:.2f} sec. ".format(self.total_train_time) +\
             "Current estimated time per step: {:.2e} sec.".format(self.estimated_time_per_step))
@@ -188,12 +190,12 @@ class Model():
       return None
 
     if self.choose_to_stop_early():
-      print_log("Oops! Choose to stop early for next call!")
+      logger.info("Oops! Choose to stop early for next call!")
       self.done_training = True
     test_begin = time.time()
     if remaining_time_budget and self.estimated_time_test and\
         self.estimated_time_test > remaining_time_budget:
-      print_log("Not enough time for test. " +\
+      logger.info("Not enough time for test. " +\
             "Estimated time for test: {:.2e}, ".format(self.estimated_time_test) +\
             "But remaining time budget is: {:.2f}. ".format(remaining_time_budget) +\
             "Stop train/predict process by returning None.")
@@ -202,7 +204,7 @@ class Model():
     msg_est = ""
     if self.estimated_time_test:
       msg_est = "estimated time: {:.2e} sec.".format(self.estimated_time_test)
-    print_log("Begin testing...", msg_est)
+    logger.info("Begin testing..." + msg_est)
 
     # PYTORCH
     if not hasattr(self, 'testloader'):
@@ -216,7 +218,7 @@ class Model():
     self.total_test_time += test_duration
     self.cumulated_num_tests += 1
     self.estimated_time_test = self.total_test_time / self.cumulated_num_tests
-    print_log("[+] Successfully made one prediction. {:.2f} sec used. ".format(test_duration) +\
+    logger.info("[+] Successfully made one prediction. {:.2f} sec used. ".format(test_duration) +\
           "Total time used for testing: {:.2f} sec. ".format(self.total_test_time) +\
           "Current estimated time for test: {:.2e} sec.".format(self.estimated_time_test))
     return predictions
@@ -236,7 +238,7 @@ class Model():
       A 4-D Tensor with fixed, known shape.
     """
     tensor_4d_shape = tensor_4d.shape
-    print_log("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
+    logger.info("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
 
     if tensor_4d_shape[0] > 0 and tensor_4d_shape[0] < 10:
       num_frames = tensor_4d_shape[0]
@@ -252,18 +254,18 @@ class Model():
       new_col_count=self.default_image_size[1]
 
     if not tensor_4d_shape[0] > 0:
-      print_log("Detected that examples have variable sequence_size, will " +
+      logger.info("Detected that examples have variable sequence_size, will " +
                 "randomly crop a sequence with num_frames = " +
                 "{}".format(num_frames))
       tensor_4d = crop_time_axis(tensor_4d, num_frames=num_frames)
     if not tensor_4d_shape[1] > 0 or not tensor_4d_shape[2] > 0:
-      print_log("Detected that examples have variable space size, will " +
+      logger.info("Detected that examples have variable space size, will " +
                 "resize space axes to (new_row_count, new_col_count) = " +
                 "{}".format((new_row_count, new_col_count)))
       tensor_4d = resize_space_axes(tensor_4d,
                                     new_row_count=new_row_count,
                                     new_col_count=new_col_count)
-    print_log("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
+    logger.info("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
     return tensor_4d
 
   def get_dataloader(self, tf_dataset, num_images, batch_size):
@@ -273,7 +275,7 @@ class Model():
             train_dataset,
             batch_size=self.train_batch_size,
             shuffle=True,
-            drop_last=True
+            drop_last=False
         )
     return dataloader
 
@@ -358,17 +360,11 @@ class Model():
     batch_size = self.train_batch_size
     num_examples = self.metadata_.size()
     num_epochs = self.cumulated_num_steps * batch_size / num_examples
-    print_log("Model already trained for {} epochs.".format(num_epochs))
+    logger.info("Model already trained for {} epochs.".format(num_epochs))
     return num_epochs > self.num_epochs_we_want_to_train # Train for at least certain number of epochs then stop
 
 
 #### Other helper functions
-def print_log(*content):
-  """Logging function. (could've also used `import logging`.)"""
-  now = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-  print("MODEL INFO: " + str(now)+ " ", end='')
-  print(*content)
-
 def crop_time_axis(tensor_4d, num_frames, begin_index=None):
   """Given a 4-D tensor, take a slice of length `num_frames` on its time axis.
   Args:
@@ -409,3 +405,25 @@ def resize_space_axes(tensor_4d, new_row_count, new_col_count):
   resized_images = tf.image.resize_images(tensor_4d,
                                           size=(new_row_count, new_col_count))
   return resized_images
+
+def get_logger(verbosity_level):
+  """Set logging format to something like:
+       2019-04-25 12:52:51,924 INFO model.py: <message>
+  """
+  logger = logging.getLogger(__file__)
+  logging_level = getattr(logging, verbosity_level)
+  logger.setLevel(logging_level)
+  formatter = logging.Formatter(
+    fmt='%(asctime)s %(levelname)s %(filename)s: %(message)s')
+  stdout_handler = logging.StreamHandler(sys.stdout)
+  stdout_handler.setLevel(logging_level)
+  stdout_handler.setFormatter(formatter)
+  stderr_handler = logging.StreamHandler(sys.stderr)
+  stderr_handler.setLevel(logging.WARNING)
+  stderr_handler.setFormatter(formatter)
+  logger.addHandler(stdout_handler)
+  logger.addHandler(stderr_handler)
+  logger.propagate = False
+  return logger
+
+logger = get_logger('INFO')
