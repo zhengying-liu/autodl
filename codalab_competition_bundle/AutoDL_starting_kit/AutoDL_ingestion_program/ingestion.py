@@ -176,10 +176,6 @@ class BadPredictionShapeError(Exception):
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__":
-    # Mark starting time of ingestion
-    start = time.time()
-    logger.info("="*5 + " Start ingestion program. " +
-                "Version: {} ".format(VERSION) + "="*5)
 
     #### Check whether everything went well
     ingestion_success = True
@@ -268,6 +264,11 @@ if __name__=="__main__":
 
     basename = datanames[0]
 
+    # Mark starting time of ingestion
+    start = time.time()
+    logger.info("="*5 + " Start ingestion program. " +
+                "Version: {} ".format(VERSION) + "="*5)
+
     write_start_file(output_dir, start_time=start, time_budget=time_budget,
                      task_name=basename.split('.')[0])
 
@@ -289,10 +290,9 @@ if __name__=="__main__":
     correct_prediction_shape = (num_examples_test, output_dim)
 
     try:
-      # ========= Creating a model
-      from model import Model # in participants' model.py
       ##### Begin creating model #####
       logger.info("Creating model...")
+      from model import Model # in participants' model.py
       M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
       ###### End creating model ######
 
