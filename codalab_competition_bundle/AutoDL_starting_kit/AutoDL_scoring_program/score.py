@@ -7,12 +7,13 @@
 #           prediction_dir should contain e.g. start.txt, adult.predict_0, adult.predict_1,..., end.txt.
 #           score_dir should contain scores.txt, detailed_results.html
 
-VERSION = 'v20190709'
+VERSION = 'v20190820'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20190820: [ZY] Minor fix: change wait time (for ingestion) from 30s to 90s
 20190709: [ZY] Resolve all issues; rearrange some logging messages;
                simplify main function; fix exit_code of run_local_test.py;
 20190708: [ZY] Write the class Evaluator for object-oriented scoring program
@@ -596,13 +597,13 @@ class Evaluator(object):
     especially: `ingestion_start`, `ingestion_pid`, `time_budget`.
 
     Raises:
-      IngestionError if no sign of ingestion starting detected after 30 seconds.
+      IngestionError if no sign of ingestion starting detected after 90 seconds.
     """
     logger.debug("Fetching ingestion info...")
     prediction_dir = self.prediction_dir
-    # Wait 30 seconds for ingestion to start and write 'start.txt',
+    # Wait 90 seconds for ingestion to start and write 'start.txt',
     # Otherwise, raise an exception.
-    wait_time = 30
+    wait_time = 90
     ingestion_info = None
     for i in range(wait_time):
       ingestion_info = get_ingestion_info(prediction_dir)
