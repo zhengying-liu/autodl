@@ -505,7 +505,7 @@ class LearningCurve(object):
                   show_final_score=show_final_score, **kwargs)
     return alc, fig
 
-  def get_alc(self, t0=60):
+  def get_alc(self, t0=60, method='step'):
     X = [transform_time(t, T=self.time_budget, t0=t0)
          for t in self.timestamps]
     Y = list(self.scores.copy())
@@ -513,7 +513,11 @@ class LearningCurve(object):
     Y.insert(0, 0)
     X.append(1)
     Y.append(Y[-1])
-    alc = auc(X, Y)
+    if method == 'step':
+      auc_func = auc_step
+    elif method == 'trapez':
+      auc_func = auc
+    alc = auc_func(X, Y)
     return alc
 
   def get_time_used(self):
