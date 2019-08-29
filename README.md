@@ -1,5 +1,5 @@
 # AutoDL
-A data challenge in Automated Deep Learning (AutoDL), co-organized with Google.
+A data challenge in Automated Deep Learning (AutoDL), organized by ChaLearn, Google and 4Paradigm.
 
 [![Build Status](https://travis-ci.org/zhengying-liu/autodl.svg?branch=master)](https://travis-ci.org/zhengying-liu/autodl)
 
