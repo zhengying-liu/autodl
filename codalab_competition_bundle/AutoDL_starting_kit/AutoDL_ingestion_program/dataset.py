@@ -100,6 +100,9 @@ class AutoDLMetadata(object):
   def get_label_to_index_map(self):
     return self.metadata_.label_to_index_map
 
+  def get_channel_to_index_map(self):
+    return self.metadata_.channel_to_index_map
+
   def get_feature_to_index_map(self):
     return self.metadata_.feature_to_index_map
 
