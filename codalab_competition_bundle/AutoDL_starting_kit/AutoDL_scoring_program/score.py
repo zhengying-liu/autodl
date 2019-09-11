@@ -626,6 +626,12 @@ class LearningCurve(object):
     else:
       return 0
 
+  def get_final_score(self):
+    if len(self.scores) > 0:
+      return self.scores[-1]
+    else:
+      return 0
+
   def save_figure(self, output_dir):
     alc, ax = self.plot()
     fig_name = get_fig_name(self.task_name)
