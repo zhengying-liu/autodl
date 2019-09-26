@@ -18,6 +18,8 @@ RUN pip install pyyaml
 RUN pip install psutil
 RUN pip install h5py
 RUN pip install keras
+RUN pip install playsound
+RUN pip install librosa
 # CUDA 10 support for PyTorch
 RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp35-cp35m-linux_x86_64.whl
 RUN pip install torchvision
