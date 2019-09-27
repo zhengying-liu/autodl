@@ -169,6 +169,7 @@ class DataBrowser(object):
 
   @classmethod
   def show_speech(cls, tensor_4d, label_confidence_pairs=None):
+      """Play audio and display labels."""
       data = np.squeeze(tensor_4d)
       print('Playing audio...')
       DataBrowser.play_sound(data)
