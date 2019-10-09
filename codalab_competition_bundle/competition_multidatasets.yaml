@@ -4,7 +4,7 @@
 # Authors: Isabelle Guyon, Zhengying Liu, Adrien Pavao
 # Date: Apr 12, 2018
 
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
+# ALL INFORMATION,sOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # UNIVERSITE PARIS SUD, INRIA, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
 # ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
@@ -14,12 +14,12 @@
 # ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS,
 # MATERIALS, PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-title: 'AutoCV Challenge :: beta tests'
+title: 'AutoDL TABULAR data :: 25 DATASETS beta tests'
 description: Create a fully Automatic Deep Learning solution.
 image: logo.png
 has_registration: False                 # We do not check participants, registration is free
 force_submission_to_leaderboard: True   # If false, participants must submit manually
-disallow_leaderboard_modifying: True    # If true, submissions cannot be changed
+disallow_leaderboard_modifying: True    # If true,submissions cannot be changed
 enable_detailed_results: True           # True if html file written
 competition_docker_image: evariste/autodl:gpu # replace that by your own docker
 end_date: 2019-12-15
@@ -72,7 +72,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     3:
         phasenumber: 3
@@ -91,7 +91,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     4:
         phasenumber: 4
@@ -110,7 +110,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     5:
         phasenumber: 5
@@ -129,8 +129,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
+
     6:
         phasenumber: 6
         label: "Dataset 5"
@@ -148,7 +148,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     7:
         phasenumber: 7
@@ -167,7 +167,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     8:
         phasenumber: 8
@@ -186,7 +186,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     9:
         phasenumber: 9
@@ -205,8 +205,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
+
     10:
         phasenumber: 10
         label: "Dataset 9"
@@ -224,7 +224,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     11:
         phasenumber: 11
@@ -243,7 +243,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     12:
         phasenumber: 12
@@ -262,7 +262,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     13:
         phasenumber: 13
@@ -281,8 +281,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
+
     14:
         phasenumber: 14
         label: "Dataset 13"
@@ -300,7 +300,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     15:
         phasenumber: 15
@@ -319,7 +319,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     16:
         phasenumber: 16
@@ -338,7 +338,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     17:
         phasenumber: 17
@@ -357,8 +357,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
+
     18:
         phasenumber: 18
         label: "Dataset 17"
@@ -376,7 +376,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     19:
         phasenumber: 19
@@ -395,7 +395,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     20:
         phasenumber: 20
@@ -414,7 +414,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     21:
         phasenumber: 21
@@ -433,8 +433,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
+
     22:
         phasenumber: 22
         label: "Dataset 21"
@@ -452,7 +452,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     23:
         phasenumber: 23
@@ -471,7 +471,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     24:
         phasenumber: 24
@@ -490,7 +490,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     25:
         phasenumber: 25
@@ -509,7 +509,7 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
     26:
         phasenumber: 26
@@ -528,483 +528,8 @@ phases:
         ingestion_program: AutoDL_ingestion_program.zip
         scoring_program: AutoDL_scoring_program.zip
         reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
+        hidden_columns: "s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25,ave"
 
-    27:
-        phasenumber: 27
-        label: "Dataset 26"
-        description: "This tab contains submission results of your algorithm on Dataset 26."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    28:
-        phasenumber: 28
-        label: "Dataset 27"
-        description: "This tab contains submission results of your algorithm on Dataset 27."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    29:
-        phasenumber: 29
-        label: "Dataset 28"
-        description: "This tab contains submission results of your algorithm on Dataset 28."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
-    30:
-        phasenumber: 30
-        label: "Dataset 29"
-        description: "This tab contains submission results of your algorithm on Dataset 29."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    31:
-        phasenumber: 31
-        label: "Dataset 30"
-        description: "This tab contains submission results of your algorithm on Dataset 30."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    32:
-        phasenumber: 32
-        label: "Dataset 31"
-        description: "This tab contains submission results of your algorithm on Dataset 31."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    33:
-        phasenumber: 33
-        label: "Dataset 32"
-        description: "This tab contains submission results of your algorithm on Dataset 32."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    34:
-        phasenumber: 34
-        label: "Dataset 33"
-        description: "This tab contains submission results of your algorithm on Dataset 33."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    35:
-        phasenumber: 35
-        label: "Dataset 34"
-        description: "This tab contains submission results of your algorithm on Dataset 34."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    36:
-        phasenumber: 36
-        label: "Dataset 35"
-        description: "This tab contains submission results of your algorithm on Dataset 35."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    37:
-        phasenumber: 37
-        label: "Dataset 36"
-        description: "This tab contains submission results of your algorithm on Dataset 36."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
-    38:
-        phasenumber: 38
-        label: "Dataset 37"
-        description: "This tab contains submission results of your algorithm on Dataset 37."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    39:
-        phasenumber: 39
-        label: "Dataset 38"
-        description: "This tab contains submission results of your algorithm on Dataset 38."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    40:
-        phasenumber: 40
-        label: "Dataset 39"
-        description: "This tab contains submission results of your algorithm on Dataset 39."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    41:
-        phasenumber: 41
-        label: "Dataset 40"
-        description: "This tab contains submission results of your algorithm on Dataset 40."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
-    42:
-        phasenumber: 42
-        label: "Dataset 41"
-        description: "This tab contains submission results of your algorithm on Dataset 41."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    43:
-        phasenumber: 43
-        label: "Dataset 42"
-        description: "This tab contains submission results of your algorithm on Dataset 42."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    44:
-        phasenumber: 44
-        label: "Dataset 43"
-        description: "This tab contains submission results of your algorithm on Dataset 43."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    45:
-        phasenumber: 45
-        label: "Dataset 44"
-        description: "This tab contains submission results of your algorithm on Dataset 44."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
-    46:
-        phasenumber: 46
-        label: "Dataset 45"
-        description: "This tab contains submission results of your algorithm on Dataset 45."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    47:
-        phasenumber: 47
-        label: "Dataset 46"
-        description: "This tab contains submission results of your algorithm on Dataset 46."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    48:
-        phasenumber: 48
-        label: "Dataset 47"
-        description: "This tab contains submission results of your algorithm on Dataset 47."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    49:
-        phasenumber: 49
-        label: "Dataset 48"
-        description: "This tab contains submission results of your algorithm on Dataset 48."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-        
-    50:
-        phasenumber: 50
-        label: "Dataset 49"
-        description: "This tab contains submission results of your algorithm on Dataset 49."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"
-
-    51:
-        phasenumber: 51
-        label: "Dataset 50"
-        description: "This tab contains submission results of your algorithm on Dataset 50."
-        color: green                # Tab colors (white, orange, yellow, green, blue, purple)
-        start_date: 2019-04-14
-        parent_phasenumber: 1
-        is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
-        max_submissions: 100        # no max
-        max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
-        auto_migration: False        # first submission = last one of previous phase
-        ingestion_program_only_during_scoring: True # option for parallel ingestion and scoring
-        input_data: AutoDL_input_data.zip #f925bf5b-d6a9-46a8-a077-a84861e57984
-        ingestion_program: AutoDL_ingestion_program.zip
-        scoring_program: AutoDL_scoring_program.zip
-        reference_data: AutoDL_reference_data.zip #23e7c434-b87d-4fae-8850-4a3d366c7797
-        hidden_columns: "set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score, ave_score"        
-        
 # ------------------------------------------------------------------------------
 # ----------------------              LEADERBOARD                ---------------
 # ------------------------------------------------------------------------------
@@ -1021,257 +546,132 @@ leaderboard:
             label: Score
             numeric_format: 4
             rank: 2
-        set1_score:
+        s1:
             leaderboard: *RESULTS
             label: Dataset 1
             numeric_format: 4
             rank: 2
-        set2_score:
+        s2:
             leaderboard: *RESULTS
             label: Dataset 2
             numeric_format: 4
             rank: 3
-        set3_score:
+        s3:
             leaderboard: *RESULTS
             label: Dataset 3
             numeric_format: 4
             rank: 4
-        set4_score:
+        s4:
             leaderboard: *RESULTS
             label: Dataset 4
             numeric_format: 4
             rank: 5
-        set5_score:
+        s5:
             leaderboard: *RESULTS
             label: Dataset 5
             numeric_format: 4
             rank: 6
-        set6_score:
+        s6:
             leaderboard: *RESULTS
             label: Dataset 6
             numeric_format: 4
             rank: 7
-        set7_score:
+        s7:
             leaderboard: *RESULTS
             label: Dataset 7
             numeric_format: 4
             rank: 8
-        set8_score:
+        s8:
             leaderboard: *RESULTS
             label: Dataset 8
             numeric_format: 4
             rank: 9
-        set9_score:
+        s9:
             leaderboard: *RESULTS
             label: Dataset 9
             numeric_format: 4
             rank: 10
-        set10_score:
+        s10:
             leaderboard: *RESULTS
             label: Dataset 10
             numeric_format: 4
             rank: 11
-        set11_score:
+        s11:
             leaderboard: *RESULTS
             label: Dataset 11
             numeric_format: 4
             rank: 12
-        set12_score:
+        s12:
             leaderboard: *RESULTS
             label: Dataset 12
             numeric_format: 4
             rank: 13
-        set13_score:
+        s13:
             leaderboard: *RESULTS
             label: Dataset 13
             numeric_format: 4
             rank: 14
-        set14_score:
+        s14:
             leaderboard: *RESULTS
             label: Dataset 14
             numeric_format: 4
             rank: 15
-        set15_score:
+        s15:
             leaderboard: *RESULTS
             label: Dataset 15
             numeric_format: 4
             rank: 16
-        set16_score:
+        s16:
             leaderboard: *RESULTS
             label: Dataset 16
             numeric_format: 4
             rank: 17
-        set17_score:
+        s17:
             leaderboard: *RESULTS
             label: Dataset 17
             numeric_format: 4
             rank: 18
-        set18_score:
+        s18:
             leaderboard: *RESULTS
             label: Dataset 18
             numeric_format: 4
             rank: 19
-        set19_score:
+        s19:
             leaderboard: *RESULTS
             label: Dataset 19
             numeric_format: 4
             rank: 20
-        set20_score:
+        s20:
             leaderboard: *RESULTS
             label: Dataset 20
             numeric_format: 4
             rank: 21
-        set21_score:
+        s21:
             leaderboard: *RESULTS
             label: Dataset 21
             numeric_format: 4
             rank: 22
-        set22_score:
+        s22:
             leaderboard: *RESULTS
             label: Dataset 22
             numeric_format: 4
             rank: 23
-        set23_score:
+        s23:
             leaderboard: *RESULTS
             label: Dataset 23
             numeric_format: 4
             rank: 24
-        set24_score:
+        s24:
             leaderboard: *RESULTS
             label: Dataset 24
             numeric_format: 4
             rank: 25
-        set25_score:
+        s25:
             leaderboard: *RESULTS
             label: Dataset 25
             numeric_format: 4
             rank: 26
-        set26_score:
-            leaderboard: *RESULTS
-            label: Dataset 26
-            numeric_format: 4
-            rank: 27
-        set27_score:
-            leaderboard: *RESULTS
-            label: Dataset 27
-            numeric_format: 4
-            rank: 28
-        set28_score:
-            leaderboard: *RESULTS
-            label: Dataset 28
-            numeric_format: 4
-            rank: 29
-        set29_score:
-            leaderboard: *RESULTS
-            label: Dataset 29
-            numeric_format: 4
-            rank: 30
-        set30_score:
-            leaderboard: *RESULTS
-            label: Dataset 30
-            numeric_format: 4
-            rank: 31
-        set31_score:
-            leaderboard: *RESULTS
-            label: Dataset 31
-            numeric_format: 4
-            rank: 32
-        set32_score:
-            leaderboard: *RESULTS
-            label: Dataset 32
-            numeric_format: 4
-            rank: 33
-        set33_score:
-            leaderboard: *RESULTS
-            label: Dataset 33
-            numeric_format: 4
-            rank: 34
-        set34_score:
-            leaderboard: *RESULTS
-            label: Dataset 34
-            numeric_format: 4
-            rank: 35
-        set35_score:
-            leaderboard: *RESULTS
-            label: Dataset 35
-            numeric_format: 4
-            rank: 36
-        set36_score:
-            leaderboard: *RESULTS
-            label: Dataset 36
-            numeric_format: 4
-            rank: 37
-        set37_score:
-            leaderboard: *RESULTS
-            label: Dataset 37
-            numeric_format: 4
-            rank: 38
-        set38_score:
-            leaderboard: *RESULTS
-            label: Dataset 38
-            numeric_format: 4
-            rank: 39
-        set39_score:
-            leaderboard: *RESULTS
-            label: Dataset 39
-            numeric_format: 4
-            rank: 40
-        set40_score:
-            leaderboard: *RESULTS
-            label: Dataset 40
-            numeric_format: 4
-            rank: 41
-        set41_score:
-            leaderboard: *RESULTS
-            label: Dataset 41
-            numeric_format: 4
-            rank: 42
-        set42_score:
-            leaderboard: *RESULTS
-            label: Dataset 42
-            numeric_format: 4
-            rank: 43
-        set43_score:
-            leaderboard: *RESULTS
-            label: Dataset 43
-            numeric_format: 4
-            rank: 44
-        set44_score:
-            leaderboard: *RESULTS
-            label: Dataset 44
-            numeric_format: 4
-            rank: 45
-        set45_score:
-            leaderboard: *RESULTS
-            label: Dataset 45
-            numeric_format: 4
-            rank: 46
-        set46_score:
-            leaderboard: *RESULTS
-            label: Dataset 46
-            numeric_format: 4
-            rank: 47
-        set47_score:
-            leaderboard: *RESULTS
-            label: Dataset 47
-            numeric_format: 4
-            rank: 48
-        set48_score:
-            leaderboard: *RESULTS
-            label: Dataset 48
-            numeric_format: 4
-            rank: 49
-        set49_score:
-            leaderboard: *RESULTS
-            label: Dataset 49
-            numeric_format: 4
-            rank: 50
-        set50_score:
-            leaderboard: *RESULTS
-            label: Dataset 50
-            numeric_format: 4
-            rank: 51
-        ave_score:
+        ave:
             leaderboard: *RESULTS
             label: <Rank>
             numeric_format: 4
@@ -1280,7 +680,7 @@ leaderboard:
             sort: asc
             computed:
                 operation: Avg
-                fields: set1_score, set2_score, set3_score, set4_score, set5_score, set6_score, set7_score, set8_score, set9_score, set10_score, set11_score, set12_score, set13_score, set14_score, set15_score, set16_score, set17_score, set18_score, set19_score, set20_score, set21_score, set22_score, set23_score, set24_score, set25_score, set26_score, set27_score, set28_score, set29_score, set30_score, set31_score, set32_score, set33_score, set34_score, set35_score, set36_score, set37_score, set38_score, set39_score, set40_score, set41_score, set42_score, set43_score, set44_score, set45_score, set46_score, set47_score, set48_score, set49_score, set50_score
+                fields: s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24,s25
         Duration:
             leaderboard: *RESULTS
             label: Duration
