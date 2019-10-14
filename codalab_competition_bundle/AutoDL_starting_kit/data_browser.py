@@ -16,6 +16,9 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+# for wav files
+import librosa
+from playsound import playsound
 
 def _HERE(*args):
     h = os.path.dirname(os.path.realpath(__file__))
@@ -165,6 +168,29 @@ class DataBrowser(object):
     return plt
 
   @classmethod
+  def show_speech(cls, tensor_4d, label_confidence_pairs=None):
+      """Play audio and display labels."""
+      data = np.squeeze(tensor_4d)
+      print('Playing audio...')
+      DataBrowser.play_sound(data)
+      print('Done. Now opening labels window.')
+      plt.title('Labels: ' + str(label_confidence_pairs))
+      plt.show()
+      return plt
+
+  @classmethod
+  def play_sound(cls, data, nchannels=1, sampwidth=2,
+                 framerate=16000, comptype='NONE', compname='not compressed'):
+    # Create a tmp file
+    tmp_filepath = '/tmp/sound.wav'
+    # Write data
+    librosa.output.write_wav(tmp_filepath, data, framerate)
+    # PLAY
+    playsound(tmp_filepath)
+    # Delete the tmp file
+    os.system('rm ' + tmp_filepath)
+
+  @classmethod
   def get_nth_element(cls, autodl_dataset, num):
     """Get n-th element in `autodl_dataset` using iterator."""
     dataset = autodl_dataset.get_dataset()
@@ -188,6 +214,8 @@ class DataBrowser(object):
       return DataBrowser.show_image
     elif domain == 'video':
       return DataBrowser.show_video
+    elif domain == 'speech':
+      return DataBrowser.show_speech
     else:
       raise NotImplementedError("Show method not implemented for domain: " +\
                                  "{}".format(domain))
@@ -224,7 +252,6 @@ def show_examples(dataset_dir, num_examples=5, subset='train'):
       for i in range(num_examples):
         print("Visualizing example {}.".format(i+1) +
               " Close the corresponding window to continue...")
-
         data_browser.show_an_example(subset=subset)
 
 def get_tensor_shape(dataset_dir, bundle_index=0):
