@@ -50,11 +50,11 @@ class Model(object):
     # Get the output dimension, i.e. number of classes
     self.output_dim = self.metadata.get_output_size()
     # Set batch size (for both training and testing)
-    self.batch_size = 30
+    self.batch_size = 1 # necessary when the shape is variable
 
     # Attributes for preprocessing
-    self.default_image_size = (112,112)
-    self.default_num_frames = 10
+    # self.default_image_size = (112,112)
+    # self.default_num_frames = 10
     self.default_shuffle_buffer = 100
     self.meta_features = {}
 
@@ -68,7 +68,7 @@ class Model(object):
     self.cumulated_num_tests = 0
     self.estimated_time_test = None
     # Critical number for early stopping
-    self.num_epochs_we_want_to_train = 1
+    self.num_epochs_we_want_to_train = 40
 
   def train(self, dataset, remaining_time_budget=None):
     """Train this algorithm on the tensorflow |dataset|.
@@ -293,7 +293,7 @@ class Model(object):
                                             padding='valid',
                                             data_format='channels_last')
 
-    hidden_layer = tf.layers.flatten(hidden_layer)
+    hidden_layer = tf.reduce_mean(hidden_layer, axis=[1,2,3])
     hidden_layer = tf.layers.dense(inputs=hidden_layer,
                                    units=64, activation=tf.nn.relu)
     hidden_layer = tf.layers.dropout(
@@ -342,7 +342,7 @@ class Model(object):
     For more information on how to write an input function, see:
       https://www.tensorflow.org/guide/custom_estimators#write_an_input_function
     """
-    dataset = dataset.map(lambda *x: (self.preprocess_tensor_4d(x[0]), x[1]))
+    dataset = dataset.map(lambda *x: (x[0], x[1]))
 
     if is_training:
       # Shuffle input examples
@@ -387,48 +387,6 @@ class Model(object):
         self.meta_features[key] = getattr(np, stat)(vec)
     logger.info("Finished. Meta-features extracted: {}"\
                 .format(self.meta_features))
-
-  def preprocess_tensor_4d(self, tensor_4d):
-    """Preprocess a 4-D tensor (only when some dimensions are `None`, i.e.
-    non-fixed). The output tensor wil have fixed, known shape.
-
-    Args:
-      tensor_4d: A Tensor of shape
-          [sequence_size, row_count, col_count, num_channels]
-          where some dimensions might be `None`.
-    Returns:
-      A 4-D Tensor with fixed, known shape.
-    """
-    tensor_4d_shape = tensor_4d.shape
-    logger.info("Tensor shape before preprocessing: {}".format(tensor_4d_shape))
-
-    if tensor_4d_shape[0] > 0 and tensor_4d_shape[0] < 10:
-      num_frames = tensor_4d_shape[0]
-    else:
-      num_frames = self.default_num_frames
-    if tensor_4d_shape[1] > 0:
-      new_row_count = tensor_4d_shape[1]
-    else:
-      new_row_count=self.default_image_size[0]
-    if tensor_4d_shape[2] > 0:
-      new_col_count = tensor_4d_shape[2]
-    else:
-      new_col_count=self.default_image_size[1]
-
-    if not tensor_4d_shape[0] > 0:
-      logger.info("Detected that examples have variable sequence_size, will " +
-                "randomly crop a sequence with num_frames = " +
-                "{}".format(num_frames))
-      tensor_4d = crop_time_axis(tensor_4d, num_frames=num_frames)
-    if not tensor_4d_shape[1] > 0 or not tensor_4d_shape[2] > 0:
-      logger.info("Detected that examples have variable space size, will " +
-                "resize space axes to (new_row_count, new_col_count) = " +
-                "{}".format((new_row_count, new_col_count)))
-      tensor_4d = resize_space_axes(tensor_4d,
-                                    new_row_count=new_row_count,
-                                    new_col_count=new_col_count)
-    logger.info("Tensor shape after preprocessing: {}".format(tensor_4d.shape))
-    return tensor_4d
 
   def get_steps_to_train(self, remaining_time_budget):
     """Get number of steps for training according to `remaining_time_budget`.
@@ -529,69 +487,6 @@ def get_num_3dcnn_layers(sequence_size, row_count, col_count,
       num_3dcnn_layers += expo - prev
       total_expo -= (expo - prev) * (len(expos) - i)
   return num_3dcnn_layers
-
-def get_num_entries(tensor):
-  """Return number of entries for a TensorFlow tensor.
-
-  Args:
-    tensor: a tf.Tensor or tf.SparseTensor object of shape
-        (batch_size, sequence_size, row_count, col_count[, num_channels])
-  Returns:
-    num_entries: number of entries of each example, which is equal to
-        sequence_size * row_count * col_count [* num_channels]
-  """
-  tensor_shape = tensor.shape
-  assert(len(tensor_shape) > 1)
-  num_entries  = 1
-  for i in tensor_shape[1:]:
-    num_entries *= int(i)
-  return num_entries
-
-def crop_time_axis(tensor_4d, num_frames, begin_index=None):
-  """Given a 4-D tensor, take a slice of length `num_frames` on its time axis.
-
-  Args:
-    tensor_4d: A Tensor of shape
-        [sequence_size, row_count, col_count, num_channels]
-    num_frames: An integer representing the resulted chunk (sequence) length
-    begin_index: The index of the beginning of the chunk. If `None`, chosen
-      randomly.
-  Returns:
-    A Tensor of sequence length `num_frames`, which is a chunk of `tensor_4d`.
-  """
-  # pad sequence if not long enough
-  pad_size = tf.maximum(num_frames - tf.shape(tensor_4d)[0], 0)
-  padded_tensor = tf.pad(tensor_4d, ((0, pad_size), (0, 0), (0, 0), (0, 0)))
-
-  # If not given, randomly choose the beginning index of frames
-  if not begin_index:
-    maxval = tf.shape(padded_tensor)[0] - num_frames + 1
-    begin_index = tf.random.uniform([1],
-                                    minval=0,
-                                    maxval=maxval,
-                                    dtype=tf.int32)
-    begin_index = tf.stack([begin_index[0], 0, 0, 0], name='begin_index')
-
-  sliced_tensor = tf.slice(padded_tensor,
-                           begin=begin_index,
-                           size=[num_frames, -1, -1, -1])
-
-  return sliced_tensor
-
-def resize_space_axes(tensor_4d, new_row_count, new_col_count):
-  """Given a 4-D tensor, resize space axes to have target size.
-
-  Args:
-    tensor_4d: A Tensor of shape
-        [sequence_size, row_count, col_count, num_channels].
-    new_row_count: An integer indicating the target row count.
-    new_col_count: An integer indicating the target column count.
-  Returns:
-    A Tensor of shape [sequence_size, target_row_count, target_col_count].
-  """
-  resized_images = tf.image.resize_images(tensor_4d,
-                                          size=(new_row_count, new_col_count))
-  return resized_images
 
 def get_logger(verbosity_level):
   """Set logging format to something like:
