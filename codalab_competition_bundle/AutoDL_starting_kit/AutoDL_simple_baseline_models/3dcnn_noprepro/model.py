@@ -261,15 +261,16 @@ class Model(object):
       sequence_size = self.meta_features['mean_sequence_size_train']
       row_count = self.meta_features['mean_row_count_train']
       col_count = self.meta_features['mean_col_count_train']
-    num_3dcnn_layers = get_num_3dcnn_layers(sequence_size,
-                                            row_count,
-                                            col_count)
+    # num_3dcnn_layers = get_num_3dcnn_layers(sequence_size,
+    #                                         row_count,
+    #                                         col_count)
+    num_3dcnn_layers = 3
     logger.info("Constructing a CNN with {} 3D CNN layers..."\
                 .format(num_3dcnn_layers))
 
     # Repeatedly apply 3D CNN, followed by 3D max pooling
-    # until the hidden layer has reasonable number of entries (e.g. 1000)
-    num_filters = 16 # The number of filters is fixed
+    # Double the number of filters after each iteration
+    num_filters = 16
     for _ in range(num_3dcnn_layers):
       shape = hidden_layer.shape
       kernel_size = []
@@ -292,6 +293,7 @@ class Model(object):
                                             strides=pool_size,
                                             padding='valid',
                                             data_format='channels_last')
+      num_filters *= 2
 
     hidden_layer = tf.reduce_mean(hidden_layer, axis=[1,2,3])
     hidden_layer = tf.layers.dense(inputs=hidden_layer,
