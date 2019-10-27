@@ -22,7 +22,7 @@ force_submission_to_leaderboard: True   # If false, participants must submit man
 disallow_leaderboard_modifying: True    # If true, submissions cannot be changed
 enable_detailed_results: True           # True if html file written
 competition_docker_image: evariste/autodl:gpu # replace that by your own docker
-end_date: 2019-06-15
+end_date: 2019-12-15
 admin_names: eric2, guyon, Zhengying, neutralnet, tthomas63, Pavao, Zhen
 html:
     overview: overview.html
