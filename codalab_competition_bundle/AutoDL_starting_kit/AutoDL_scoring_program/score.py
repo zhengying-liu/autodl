@@ -728,13 +728,13 @@ class Evaluator(object):
     especially: `ingestion_start`, `ingestion_pid`, `time_budget`.
 
     Raises:
-      IngestionError if no sign of ingestion starting detected after 90 seconds.
+      IngestionError if no sign of ingestion starting detected after 180 seconds.
     """
     logger.debug("Fetching ingestion info...")
     prediction_dir = self.prediction_dir
-    # Wait 90 seconds for ingestion to start and write 'start.txt',
+    # Wait 180 seconds for ingestion to start and write 'start.txt',
     # Otherwise, raise an exception.
-    wait_time = 90
+    wait_time = 180
     ingestion_info = None
     for i in range(wait_time):
       ingestion_info = get_ingestion_info(prediction_dir)
@@ -770,6 +770,7 @@ class Evaluator(object):
 
   def kill_ingestion(self):
     terminate_process(self.ingestion_pid)
+    assert not self.ingestion_is_alive()
 
   def prediction_filename_pattern(self):
     return "{}.predict_*".format(self.task_name)
