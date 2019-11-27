@@ -20,9 +20,10 @@ RUN pip install h5py
 RUN pip install keras
 RUN pip install playsound
 RUN pip install librosa
+RUN pip install protobuf==3.7.1
 # CUDA 10 support for PyTorch
-RUN pip install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp35-cp35m-linux_x86_64.whl
-RUN pip install torchvision
+RUN pip install torch==1.3.1
+RUN pip install torchvision==0.4.2
 
 # Packages to be activated: Following packages are demanded by one of the
 # participants. If another participant asks to install one of these packages,
