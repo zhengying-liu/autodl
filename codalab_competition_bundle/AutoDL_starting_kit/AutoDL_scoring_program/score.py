@@ -435,13 +435,9 @@ def compute_scores_bootstrap(scoring_function, solution, prediction, n=10):
     scores = []
     l = len(solution)
     for _ in range(n): # number of scoring
-      new_solution = []
-      new_predictions = []
-      for _ in range(l): # boostrap
-          i = randrange(l)
-          new_solution.append(solution[i])
-          new_predictions.append(prediction[i])
-      scores.append(scoring_function(np.array(new_solution), np.array(new_predictions)))
+      size = solution.shape[0]
+      idx = np.random.randint(0, size, size) # bootstrap index
+      scores.append(scoring_function(solution[idx], prediction[idx]))
     return scores
 
 def end_file_generated(prediction_dir):
@@ -938,7 +934,8 @@ class Evaluator(object):
   def compute_alc_error_bars(self, n=10):
       """ Return mean, std and variance of ALC score with n runs.
           n curves are created:
-              for each timestamp, the value of AUC is computed from boostraps of y_true and y_pred.
+              For each timestamp, the value of AUC is computed from boostraps of y_true and y_pred.
+              During one curve building, we keep the same boostrap index for each prediction timestamp.
 
           Args:
               n: number of times to compute the score (more means more precision)
@@ -951,10 +948,12 @@ class Evaluator(object):
           alc_scores = []
           for _ in range(n): # n learning curves to compute
               scores = []
+              size = solution.shape[0]
+              idx = np.random.randint(0, size, size) # bootstrap index
               for prediction_file in self.prediction_files_so_far:
                   prediction = read_array(prediction_file)
-                  scores.append(compute_scores_bootstrap(scoring_function, solution, prediction, n=1)[0])
-                  # create new learning curve
+                  scores.append(scoring_function(solution[idx], prediction[idx]))
+              # create new learning curve
               learning_curve = LearningCurve(timestamps=self.relative_timestamps, # self.learning_curve.timestamps,
                                              scores=scores, # list of AUC scores
                                              time_budget=self.time_budget)
