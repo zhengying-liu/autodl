@@ -22,3 +22,12 @@ or
 ```
 docker push evariste/autodl:cpu
 ```
+
+For simplicity, two scripts are written to automate the build
+```
+./build.sh
+```
+and the release
+```
+./release.sh
+```

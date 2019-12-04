@@ -49,9 +49,9 @@ If you are new to docker, install docker from https://docs.docker.com/get-starte
 Then, at the shell, run:
 ```
 cd path/to/autodl_starting_kit_stable/
-docker run -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:cpu
+docker run -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:cpu-latest
 ```
-The tag `cpu` indicates that this image only supports usage of CPU (instead of
+The tag `cpu-latest` indicates that this image only supports usage of CPU (instead of
 GPU). The option `-v "$(pwd):/app/codalab"` mounts current directory
 (`autodl_starting_kit_stable/`) as `/app/codalab`. If you want to mount other
 directories on your disk, please replace `$(pwd)` by your own directory.
@@ -60,7 +60,7 @@ inside Docker.
 
 The backend on CodaLab runs a slightly different Docker image
 ```
-evariste/autodl:gpu
+evariste/autodl:gpu-latest
 ```
 who has Nvidia GPU supports. Both Docker images have `python=3.5.2` and have
 installed packages such as
@@ -70,7 +70,7 @@ run local test with Nvidia GPU support, please make sure you have
 [installed nvidia-docker](https://github.com/NVIDIA/nvidia-docker) and run
 instead
 ```
-nvidia-docker run -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:gpu
+nvidia-docker run -it -v "$(pwd):/app/codalab" -p 8888:8888 evariste/autodl:gpu-latest
 ```
 
 Make sure you use enough RAM (**at least 4GB**). If the port 8888 is occupied,
