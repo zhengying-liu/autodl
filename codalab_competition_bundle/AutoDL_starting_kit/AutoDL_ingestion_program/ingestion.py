@@ -175,6 +175,44 @@ class ModelApiError(Exception):
 class BadPredictionShapeError(Exception):
   pass
 
+class TimeoutException(Exception):
+  pass
+
+class Timer:
+  def __init__(self):
+    self.duration = 0
+    self.total = None
+    self.remain = None
+    self.exec = None
+
+  def set(self, time_budget):
+    self.total = time_budget
+    self.remain = time_budget
+    self.exec = 0
+
+  @contextmanager
+  def time_limit(self, pname):
+    def signal_handler(signum, frame):
+      raise TimeoutException("Timed out!")
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(int(math.ceil(self.remain)))
+    start_time = time.time()
+
+    try:
+      yield
+    finally:
+      exec_time = time.time() - start_time
+      signal.alarm(0)
+      self.exec += exec_time
+      self.duration += exec_time
+      self.remain = self.total - self.exec
+
+      logger.info("{} success, time spent so far {} sec"\
+                  .format(pname, self.exec))
+
+      if self.remain <= 0:
+        raise TimeoutException("Timed out for the process: {}!".format(pname))
+
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__":
@@ -283,6 +321,23 @@ if __name__=="__main__":
     output_dim = D_test.get_metadata().get_output_size()
     correct_prediction_shape = (num_examples_test, output_dim)
 
+    # 20 min for participants to initializing and install other packages
+    try:
+      init_time_budget = 20 * 60 # time budget for initilization.
+      timer = Timer()
+      timer.set(init_time_budget)
+      with timer.time_limit("Initialization"):
+        ##### Begin creating model #####
+        logger.info("Creating model...this process should not exceed 20min.")
+        from model import Model # in participants' model.py
+        M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
+        ###### End creating model ######
+    except TimeoutException as e:
+      logger.info("[-] Initialization phase exceeded time budget. Move to train/predict phase")
+    except Exception as e:
+      logger.error("Failed to initializing model.")
+      logger.error("Encountered exception:\n" + str(e), exc_info=True)
+
     # Mark starting time of ingestion
     start = time.time()
     logger.info("="*5 + " Start core part of ingestion program. " +
@@ -292,12 +347,6 @@ if __name__=="__main__":
                      task_name=basename.split('.')[0])
 
     try:
-      ##### Begin creating model #####
-      logger.info("Creating model...")
-      from model import Model # in participants' model.py
-      M = Model(D_train.get_metadata()) # The metadata of D_train and D_test only differ in sample_count
-      ###### End creating model ######
-
       # Check if the model has methods `train` and `test`.
       for attr in ['train', 'test']:
         if not hasattr(M, attr):
