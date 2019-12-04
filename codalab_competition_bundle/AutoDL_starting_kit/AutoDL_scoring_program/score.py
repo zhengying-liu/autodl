@@ -7,7 +7,7 @@
 #           prediction_dir should contain e.g. start.txt, adult.predict_0, adult.predict_1,..., end.txt.
 #           score_dir should contain scores.txt, detailed_results.html
 
-VERSION = 'v20190908'
+VERSION = 'v20191204'
 DESCRIPTION =\
 """This is the scoring program for AutoDL challenge. It takes the predictions
 made by ingestion program as input and compare to the solution file and produce
@@ -737,7 +737,7 @@ class Evaluator(object):
     for i in range(wait_time):
       ingestion_info = get_ingestion_info(prediction_dir)
       if not ingestion_info is None:
-        logger.debug("Detected the start of ingestion after {} ".format(i) +
+        logger.info("Detected the start of ingestion after {} ".format(i) +
                     "seconds. Start scoring.")
         break
       time.sleep(1)
