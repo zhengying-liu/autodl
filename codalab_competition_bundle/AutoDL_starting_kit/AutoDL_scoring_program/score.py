@@ -13,6 +13,7 @@ DESCRIPTION =\
 made by ingestion program as input and compare to the solution file and produce
 a learning curve.
 Previous updates:
+20191204: [ZY] Set scoring waiting time to 30min (1800s)
 20190908: [ZY] Add algebraic operations of learning curves
 20190823: [ZY] Fix the ALC in learning curve: use auc_step instead of auc
 20190820: [ZY] Minor fix: change wait time (for ingestion) from 30s to 90s
@@ -724,13 +725,14 @@ class Evaluator(object):
     especially: `ingestion_start`, `ingestion_pid`, `time_budget`.
 
     Raises:
-      IngestionError if no sign of ingestion starting detected after 180 seconds.
+      IngestionError if no sign of ingestion starting detected after 1800
+      seconds.
     """
     logger.debug("Fetching ingestion info...")
     prediction_dir = self.prediction_dir
-    # Wait 180 seconds for ingestion to start and write 'start.txt',
+    # Wait 1800 seconds for ingestion to start and write 'start.txt',
     # Otherwise, raise an exception.
-    wait_time = 180
+    wait_time = 1800
     ingestion_info = None
     for i in range(wait_time):
       ingestion_info = get_ingestion_info(prediction_dir)
