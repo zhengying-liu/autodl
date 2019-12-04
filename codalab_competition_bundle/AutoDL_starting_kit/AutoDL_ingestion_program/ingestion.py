@@ -6,7 +6,7 @@
 
 # AS A PARTICIPANT, DO NOT MODIFY THIS CODE.
 
-VERSION = 'v20190820'
+VERSION = 'v20191204'
 DESCRIPTION =\
 """This is the "ingestion program" written by the organizers. It takes the
 code written by participants (with `model.py`) and one dataset as input,
@@ -14,6 +14,9 @@ run the code on the dataset and produce predictions on test set. For more
 information on the code/directory structure, please see comments in this
 code (ingestion.py) and the README file of the starting kit.
 Previous updates:
+20191204: [ZY] Add timer and separate model initialization from train/predict
+               process, : now model initilization doesn't consume time budget
+               quota (but can only use 20min)
 20190820: [ZY] Mark the beginning of ingestion right before model.py to reduce
                variance
 20190708: [ZY] Integrate Julien's parallel data loader
