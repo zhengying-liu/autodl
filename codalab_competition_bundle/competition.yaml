@@ -26,11 +26,12 @@ end_date: 2019-2-14
 admin_names: eric2, guyon, Zhengying, neutralnet, tthomas63, Pavao, Zhen
 html:
     overview: overview.html
+    quick_start: quick_start.html
     evaluation: evaluation.html
     terms: terms.html
     help: help.html
     credits: credits.html
-    data: data.html # we are forced to have this, otherwise the bundle upload fails
+    data: data.html
 
 # ------------------------------------------------------------------------------
 # ----------------------|               PHASES                   |--------------
