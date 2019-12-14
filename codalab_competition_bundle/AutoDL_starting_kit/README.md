@@ -114,11 +114,12 @@ http://0.0.0.0:8888/?token=82e416e792c8f6a9f2194d2f4dbbd3660ad4ca29a4c58fe7
 and select `tutorial.ipynb` in the menu.
 
 ## Download public datasets
-We provide 5 public datasets for participants. They can use these datasets to:
+We provide several public datasets for participants. They can use these datasets to:
 1. Explore data (e.g. using `data_browser.py`, see next section);
 2. Do local test for their own algorithm;
 3. Enable meta-learning.
-We also provide a script to facilitate the data downloading process. The usage
+These datasets can be downloaded on the competition website and we also provide
+a script to facilitate the data downloading process. The usage
 is:
 ```bash
 python download_public_datasets.py
