@@ -1,27 +1,27 @@
 <h2>Competition protocol</h2>
-<p>This challenge has<strong> two&nbsp;phases</strong>. This is the <strong>feed-back phase:</strong> when you submit your code, you get immediate feed-back on five development datasets. In the final test phase, you will be evaluated on five new datasets. Eligible participants to the final phase will be notified when and where to submit their code for a final blind test on these five new datasets. The ranking in the final phase will count towards determining the winners.</p>
-<p>Code submitted is trained and tested automatically, without any human intervention. Code submitted on "All datasets" is run on all five development datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
+<p>This challenge has<strong> two&nbsp;phases</strong>. This is the <strong>feedback phase:</strong> when you submit your code, you get immediate feedback on 5 feedback datasets. In the final test phase, you will be evaluated on several new datasets. Eligible participants to the final phase will be notified when and where to submit their code for a final blind test. The ranking in the final phase will count towards determining the winners.</p>
+<p>Code submitted is trained and tested automatically, without any human intervention. Code submitted on "All datasets" is run on all five feedback datasets in parallel on separate compute workers, each one with its own time budget.&nbsp;</p>
 <p>The identities of the datasets used for testing on the platform are concealed.&nbsp;The data are provided in a&nbsp;<strong>raw form</strong>&nbsp;(no feature extraction) to encourage researchers to use Deep Learning methods performing automatic feature learning, although this is NOT a requirement. All problems are&nbsp;<strong>multi-label classification&nbsp;</strong>problems. The tasks are constrained by the&nbsp;<strong>time budget (20 minutes/dataset)</strong>.&nbsp;</p>
 <p>Here is some pseudo-code of the evaluation protocol:</p>
-<pre><code># For each dataset, our evaluation program calls the model constructor:
-M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)
+<pre><code># For each dataset, our evaluation program calls the model constructor<br /># <strong>IMPORTANT</strong>: this initilization step doesn't consume time in the total time budget<br />#            so one should carry out meta-learning or loading pre-trained weights in this step.<br />#            This step should not exceed <strong>20min</strong>. Otherwise the submission will fail.
+M =&nbsp;<strong>Model</strong>(metadata=dataset_metadata)<br />
 # Initialize
 remaining_time budget = overall_time_budget
-start_time = time()
+start_time = time()<br />
 # Ingestion program calls multiple times train and test:
 repeat until M.done_training or remaining_time_budget &lt; 0
 {
-<strong>  M.train</strong> (training_data, remaining_time_budget)
-  remaining_time_budget = start_time + overall_time_budget - time.time()
+<strong>  M.train</strong>(training_data, remaining_time_budget)
+  remaining_time_budget = start_time + overall_time_budget - time.time()<br />
   results = <strong>M.test</strong>(test_data, remaining_time_budget)
-  remaining_time_budget = start_time + overall_time_budget - time.time()<br />  # Results made available to scoring program (run in separate container)
+  remaining_time_budget = start_time + overall_time_budget - time.time()<br /><br />  # Results made available to scoring program (run in separate container)
   save(results)
 }
 </code></pre>
 <p><span>It is the responsibility of the participants to make sure</span>&nbsp;that neither the "train" nor the "test" methods exceed the &ldquo;remaining_time_budget&rdquo;. The method &ldquo;train&rdquo; can choose to manage its time budget such that it trains in varying time increments.&nbsp;There is pressure that it does not use all "overall_time_budget" at the first iteration because we use the area under the learning curve as metric.</p>
 <h2>Metrics</h2>
 <p><span>The participants can train in batches of pre-defined duration to incrementally improve their performance</span>, until the time limit is attained. In this way we can plot learning curves:&nbsp;<strong>"performance" as a function of time</strong>. Each time the "train" method terminates, the "test" method is called and the results are saved, so the scoring program can use them, together with their timestamp.</p>
-<p>We treat both multi-class and multi-label problems alike. Each label/class is considered a separate binary classification problem, and we compute the normalized AUC (or Gini coefficient)</p>
+<p>We treat both multi-class and multi-label problems alike. Each label/class is considered a separate binary classification problem, and we compute the normalized AUC (NAUC or Gini coefficient)</p>
 <p>&nbsp; &nbsp; 2 * AUC - 1</p>
 <p>as score for each prediction, here AUC is the usual <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">area under ROC curve</a> (ROC AUC).</p>
 <p>For each dataset, we compute the&nbsp;<strong>Area under Learning Curve (ALC)</strong>. The learning curve is drawn as follows:</p>

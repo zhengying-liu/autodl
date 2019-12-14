@@ -7,13 +7,13 @@
 <h3>Can I enter any time?</h3>
 <p>Yes, until the challenge deadline.</p>
 <h3>Where can I download the data?</h3>
-<p>You can download "public data" only from the Instructions page. The data on which your code is evaluated cannot be downloaded, it will be visible to your code only, on the Codalab platform.</p>
+<p>You can download "public data" only from the Data page. The data on which your code is evaluated cannot be downloaded, it will be visible to your code only, on the Codalab platform.</p>
 <h3>How do I make submissions?</h3>
 <p>To make a valid challenge entry, make sure to click first the orange button "All datasets", then click the blue button on the upper right side "Upload a Submission". This will ensure that you submit on all 5 datasets of the challenge simultaneously. You may also make a submission on a single dataset for debug purposes, but it will not count towards the final ranking.</p>
 <h3>Do you provide tips on how to get started?</h3>
 <p>We provide a Starting Kit in Python with step-by-step instructions in a Jupyter notebook called "tutorial.ipynb", which can be found in the github repository&nbsp;<a href="https://github.com/zhengying-liu/autodl_starting_kit_stable">https://github.com/zhengying-liu/autodl_starting_kit_stable</a>. You can also have a well rendered preview <a href="https://nbviewer.jupyter.org/github/zhengying-liu/autodl_starting_kit_stable/blob/master/tutorial.ipynb">here</a>.</p>
 <h3>Are there publication opportunities?</h3>
-<p>Yes. Top ranking participants will be invited to submit papers to a&nbsp;<a href="https://drive.google.com/file/d/1_zYzXowLzLN7oJuQ-mdJ-YM-zBb60GE5/view?usp=sharing">special issue of the IEEE transaction journal PAMI on Automated Machine Learning</a>&nbsp;and will be entered in a contest for the best paper. Deadline November 30, 2019.</p>
+<p>Yes. Top ranking participants will be invited to submit papers to a&nbsp;<a href="https://drive.google.com/file/d/1_zYzXowLzLN7oJuQ-mdJ-YM-zBb60GE5/view?usp=sharing">special issue of the IEEE transaction journal PAMI on Automated Machine Learning</a>&nbsp;and will be entered in a contest for the best paper. Deadline to be define.</p>
 <p>There will be 2 best paper awards of $1000 ("best paper" and "best student paper").</p>
 <h3>Are there prizes?</h3>
 <p>Yes, a 4000 USD prize pool.</p>
@@ -89,7 +89,7 @@
 <h3>Will there be a final test round on separate datasets?</h3>
 <p>YES. The ranking of participants will be made from a final blind test made by evaluating a SINGLE SUBMISSION made on the final test submission site. The submission will be evaluated on five new datasets in a completely "blind testing" manner. The final test ranking will determine the winners.</p>
 <h3>What is my time budget?</h3>
-<p>Each execution must run in less than 20 minutes (1200 seconds) for each dataset. Your cumulative time is limited to 5 hours per day in total.</p>
+<p>Each execution must run in less than 20 minutes (1200 seconds) for each dataset.</p>
 <h3>Does the time budget correspond to wall time or CPU/GPU time?</h3>
 <p>Wall time.</p>
 <h3>My submission seems stuck, how long will it run?</h3>
@@ -111,9 +111,9 @@
 <h3>Do I have to use TensorFlow?</h3>
 <p>No. We use TFRecords to format the datasets in a uniform manner, but you can use other software to process the data, including PyTorch (included in the Docker, see the following question).</p>
 <h3>Which docker are you running on Codalab?</h3>
-<p><strong>evariste/autodl:gpu</strong>, see the <a href="https://github.com/zhengying-liu/autodl/blob/master/docker/Dockerfile" target="_blank">Dockerfile</a> and some instructions on <a href="https://hub.docker.com/r/evariste/autodl">dockerhub</a>.</p>
+<p><strong>evariste/autodl:gpu-latest</strong>, see the <a href="https://github.com/zhengying-liu/autodl/blob/master/docker/Dockerfile" target="_blank">Dockerfile</a> and some instructions on <a href="https://hub.docker.com/r/evariste/autodl">dockerhub</a>.</p>
 <h3>How do I test my code in the same environment that you are using before submitting?</h3>
-<p>When you submit code to Codalab, your code is executed inside a Docker container. This environment can be exactly reproduced on your local machine by downloading the corresponding docker image. The docker environment of the challenge contains Anaconda libraries, TensorFlow, and PyTorch (among other things).&nbsp;<br /> Non GPU users, if you are new to Docker, <a href="https://www.docker.com/get-started">follow these instructions to install docker.</a>&nbsp;You may then use the docker <strong>evariste/autodl:cpu</strong>.<strong> See details in the Starting Kit that can be downloaded from the Instructions page.&nbsp;</strong>GPU users, follow these <a href="https://github.com/NVIDIA/nvidia-docker/wiki">more detailed instructions</a>.</p>
+<p>When you submit code to Codalab, your code is executed inside a Docker container. This environment can be exactly reproduced on your local machine by downloading the corresponding docker image. The docker environment of the challenge contains Anaconda libraries, TensorFlow, and PyTorch (among other things).&nbsp;<br /> Non GPU users, if you are new to Docker, <a href="https://www.docker.com/get-started">follow these instructions to install docker.</a>&nbsp;You may then use the docker <strong>evariste/autodl:cpu-latest</strong>.<strong> See details in the Starting Kit that can be downloaded from the Instructions page.&nbsp;</strong>GPU users, follow these <a href="https://github.com/NVIDIA/nvidia-docker/wiki">more detailed instructions</a>.</p>
 <h3>What is meant by "Leaderboard modifying disallowed"?</h3>
 <p>Your last submission is shown automatically on the leaderboard. You cannot choose which submission to select. If you want another submission than the last one you submitted to "count" and be displayed on the leaderboard, you need to re-submit it.</p>
 <h3>Can I register multiple times?</h3>

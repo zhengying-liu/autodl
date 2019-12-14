@@ -1,5 +1,28 @@
-<h2>Larger practice datasets</h2>
-<p style="text-align: left;">The starting kit contains sample data, but you may want to develop your code with larger practice datasets. We provide 8 public datasets for this purpose. You will have access to the data (training set and test set) AND the true labels for these datasets. Notice that the video datasets do not include a sound track.</p>
+<h2>Datasets</h2>
+<p>Each dataset in this competition comes from one of following 5 domains: image, video, speech, text or tabular. Every dataset is formatted in <a href="https://www.tensorflow.org/tutorials/load_data/tfrecord">TFRecords</a>&nbsp;and split into a train set (with true labels) and a test set (without true labels). The data loading process is done in the <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/tree/master/AutoDL_ingestion_program">ingestion program</a> (thus common to all participants), which parses these TFRecords to a `tf.data.Dataset` object. Each of its examples is of the form</p>
+<pre>(example, labels)</pre>
+<p>where `example` is a dense <strong>4-D Tensor</strong> of dtype <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/blob/e277cbb3a4d156f90fefe6c707c1bddc805d8ad5/data_browser.py#L122">tf.float32</a> and of shape</p>
+<pre>(sequence_size, row_count, col_count, num_channels)</pre>
+<p>and `labels` is a 1-D Tensor of shape</p>
+<pre>(output_dim,).</pre>
+<p>Here `output_dim` represents number of classes of the&nbsp;multilabel classification task.</p>
+<h2>Metadata</h2>
+<p>The metadata of each dataset contains info such as the shape of examples, number of examples, number of classes, etc. These info can be accessed by calling different functions found at <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/blob/e277cbb3a4d156f90fefe6c707c1bddc805d8ad5/AutoDL_ingestion_program/dataset.py#L41">here</a>.</p>
+<p>Although the domain information is not given directly in the metadata, it can be inferred from metadata by a function similar to <a href="https://github.com/zhengying-liu/autodl_starting_kit_stable/blob/e277cbb3a4d156f90fefe6c707c1bddc805d8ad5/data_browser.py#L122">this one</a>.</p>
+<h2>Specification for text datasets</h2>
+<p>Although it is straight-forward to interpret the 4-D Tensor representation of each example for most domains, we need to make some manual choices to encode <strong>text</strong> datasets. The choices we made are:&nbsp;</p>
+<ul>
+<li>For English, split the original document by space to tokenize; For Chinese, consider each character as a token;</li>
+<li>Construct a vocabulary and map each of these tokens to an integer index;</li>
+<li>Replace each token by the index (cast as tf.float32);</li>
+<li>Each example (document) is then a sequence of integers.</li>
+</ul>
+<p>The mapping from token to integer index can be accessed by calling</p>
+<pre>token_to_index = metadata.get_channel_to_index_map()</pre>
+<p><strong>Embedding weights:</strong></p>
+<p>In the Docker image running by the platform (<strong>evariste/autodl:gpu-latest</strong>),&nbsp; a&nbsp;<strong>built-in embedding model</strong>&nbsp;is provided for Chinese and English respectively, and the path of the embedding models is "<strong>/app/embedding".</strong>&nbsp;Both the embedding models are from&nbsp;<a href="https://fasttext.cc/">fastText</a>&nbsp;(<a href="https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.zh.300.vec.gz">Chinese</a>,&nbsp;<a href="https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.vec.gz">English</a>)</p>
+<h2>Public datasets</h2>
+<p style="text-align: left;">We provide a list of public datasets. You will have access to the data (training set and test set) AND the true labels for these datasets. Notice that the video datasets do not include a sound track.</p>
 <table border="1" cellspacing="1" cellpadding="1">
 <tbody>
 <tr>
@@ -256,9 +279,7 @@
 </tr>
 </tbody>
 </table>
-
-<br>
-
+<p>&nbsp;</p>
 <table border="1" cellspacing="1" cellpadding="1">
 <tbody>
 <tr>
@@ -552,17 +573,14 @@
 </tr>
 </tbody>
 </table>
-
-<br>
-
+<p>&nbsp;</p>
 <ul>
 <li>num_train/num_test: number of training/test examples</li>
-<li>sequence_size/row_count/col_count/num_channels: shape parameters of the examples (in AutoCV challenge, every example is represented by a 4D tensor with axes t, x, y and c (t for time and c for channel)). A <em>row_count</em> or <em>col_count</em> of -1 means the value varies from one example to another.</li>
+<li>sequence_size/row_count/col_count/num_channels: shape of the examples. -1 means the value varies from one example to another.</li>
 <li>output_dim: number of classes</li>
-<li>has_locality_col (resp. has_locality_row): A flag indicating whether rows (resp. columns) in the tensor correspond to variables&nbsp;<span>interrelated</span> with some underlying topological structure ,reflected by the closeness of indices, like in images or videos.</li>
 </ul>
 <p>These data were re-formatted from original public datasets. If you use them, please make sure to acknowledge the original data donnors (see "Source" in the data table) and check the tems of use.</p>
 <p><strong>To download all public datasets at once:</strong></p>
 <pre>cd autodl_starting_kit_stable<br />python download_public_datasets.py</pre>
 <h2>Format and use your own datasets</h2>
-<p>Raw data are preserved, but formatted in a generic data format based on&nbsp;<a href="https://www.tensorflow.org/programmers_guide/datasets#consuming_tfrecord_data">TFRecords</a>, used by&nbsp;<a href="https://www.tensorflow.org/">TensorFlow</a>. However, this will not impose to participants to use deep learning algorithms nor even Tensorflow. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
+<p>We provide toolkit to participants to format their own datasets to the same format of this challenge. If you want to practice designing algorithms with your own datasets, <a href="https://github.com/zhengying-liu/autodl-contrib/blob/master/README.md">follow these steps</a>.&nbsp;</p>
