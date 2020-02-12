@@ -19,6 +19,9 @@ Reads data in the Tensorflow AutoDL standard format.
 import os
 import tensorflow as tf
 import numpy as np
+# Resolve "ImportError: Python is not installed as a framework." issue
+import matplotlib
+matplotlib.use('PS')
 import matplotlib.pyplot as plt
 from tensorflow import app
 from tensorflow import flags
