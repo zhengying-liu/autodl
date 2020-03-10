@@ -64,7 +64,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -83,7 +83,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -102,7 +102,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -121,7 +121,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -140,7 +140,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -159,7 +159,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -178,7 +178,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -197,7 +197,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -216,7 +216,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
@@ -235,7 +235,7 @@ phases:
         start_date: 2019-04-14
         parent_phasenumber: 1
         is_scoring_only: True       # if false -> code submission BUT this is an exception
-        execution_time_limit: 1200  # (in sec) must be given when code submission enabled
+        execution_time_limit: 3600  # (in sec) must be given when code submission enabled
         max_submissions: 100        # no max
         max_submissions_per_day: 5  # Maximum number of submissions per day, to avoid congestion
         auto_migration: False        # first submission = last one of previous phase
