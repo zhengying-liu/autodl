@@ -83,7 +83,7 @@ verbosity_level = 'INFO'
 from libscores import read_array, sp, ls, mvmean, tiedrank, _HERE, get_logger
 from os.path import join
 from sys import argv
-from sklearn.metrics import auc
+from sklearn.metrics import auc, roc_auc_score
 import argparse
 import base64
 import datetime
@@ -104,7 +104,7 @@ logger = get_logger(verbosity_level)
 ################################################################################
 
 # Metric used to compute the score of a point on the learning curve
-def autodl_auc(solution, prediction, valid_columns_only=True):
+def _autodl_auc(solution, prediction, valid_columns_only=True):
   """Compute normarlized Area under ROC curve (AUC).
   Return Gini index = 2*AUC-1 for  binary classification problems.
   Should work for a vector of binary 0/1 (or -1/1)"solution" and any discriminant values
@@ -132,6 +132,20 @@ def autodl_auc(solution, prediction, valid_columns_only=True):
     nneg = sum(s_ < 1)
     auc[k] = (sum(r_[s_ == 1]) - npos * (npos + 1) / 2) / (nneg * npos)
   return 2 * mvmean(auc) - 1
+
+
+def autodl_auc(solution, prediction, valid_columns_only=True):
+    """More efficient implementation of `_autodl_auc`."""
+    if valid_columns_only:
+        valid_columns = get_valid_columns(solution)
+        if len(valid_columns) < solution.shape[-1]:
+            logger.info("Some columns in solution have only one class, " +
+                            "ignoring these columns for evaluation.")
+            solution = solution[:, valid_columns].copy()
+            prediction = prediction[:, valid_columns].copy()
+    auc = roc_auc_score(solution, prediction)
+    return 2 * auc - 1
+
 
 def accuracy(solution, prediction):
   """Get accuracy of 'prediction' w.r.t true labels 'solution'."""
