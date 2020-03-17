@@ -861,6 +861,14 @@ class Evaluator(object):
                   .format(score_filename, score, duration))
     return score_info_dict
 
+  def append_score(self, scores_dict):
+      """Add fields and values to scores.txt"""
+      score_filename = os.path.join(self.score_dir, 'scores.txt')
+      with open(score_filename, 'a') as f:
+          for key, value in scores_dict.items():
+              f.write('{}: '.format(key) + str(value) + '\n')
+      return scores_dict
+
   def write_scores_html(self, auto_refresh=True, append=False):
     score_dir = self.score_dir
     filename = 'detailed_results.html'
@@ -1080,14 +1088,19 @@ if __name__ == "__main__":
     # Compute scoring error bars of last prediction
     n = 10
     logger.info("Computing error bars with {} scorings...".format(n))
-    mean, std, var = evaluator.compute_error_bars(n=n)
-    logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
+    nauc_mean, nauc_std, nauc_var = evaluator.compute_error_bars(n=n)
+    logger.info("\nLatest prediction NAUC:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(nauc_mean, nauc_std, nauc_var))
 
     # Compute ALC error bars
     n = 5
     logger.info("Computing ALC error bars with {} curves...".format(n))
-    mean, std, var = evaluator.compute_alc_error_bars(n=n)
-    logger.info("\nArea under Learning Curve:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(mean, std, var))
+    alc_mean, alc_std, alc_var = evaluator.compute_alc_error_bars(n=n)
+    logger.info("\nArea under Learning Curve:\n* Mean: {}\n* Standard deviation: {}\n* Variance: {}".format(alc_mean, alc_std, alc_var))
+
+    # Write error bars into scores.txt file
+    scores_dict = {"nauc_mean":nauc_mean, "nauc_std":nauc_std, "nauc_var":nauc_var,
+                   "alc_mean":alc_mean, "alc_std":alc_std, "alc_var":alc_var}
+    evaluator.append_score(scores_dict)
 
     scoring_start = evaluator.start_time
     # Use 'end.txt' file to detect if ingestion program ends
