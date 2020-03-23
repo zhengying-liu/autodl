@@ -13,6 +13,7 @@ from models.crnn2d_larger import Crnn2dLargerModel
 from models.crnn2d_vgg import Crnn2dVggModel
 from models.my_classifier import Classifier
 from tools import log
+from data_process import ohe2cat
 
 
 def auc_metric(solution, prediction):
@@ -288,6 +289,7 @@ class ModelManager(Classifier):
 
         # init model really
         self._get_or_create_model()
+        self._classes = np.unique(ohe2cat(train_y))
         self._model.fit(train_x, train_y, (val_x, val_y),
                         self._round_num, **kwargs)
 
@@ -330,9 +332,15 @@ class ModelManager(Classifier):
                                                                         max_duration=SECOND_ROUND_DURATION,
                                                                         is_mfcc=self._use_mfcc)
             if self._round_num > 1:
-                y_pred = self._model.predict(self._test_x, batch_size=32)
+                _y_pred = self._model.predict(self._test_x, batch_size=32)
             else:
-                y_pred = self._model.predict(self._test_x, batch_size=32 * 8)
+                _y_pred = self._model.predict(self._test_x, batch_size=32 * 8)
+
+            # ensure y_pred has the same shape as y_test
+            y_pred = np.zeros((self._test_x.shape[0], self._num_classes))
+            for _id, _col in enumerate(self._classes):
+                y_pred[:, _col] = _y_pred[:, _id]
+
             if self._k_best_auc[-1] < auc and auc > self._each_model_best_auc[LR_MODEL][-1] - 0.1:
                 self._k_best_predicts[-1] = y_pred
                 self._k_best_auc[-1] = auc
